@@ -50,10 +50,9 @@ def main(labels, wavs, output):
             chunks_df = pd.DataFrame(chunks_data)
 
             filtered_data = scored_data[scored_data['IN FILE'] == audio_file]
-
             for _, row in filtered_data.iterrows():
                 if row['TOP1MATCH'] != 'null':
-                    start_time = float(row['OFFSET']) / 1000
+                    start_time = float(row['OFFSET'])
                     end_time = start_time + float(row['DURATION'])
 
                     for i in range(len(chunks_df)):
@@ -75,11 +74,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Input Directory Path'
         )
-    parser.add_argument('human_labels', type=str,
+    parser.add_argument('labels', type=str,
                         help='Path to human labeled csv')
-    parser.add_argument('wav_files', type=str,
+    parser.add_argument('wavs', type=str,
                         help='Path to all wav files that have been labeled')
-    parser.add_argument('output_dir', type=str,
+    parser.add_argument('output', type=str,
                         help='Path to desired directory for output csvs')
     args = parser.parse_args()
     main(args.labels, args.wavs, args.output)
