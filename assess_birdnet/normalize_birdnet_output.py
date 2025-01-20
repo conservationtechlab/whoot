@@ -1,33 +1,86 @@
+"""Script to adjust birdnet output
+
+This script takes a master csv containing the aggregated birdnet output
+text files and creates an expanded csv containing  a "no" label
+for each chunk of time that birdnet did not detect a vocalization. The
+3-second chunks where birdnet made a detection will be marked with a "yes"
+
+python normalize_birdnet_output.py /path/to/aggregated_birdnet_output.csv
+/path/to/birdnet_labeled.csv
+"""
+import argparse
 import pandas as pd
 import numpy as np
 
-ml_output = pd.read_csv('/home/katie/BirdNET-Analyzer/analyze_audio/analyze_audio_master.csv')
+
+def main(aggr_birdnet, birdnet_labeled):
+    """Main function to take birdnet labels and create a
+    dataframe that has time chunks for the whole audio file
+    duration and labels the detection periods with "yes"
+
+    Args:
+        aggr_birdnet: aggregated birdnet analysis file
+        birdnet_labeled: path to desired output csv
+
+    """
+    ml_output = pd.read_csv(aggr_birdnet)
+
+    ml_output = ml_output.apply(adjust_time, axis=1)
+
+    # total duration of the sound file(s) that birdnet analyzed
+    total_duration = 3 * 60 * 60
+    all_intervals = pd.DataFrame({
+        'Begin Time (s)': np.arange(0, total_duration, 3),
+        'End Time (s)': np.arange(3, total_duration + 3, 3),
+    })
+
+    all_intervals['Label'] = 'no'
+
+    for _, row in ml_output.iterrows():
+        start = row['Begin Time (s)']
+        end = row['End Time (s)']
+        mask = (
+            all_intervals['Begin Time (s)'] >= start
+        ) & (all_intervals['End Time (s)'] <= end)
+        all_intervals.loc[mask, 'Label'] = 'yes'
+
+    print(all_intervals.head(20))
+
+    all_intervals.to_csv(birdnet_labeled, index=False)
+
 
 def adjust_time(row):
+    """Function to standardize the timestamps for the aggregated
+    birdnet input file. This is because this script was designed
+    assuming that the analysis needed to be aggregated from split
+    wav files from the same larger audio recording. This function
+    ensures that if you split up your sound file in smaller bits
+    to be analyzed by birdnet and aggregate their output, the time
+    chunks will represent the entire sound file in order and not
+    as separate audio files.
+
+    Args:
+        rows: rows in the aggregated birdnet analysis file
+    Returns:
+        rows: the adjusted row
+
+    """
     chunk_number = int(row['File Name'].split('out')[1].split('.')[0])
     offset = chunk_number * 600
     row['Begin Time (s)'] += offset
     row['End Time (s)'] += offset
     return row
 
-ml_output = ml_output.apply(adjust_time, axis=1)
 
-total_duration = 3 * 60 * 60
-all_intervals = pd.DataFrame({
-    'Begin Time (s)': np.arange(0, total_duration, 3),
-    'End Time (s)': np.arange(3, total_duration + 3, 3),
-})
-
-all_intervals['Label'] = 'no'
-
-for _, row in ml_output.iterrows():
-    start = row['Begin Time (s)']
-    end = row['End Time (s)']
-    mask = (all_intervals['Begin Time (s)'] >= start) & (all_intervals['End Time (s)'] <= end)
-    all_intervals.loc[mask, 'Label'] = 'yes'
-
-print(all_intervals.head(20))
-
-all_intervals.to_csv('adjusted_ml_output.csv', index=False)
-
-
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Input Directory Path'
+        )
+    parser.add_argument('aggr_birdnet',
+                        type=str,
+                        help='File path to aggregated birdnet raw output')
+    parser.add_argument('birdnet_labeled',
+                        type=str,
+                        help='Result csv with adjusted birdnet results')
+    args = parser.parse_args()
+    main(args.aggr_birdnet, args.birdnet_labeled)
