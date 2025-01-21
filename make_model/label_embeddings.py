@@ -29,17 +29,20 @@ def main(human_labels, embeddings, output):
     for filename in os.listdir(human_labels):
         file_path = os.path.join(human_labels, filename)
         df = pd.read_csv(file_path)
-        df.add 1024 empty columns
-        filename = strip _chunks.csv
+        stripped_filename = filename.strip("_chunks.csv")
         for birdnet in os.listdir(embeddings):
-            birdnet_path = os.path.join(embeddings, birdnet)
-            dfb = pd.read(birdnet_path)
-            strip first 2 columns
-            if check num rows -1 equals num rows in df:
-                fill the 1024 column info from dfb into df-
-                save the file to new df in output%03.csv
-                print(f"Labeled embeddings created for: {output_filename}") 
-
+            stripped_birdnet = birdnet.strip(".birdnet.embeddings.txt")
+            if stripped_birdnet == stripped_filename:
+                birdnet_path = os.path.join(embeddings, birdnet)
+                dfb = pd.read_csv(birdnet_path, delimiter=",")
+                dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
+                combined_df = pd.concat([df, dfb_stripped], axis=1)
+                output_filename = stripped_filename + "_labeled_embeddings.csv"
+                output_path = os.path.join(output, output_filename)
+                combined_df.to_csv(output_path, index=False)
+                print(f"Labeled embeddings created for: {output_path}") 
+            else:
+                continue
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
