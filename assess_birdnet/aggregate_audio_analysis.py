@@ -46,7 +46,9 @@ def main(root_dir):
                 "High Freq (Hz)", "Species Code",
                 "Common Name",
                 "Confidence",
-                "File Name"
+                "File Name",
+                "Extra 1",
+                "Extra 2"
             ]
 
             with open(
@@ -66,7 +68,7 @@ def main(root_dir):
                             data.append(file_name)
                             csv_writer.writerow(data)
 
-            print(f"File for directory '{root}' created successfully.")
+            print(f"File '{output_csv_file}' created successfully.")
 
 
 if __name__ == '__main__':
