@@ -28,11 +28,11 @@ def main(labels, adjusted_labels):
     scored_data = pd.read_csv(labels)
 
     # need to insert wav file of interest, cannot handle multiple at once
-    file_of_interest = '20170422_180000.wav'
+    file_of_interest = '20170421_180000.wav'
     filtered_data = scored_data[scored_data['IN FILE'] == file_of_interest]
 
     # time length of audio file of interest
-    audio_file_duration = 3 * 60 * 60
+    audio_file_duration = 10800
 
     total_chunks = audio_file_duration // 3
     chunks_data = {
@@ -41,9 +41,8 @@ def main(labels, adjusted_labels):
         'Label': ['no'] * total_chunks
     }
     chunks_df = pd.DataFrame(chunks_data)
-
-    for row in filtered_data:
-        filtered_data.apply(mark_intervals(row, chunks_df),
+    for i, row in filtered_data.iterrows():
+        filtered_data.apply(lambda row: mark_intervals(row, chunks_df),
                             axis=1)
 
     print(chunks_df.head(20))
@@ -62,8 +61,8 @@ def mark_intervals(row, chunks_df):
         chunks_df: the new unlabeled dataframe
 
     """
-    start_time = row['OFFSET']
-    end_time = start_time + row['DURATION']
+    start_time = float(row['OFFSET'])
+    end_time = start_time + float(row['DURATION'])
     start_chunk = int(start_time // 3)
     end_chunk = int(end_time // 3)
 
@@ -75,10 +74,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Input Directory Path'
         )
-    parser.add_argument('human labels',
+    parser.add_argument('labels',
                         type=str,
                         help='File path to human labeled raw output')
-    parser.add_argument('adjusted human label output',
+    parser.add_argument('adjusted_labels',
                         type=str,
                         help='Result csv with adjusted human labels')
     args = parser.parse_args()
