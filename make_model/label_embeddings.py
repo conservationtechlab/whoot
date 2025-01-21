@@ -15,6 +15,7 @@ python label_embeddings.py /path/to/output/ /path/to/birdnet_embeddings/ /path/t
 import argparse
 import pandas as pd
 import os
+import numpy as np
 
 
 def main(human_labels, embeddings, output):
@@ -34,15 +35,38 @@ def main(human_labels, embeddings, output):
             stripped_birdnet = birdnet.strip(".birdnet.embeddings.txt")
             if stripped_birdnet == stripped_filename:
                 birdnet_path = os.path.join(embeddings, birdnet)
-                dfb = pd.read_csv(birdnet_path, delimiter=",")
+                dfb = pd.read_csv(birdnet_path, delimiter=",", header=None)
                 dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
-                combined_df = pd.concat([df, dfb_stripped], axis=1)
+                dfb_stripped.columns = [f"feature_{i}" for i in range(1, len(dfb_stripped.columns) + 1)]
+                df_stripped  = compare_dfs(df, dfb_stripped)
+                combined_df = pd.concat([df_stripped, dfb_stripped], axis=1)
                 output_filename = stripped_filename + "_labeled_embeddings.csv"
                 output_path = os.path.join(output, output_filename)
                 combined_df.to_csv(output_path, index=False)
                 print(f"Labeled embeddings created for: {output_path}") 
             else:
                 continue
+
+def compare_dfs(df, dfb):
+    """Ensure embeddings and labels have same number of rows.
+
+    Args:
+        df: the labeled dataframe
+        dfb: the embeddings
+
+    Returns:
+        proper_df: labels with correct number of rows
+
+    """
+    if abs(len(df) - len(dfb)) > 1:
+        print(abs(len(df) - len(dfb)))
+        raise ValueError("Dfs have a difference greater than 1 row")
+
+    if len(df) > len(dfb):
+        df_stripped = df.iloc[:-1]
+
+    return df_stripped
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
