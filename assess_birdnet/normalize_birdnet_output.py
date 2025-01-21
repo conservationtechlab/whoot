@@ -25,26 +25,26 @@ def main(aggr_birdnet, birdnet_labeled):
     """
     ml_output = pd.read_csv(aggr_birdnet)
 
-    ml_output = ml_output.apply(adjust_time, axis=1)
+    filtered_data = ml_output[ml_output['Common Name'] == 'burowl']
+
+    filtered_data  = filtered_data.apply(adjust_time, axis=1)
 
     # total duration of the sound file(s) that birdnet analyzed
-    total_duration = 3 * 60 * 60
+    total_duration = 10800
     all_intervals = pd.DataFrame({
         'Begin Time (s)': np.arange(0, total_duration, 3),
         'End Time (s)': np.arange(3, total_duration + 3, 3),
     })
-
     all_intervals['Label'] = 'no'
 
-    for _, row in ml_output.iterrows():
+
+    for _, row in filtered_data.iterrows():
         start = row['Begin Time (s)']
         end = row['End Time (s)']
         mask = (
             all_intervals['Begin Time (s)'] >= start
         ) & (all_intervals['End Time (s)'] <= end)
         all_intervals.loc[mask, 'Label'] = 'yes'
-
-    print(all_intervals.head(20))
 
     all_intervals.to_csv(birdnet_labeled, index=False)
 
@@ -62,15 +62,14 @@ def adjust_time(row):
     Args:
         rows: rows in the aggregated birdnet analysis file
     Returns:
-        rows: the adjusted row
+        pandas.Series object: the adjusted row
 
     """
-    chunk_number = int(row['File Name'].split('out')[1].split('.')[0])
-    offset = chunk_number * 600
+    chunk_number = int(row['File Name'].split('output_')[1].split('.')[0])
+    offset = chunk_number * 60
     row['Begin Time (s)'] += offset
     row['End Time (s)'] += offset
     return row
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
