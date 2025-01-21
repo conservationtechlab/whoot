@@ -1,33 +1,85 @@
+"""Adjust human labeled data
+
+This script takes the human labeled data and will output a
+dataframe containing time chunks for your specific sound file
+of interest and labels for each chunk depending on what
+detections were marked by the human labelers.
+
+python normalize_scored_output.py /path/to/human_labeled.csv
+/path/to/output_dataframe.csv
+
+"""
+import argparse
 import pandas as pd
 
-scored_data = pd.read_csv('/home/katie/Downloads/ChickEmer_2017_LS27A.csv')
 
-file_of_interest = '20170422_180000.wav'
-filtered_data = scored_data[scored_data['IN FILE'] == file_of_interest]
+def main(labels, adjusted_labels):
+    """Main function to create a dataframe with the whole
+    duration of the audio file of interest represented in
+    time chunks labeled 'no' or 'yes' if the human labels
+    marked a vocalization in that specific time chunk
 
-audio_file_duration = 3 * 60 * 60
+    Args:
+        labels: the human labeled data
+        adjusted_labels: the resulting csv dataframe with labels
+    for each 3 second chunk based on the human labels
 
-total_chunks = audio_file_duration // 3
-chunks_data = {
-    'Chunk Start': [i*3 for i in range(total_chunks)],
-    'Chunk End': [(i+1)*3 for i in range(total_chunks)],
-    'Label': ['no'] * total_chunks 
-}
-chunks_df = pd.DataFrame(chunks_data)
+    """
+    scored_data = pd.read_csv(labels)
 
-def mark_intervals(row):
+    # need to insert wav file of interest, cannot handle multiple at once
+    file_of_interest = '20170422_180000.wav'
+    filtered_data = scored_data[scored_data['IN FILE'] == file_of_interest]
+
+    # time length of audio file of interest
+    audio_file_duration = 3 * 60 * 60
+
+    total_chunks = audio_file_duration // 3
+    chunks_data = {
+        'Chunk Start': [i*3 for i in range(total_chunks)],
+        'Chunk End': [(i+1)*3 for i in range(total_chunks)],
+        'Label': ['no'] * total_chunks
+    }
+    chunks_df = pd.DataFrame(chunks_data)
+
+    for row in filtered_data:
+        filtered_data.apply(mark_intervals(row, chunks_df),
+                            axis=1)
+
+    print(chunks_df.head(20))
+
+    chunks_df.to_csv(adjusted_labels, index=False)
+
+
+def mark_intervals(row, chunks_df):
+    """Function to relabel the row in the dataframe
+    to yes if the human labels marked a vocalization
+    at that point
+
+    Args:
+        row: current row in the human labeled data
+    that matches the audio file of interest
+        chunks_df: the new unlabeled dataframe
+
+    """
     start_time = row['OFFSET']
     end_time = start_time + row['DURATION']
     start_chunk = int(start_time // 3)
     end_chunk = int(end_time // 3)
-    
+
     if row['TOP1MATCH'] != 'null':
         chunks_df.loc[start_chunk:end_chunk, 'Label'] = 'yes'
 
-filtered_data.apply(mark_intervals, axis=1)
 
-print(chunks_df.head(20))
-
-chunks_df.to_csv('formatted_data_for_20170422_180000.csv', index=False)
-
-
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Input Directory Path'
+        )
+    parser.add_argument('human labels',
+                        type=str,
+                        help='File path to human labeled raw output')
+    parser.add_argument('adjusted human label output',
+                        type=str,
+                        help='Result csv with adjusted human labels')
+    args = parser.parse_args()
+    main(args.labels, args.adjusted_labels)
