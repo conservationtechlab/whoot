@@ -1,11 +1,13 @@
 """Script to Evaluate Birdnet
 
-   This script compares human and birdnet labels and outputs the
-   confusion matrix, accuracy, precision, recall, and F1 score
-   assuming the human labels are 100% accurate.
+This script compares human and birdnet labels and outputs the
+confusion matrix, accuracy, precision, recall, and F1 score
+assuming the human labels are 100% accurate.
 
-assess_performance.py /path/to/human_labeled.csv /path/to/birdnet_labeled.csv
+Example:
+    $ python assess_performance.py /path/to/human_labeled.csv /path/to/birdnet_labeled.csv
 
+# pylint: disable=line-too-long
 """
 import argparse
 import pandas as pd
@@ -14,10 +16,13 @@ from sklearn.metrics import recall_score, f1_score
 
 
 def main(human_labeled, birdnet_labeled):
-    """Main script that prints metrics comparing human/birdnet labeled
-    acoustic data assuming the human labels are ground truth
+    """Evaluate Birdnet metrics
+    Main script that prints metrics comparing human/birdnet labeled
+    acoustic data assuming the human labels are ground truth.
 
-    Args: path to human labeled csv, path to birdnet labeled csv
+    Args:
+        human_labeled (str): The path to the human labeled csv.
+        birdnet_labeled (str): The path to the adjusted birdnet output.
     """
     scored_data = pd.read_csv(human_labeled)
     ml_output = pd.read_csv(birdnet_labeled)
@@ -43,9 +48,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Input Directory Path'
         )
-    parser.add_argument('human_labeled', type=str,
+    parser.add_argument('human_labeled',
+                        type=str,
                         help='Path to human labeled adjusted output')
-    parser.add_argument('birdnet_labeled', type=str,
+    parser.add_argument('birdnet_labeled',
+                        type=str,
                         help='Path to birdnet labeled adjusted output')
     args = parser.parse_args()
     main(args.human_labeled, args.birdnet_labeled)
