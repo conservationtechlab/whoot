@@ -5,24 +5,26 @@ dataframe containing time chunks for your specific sound file
 of interest and labels for each chunk depending on what
 detections were marked by the human labelers.
 
-python normalize_scored_output.py /path/to/human_labeled.csv
-/path/to/output_dataframe.csv
+Example:
+    $ python normalize_scored_output.py /path/to/human_labeled.csv /path/to/output_dataframe.csv
 
+# pylint: disable=line-too-long
 """
 import argparse
 import pandas as pd
 
 
 def main(labels, adjusted_labels):
-    """Main function to create a dataframe with the whole
+    """Organize and expand human labeled data
+    Main function to create a dataframe with the whole
     duration of the audio file of interest represented in
     time chunks labeled 'no' or 'yes' if the human labels
-    marked a vocalization in that specific time chunk
+    marked a vocalization in that specific time chunk.
 
     Args:
-        labels: the human labeled data
-        adjusted_labels: the resulting csv dataframe with labels
-    for each 3 second chunk based on the human labels
+        labels (str): The path to the human labeled data.
+        adjusted_labels (str): The resulting csv dataframe with
+        labels for each 3 second chunk based on the human labels.
 
     """
     scored_data = pd.read_csv(labels)
@@ -41,24 +43,23 @@ def main(labels, adjusted_labels):
         'Label': ['no'] * total_chunks
     }
     chunks_df = pd.DataFrame(chunks_data)
-    for i, row in filtered_data.iterrows():
-        filtered_data.apply(lambda row: mark_intervals(row, chunks_df),
-                            axis=1)
-
-    print(chunks_df.head(20))
+    filtered_data.apply(lambda row: mark_intervals(row, chunks_df),
+                        axis=1)
 
     chunks_df.to_csv(adjusted_labels, index=False)
+    print(f"File {adjusted_labels} created successfully.")
 
 
 def mark_intervals(row, chunks_df):
-    """Function to relabel the row in the dataframe
+    """Labeling detections
+    Function to relabel the row in the dataframe
     to yes if the human labels marked a vocalization
-    at that point
+    at that point.
 
     Args:
-        row: current row in the human labeled data
-    that matches the audio file of interest
-        chunks_df: the new unlabeled dataframe
+        row (pandas.Series object): The current row in the human labeled
+        data that matches the audio file of interest.
+        chunks_df (pandas.Dataframe object): The new unlabeled dataframe.
 
     """
     start_time = float(row['OFFSET'])
