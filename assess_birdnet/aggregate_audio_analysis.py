@@ -2,13 +2,11 @@
 
 Script for combining the batch out output files that Birdnet (acoustic bird
 species classification model) produces into one master csv including the file
-name of the file that the information came from.
+name of the file that the information came from. Needed if the .wav file
+needed to be split into smaller segments for processing.
 
-Args: Path to the directory containing the text files
-Output: A csv with all of the birdnet results from running analysis on
-multiple recordings, ignoring files that had 0 detections
-
-python aggregate_audio_analysis.py /path/to/input/dir
+Example:
+    $ python aggregate_audio_analysis.py /path/to/input/dir
 
 """
 import os
@@ -17,10 +15,13 @@ import argparse
 
 
 def main(root_dir):
-    """Main function that creates a CSV and populates it with the detection
+    """Aggregate birdnet results.
+
+    Main function that creates a CSV and populates it with the detection
     information from Birdnet text file outputs
 
-    Args: Path to directpry containing Birdnet results
+    Args:
+        root_dir (str): The path to directory containing Birdnet results
 
     """
     # Scanning the root directory containing sub-direcctories
@@ -78,7 +79,9 @@ if __name__ == '__main__':
         )
 
     # Create and parse arguements
-    parser.add_argument('root_dir', type=str, help='Directory path to files')
+    parser.add_argument('root_dir',
+                        type=str,
+                        help='Directory path to files')
     # Parse the command-line arguments
     args = parser.parse_args()
 
