@@ -1,4 +1,4 @@
-"""Script to adjust birdnet output
+"""Standardize Birdnet Output.
 
 This script takes a master csv containing the aggregated birdnet output
 text files and creates an expanded csv containing  a "no" label
@@ -7,33 +7,36 @@ for each chunk of time that birdnet did not detect a vocalization. The
 
 Example:
 
-    $ python normalize_birdnet_output.py /path/to/aggregated_birdnet_output.csv /path/to/birdnet_labeled.csv
+    $ python normalize_birdnet_output.py \\
+      /path/to/aggregated_birdnet_output.csv /path/to/birdnet_labeled.csv
 
-# pylint: disable=line-too-long
 """
+
 import argparse
 import pandas as pd
 import numpy as np
 
 
 def main(aggr_birdnet, birdnet_labeled):
-    """Organize and expand birdnet labels
+    """Organize and expand birdnet labels.
+
     Main function to take birdnet labels and create a
     dataframe that has time chunks for the whole audio file
     duration and labels the detection periods with "yes".
 
     Args:
-        aggr_birdnet (str): aggregated birdnet analysis file
-        birdnet_labeled (str): path to desired output csv
+        aggr_birdnet (str): Path to ggregated Birdnet analysis file.
+        birdnet_labeled (str): Path to desired output csv.
 
     """
     ml_output = pd.read_csv(aggr_birdnet)
 
     filtered_data = ml_output[ml_output['Common Name'] == 'burowl']
 
+    # Pptional if Birdnet analysis is continuous and not aggregated.
     filtered_data = filtered_data.apply(adjust_time, axis=1)
 
-    # total duration of the sound file(s) that birdnet analyzed
+    # Total duration of the sound file(s) that Birdnet analyzed.
     total_duration = 10800
     all_intervals = pd.DataFrame({
         'Begin Time (s)': np.arange(0, total_duration, 3),
@@ -53,7 +56,8 @@ def main(aggr_birdnet, birdnet_labeled):
 
 
 def adjust_time(row):
-    """Continuous timestamps
+    """Create continuous timestamps.
+
     Function to standardize the timestamps for the aggregated
     birdnet input file. This is because this script was designed
     assuming that the analysis needed to be aggregated from split
@@ -64,10 +68,10 @@ def adjust_time(row):
     as separate audio files.
 
     Args:
-        row (pandas.Series object): rows in the aggregated birdnet
-        analysis file
+        row (pandas.Series): The current row in the dataframe.
+
     Returns:
-        row (pandas.Series object): the adjusted row
+        (pandas.Series): The time adjusted row in the dataframe.
 
     """
     chunk_number = int(row['File Name'].split('output_')[1].split('.')[0])
