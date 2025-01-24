@@ -7,7 +7,7 @@ for each chunk of time that birdnet did not detect a vocalization. The
 
 Example:
 
-    $ python normalize_birdnet_output.py \\
+    $ python normalize_birdnet_output.py \
       /path/to/aggregated_birdnet_output.csv /path/to/birdnet_labeled.csv
 
 """
@@ -25,7 +25,7 @@ def main(aggr_birdnet, birdnet_labeled):
     duration and labels the detection periods with "yes".
 
     Args:
-        aggr_birdnet (str): Path to ggregated Birdnet analysis file.
+        aggr_birdnet (str): Path to aggregated Birdnet analysis file.
         birdnet_labeled (str): Path to desired output csv.
 
     """
@@ -33,7 +33,7 @@ def main(aggr_birdnet, birdnet_labeled):
 
     filtered_data = ml_output[ml_output['Common Name'] == 'burowl']
 
-    # Pptional if Birdnet analysis is continuous and not aggregated.
+    # Optional if Birdnet analysis is continuous and not aggregated.
     filtered_data = filtered_data.apply(adjust_time, axis=1)
 
     # Total duration of the sound file(s) that Birdnet analyzed.
@@ -71,7 +71,7 @@ def adjust_time(row):
         row (pandas.Series): The current row in the dataframe.
 
     Returns:
-        (pandas.Series): The time adjusted row in the dataframe.
+        pandas.Series: The time adjusted row in the dataframe.
 
     """
     chunk_number = int(row['File Name'].split('output_')[1].split('.')[0])
