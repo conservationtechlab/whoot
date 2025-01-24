@@ -42,6 +42,8 @@ def main(labeled_embeddings, saved_model):
     combined_x = pd.concat(all_x, ignore_index=True)
     combined_y = pd.concat(all_y, ignore_index=True)
 
+    print(f"Detection types in entire set: \n{combined_y.value_counts()}")
+
     train_x, test_x, train_y, test_y = train_test_split(combined_x,
                                                         combined_y,
                                                         test_size=0.2,
