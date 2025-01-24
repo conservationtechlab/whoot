@@ -12,13 +12,12 @@ Example:
 """
 
 import argparse
+import os
+import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import classification_report, accuracy_score, recall_score, precision_score
-import numpy as np
-import os
-import pickle
+from sklearn.metrics import classification_report
 
 
 def main(labeled_embeddings, saved_model):
@@ -31,30 +30,33 @@ def main(labeled_embeddings, saved_model):
         saved_model (str): The path to the model.
 
     """
-    all_X = []
-    all_Y = []
+    all_x = []
+    all_y = []
     for embeddings_file in os.listdir(labeled_embeddings):
         embeddings_path = os.path.join(labeled_embeddings, embeddings_file)
-        df = pd.read_csv(embeddings_path)
-        X = df.drop(['Chunk Start', 'Chunk End', 'Label'], axis=1)
-        y = df['Label']
-        all_X.append(X)
-        all_Y.append(y)
-    X_combined = pd.concat(all_X, ignore_index=True)
-    Y_combined = pd.concat(all_Y, ignore_index=True)
+        le_df = pd.read_csv(embeddings_path)
+        embed = le_df.drop(['Chunk Start', 'Chunk End', 'Label'], axis=1)
+        label = le_df['Label']
+        all_x.append(embed)
+        all_y.append(label)
+    combined_x = pd.concat(all_x, ignore_index=True)
+    combined_y = pd.concat(all_y, ignore_index=True)
 
-    X_train, X_test, y_train, y_test = train_test_split(X_combined, Y_combined, test_size=0.2, random_state=42)
-
+    train_x, test_x, train_y, test_y = train_test_split(combined_x,
+                                                        combined_y,
+                                                        test_size=0.2,
+                                                        random_state=42)
 
     svm = SVC(class_weight='balanced', probability=True)
-    svm.fit(X_train, y_train)
+    svm.fit(train_x, train_y)
 
-    y_pred_default = svm.predict(X_test)
+    y_pred_default = svm.predict(test_x)
 
-    pickle.dump(svm, open(saved_model, 'wb'))
+    with open(saved_model, 'wb') as file:
+        pickle.dump(svm, file)
 
     print("Classification report with default threshold:")
-    print(classification_report(y_test, y_pred_default))
+    print(classification_report(test_y, y_pred_default))
 
 
 if __name__ == '__main__':

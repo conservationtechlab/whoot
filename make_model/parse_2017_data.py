@@ -1,14 +1,17 @@
-"""Script to adjust the human labeled output into labeled dateframes
+"""Standardize the human labels.
 
 Each sound file of interest has a corresponding csv created that contains
-labels for each 3 second chunk in the file, where 'yes' is maarked on
+labels for each 3 second chunk in the file, where 'yes' is marked on
 that time chunk if the human label contains a vocalization in that time
 frame.
 
-python parse_2017_data.py /human_labels.csv /directory to wav files/
-/directory/output/
+Example:
+
+    $ python parse_2017_data.py /path/to/human_labels.csv \
+      /path/to/directory/of/wavs/ /path/to/directory/output/
 
 """
+
 import argparse
 import os
 import pandas as pd
@@ -16,14 +19,16 @@ import librosa
 
 
 def main(labels, wavs, output):
-    """Main script to create csvs of fully human labeled data for each
-    wav file of interest
+    """Create human labeled dataframes.
+
+    Main script to create csvs of human labeled data for each
+    wav file of interest.
 
     Args:
-        labels: path to human labeled csv
-        wavs: path to all audio (corresponding to labeled csv)
-        output: path to directory where each csv will output (1 for each
-    wav)
+        labels (str): The path to human labeled csv.
+        wavs (str): The path to all audio files.
+        output (str): The path to directory where each csv will
+            output (1 for each wav).
 
     """
     os.makedirs(output, exist_ok=True)
@@ -35,10 +40,11 @@ def main(labels, wavs, output):
             audio_path = os.path.join(wavs, audio_file)
 
             try:
-                y, sr = librosa.load(audio_path, sr=None)
-                audio_duration = librosa.get_duration(y=y, sr=sr)
-            except Exception as e:
-                print(f"Error processing {audio_file}: {e}")
+                time_series, sample_rate = librosa.load(audio_path, sr=None)
+                audio_duration = librosa.get_duration(y=time_series,
+                                                      sr=sample_rate)
+            except Exception as err:
+                print(f"Error processing {audio_file}: {err}")
                 continue
 
             total_chunks = int(audio_duration // 3) + 1
