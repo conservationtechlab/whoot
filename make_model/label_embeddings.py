@@ -10,7 +10,9 @@ running parse_2017_data.py to create 1 csv that contains the human
 ground truth label as well as columns for each of the 1024 features
 per 3 second chunk.
 
-python label_embeddings.py /path/to/output/ /path/to/birdnet_embeddings/ /path/to/desired/outputs/
+Example:
+
+    $ python label_embeddings.py /path/to/output/ /path/to/birdnet_embeddings/ /path/to/desired/outputs/
 """
 import argparse
 import pandas as pd
@@ -35,7 +37,7 @@ def main(human_labels, embeddings, output):
             stripped_birdnet = birdnet.strip(".birdnet.embeddings.txt")
             if stripped_birdnet == stripped_filename:
                 birdnet_path = os.path.join(embeddings, birdnet)
-                dfb = pd.read_csv(birdnet_path, delimiter=",", header=None)
+                dfb = pd.read_csv(birdnet_path, delimiter="[,\t]", header=None)
                 dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
                 dfb_stripped.columns = [f"feature_{i}" for i in range(1, len(dfb_stripped.columns) + 1)]
                 df_stripped  = compare_dfs(df, dfb_stripped)
