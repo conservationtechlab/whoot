@@ -1,4 +1,4 @@
-"""Aggregate Birdnet Output Files
+"""Aggregate Birdnet Output Files.
 
 Script for combining the batch out output files that Birdnet (acoustic bird
 species classification model) produces into one master csv including the file
@@ -9,6 +9,7 @@ Example:
     $ python aggregate_audio_analysis.py /path/to/input/dir
 
 """
+
 import os
 import csv
 import argparse

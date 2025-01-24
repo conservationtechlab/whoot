@@ -1,4 +1,4 @@
-"""Adjust human labeled data
+"""Standardize human labeled data.
 
 This script takes the human labeled data and will output a
 dataframe containing time chunks for your specific sound file
@@ -6,16 +6,19 @@ of interest and labels for each chunk depending on what
 detections were marked by the human labelers.
 
 Example:
-    $ python normalize_scored_output.py /path/to/human_labeled.csv /path/to/output_dataframe.csv
 
-# pylint: disable=line-too-long
+    $ python normalize_scored_output.py \\
+      /path/to/human_labeled.csv /path/to/output_dataframe.csv
+
 """
+
 import argparse
 import pandas as pd
 
 
 def main(labels, adjusted_labels):
-    """Organize and expand human labeled data
+    """Standardize human labeled data.
+
     Main function to create a dataframe with the whole
     duration of the audio file of interest represented in
     time chunks labeled 'no' or 'yes' if the human labels
@@ -24,16 +27,16 @@ def main(labels, adjusted_labels):
     Args:
         labels (str): The path to the human labeled data.
         adjusted_labels (str): The resulting csv dataframe with
-        labels for each 3 second chunk based on the human labels.
+            labels for each 3 second chunk based on the human labels.
 
     """
     scored_data = pd.read_csv(labels)
 
-    # need to insert wav file of interest, cannot handle multiple at once
+    # Need to insert wav file of interest.
     file_of_interest = '20170421_180000.wav'
     filtered_data = scored_data[scored_data['IN FILE'] == file_of_interest]
 
-    # time length of audio file of interest
+    # Time length of audio file of interest.
     audio_file_duration = 10800
 
     total_chunks = audio_file_duration // 3
@@ -51,15 +54,16 @@ def main(labels, adjusted_labels):
 
 
 def mark_intervals(row, chunks_df):
-    """Labeling detections
+    """Label positive detections.
+
     Function to relabel the row in the dataframe
     to yes if the human labels marked a vocalization
     at that point.
 
     Args:
-        row (pandas.Series object): The current row in the human labeled
-        data that matches the audio file of interest.
-        chunks_df (pandas.Dataframe object): The new unlabeled dataframe.
+        row (pandas.Series): The current row in the human labeled
+            data that matches the audio file of interest.
+        chunks_df (pandas.Dataframe): The new unlabeled dataframe.
 
     """
     start_time = float(row['OFFSET'])
