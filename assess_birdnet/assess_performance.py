@@ -6,7 +6,7 @@ assuming the human labels are 100% accurate.
 
 Example:
 
-    $ python assess_performance.py /path/to/human_labeled.csv \\
+    $ python assess_performance.py /path/to/human_labeled.csv \
       /path/to/birdnet_labeled.csv
 
 """
