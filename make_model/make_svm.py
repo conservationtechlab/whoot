@@ -1,3 +1,16 @@
+"""Create Support Vector Machine Model.
+
+This script takes the labeled embeddings file, randomly divides into
+a train and test set, trains a linear 2-class SVM, outputs the metrics,
+and saves the model to a file to be used later.
+
+Example:
+
+    $ python make_svm.py /path/to/labeled_embeddings.csv \\
+      /path/to/desired/model/output.sav
+
+"""
+
 import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -5,14 +18,18 @@ from sklearn.svm import SVC
 from sklearn.metrics import classification_report, accuracy_score, recall_score, precision_score
 import numpy as np
 import os
+import pickle
 
 
-def main(labeled_embeddings):
-    """Create SVM
+def main(labeled_embeddings, saved_model):
+    """Create and save SVM.
 
+    Create the SVM, output the metrics, and save the model.
 
     Args:
-        labeled_embeddings (str): path to folder with labeled embeddings
+        labeled_embeddings (str): The path to folder with labeled embeddings.
+        saved_model (str): The path to the model.
+
     """
     all_X = []
     all_Y = []
@@ -30,10 +47,12 @@ def main(labeled_embeddings):
     X_train, X_test, y_train, y_test = train_test_split(X_combined, Y_combined, test_size=0.2, random_state=42)
 
 
-    clf = SVC(class_weight='balanced', probability=True) 
-    clf.fit(X_train, y_train)
+    svm = SVC(class_weight='balanced', probability=True)
+    svm.fit(X_train, y_train)
 
-    y_pred_default = clf.predict(X_test)
+    y_pred_default = svm.predict(X_test)
+
+    pickle.dump(svm, open(saved_model, 'wb'))
 
     print("Classification report with default threshold:")
     print(classification_report(y_test, y_pred_default))
@@ -44,10 +63,13 @@ def main(labeled_embeddings):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Input Directory Path'
+        description='Input CSV and model output'
         )
     parser.add_argument('labeled_embeddings',
                         type=str,
-                        help='Directory path to labels with embeddings')
+                        help='Directory path to labels with embeddings.')
+    parser.add_argument('saved_model',
+                        type=str,
+                        help='Path to the saved model output.')
     args = parser.parse_args()
-    main(args.labeled_embeddings)
+    main(args.labeled_embeddings, args,saved_model)
