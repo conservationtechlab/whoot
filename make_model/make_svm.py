@@ -6,7 +6,7 @@ and saves the model to a file to be used later.
 
 Example:
 
-    $ python make_svm.py /path/to/labeled_embeddings.csv \\
+    $ python make_svm.py /path/to/labeled_embeddings.csv \
       /path/to/desired/model/output.sav
 
 """
@@ -36,8 +36,7 @@ def main(labeled_embeddings, saved_model):
     for embeddings_file in os.listdir(labeled_embeddings):
         embeddings_path = os.path.join(labeled_embeddings, embeddings_file)
         df = pd.read_csv(embeddings_path)
-
-        X = df.drop(['Chunk Start', 'Chunk End', 'Label'])
+        X = df.drop(['Chunk Start', 'Chunk End', 'Label'], axis=1)
         y = df['Label']
         all_X.append(X)
         all_Y.append(y)
@@ -57,9 +56,6 @@ def main(labeled_embeddings, saved_model):
     print("Classification report with default threshold:")
     print(classification_report(y_test, y_pred_default))
 
-    print("Classification report with custom threshold of -0.33:")
-    print(classification_report(y_test, y_pred_custom_threshold))
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -72,4 +68,4 @@ if __name__ == '__main__':
                         type=str,
                         help='Path to the saved model output.')
     args = parser.parse_args()
-    main(args.labeled_embeddings, args,saved_model)
+    main(args.labeled_embeddings, args.saved_model)
