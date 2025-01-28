@@ -84,6 +84,8 @@ def compare_dfs(label_df, dfb):
 
     if len(label_df) > len(dfb):
         df_stripped = label_df.iloc[:-1]
+    else:
+        df_stripped = label_df
 
     return df_stripped
 
