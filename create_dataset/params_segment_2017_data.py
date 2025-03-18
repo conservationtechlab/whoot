@@ -22,7 +22,6 @@ import argparse
 import yaml
 import os
 import pandas as pd
-import librosa
 from pydub import AudioSegment
 
 
@@ -62,30 +61,17 @@ def create_bird_segments(labels, wavs, output, config):
         if audio_file.endswith('.wav'):
             audio_path = os.path.join(wavs, audio_file)
 
-            try:
-                time_series, sample_rate = librosa.load(audio_path, sr=None)
-                audio_duration = librosa.get_duration(y=time_series,
-                                                      sr=sample_rate)
-            except Exception as err:
-                print(f"Error processing {audio_file}: {err}")
-                continue
-
             filtered_data = scored_data[scored_data['IN FILE'] == audio_file]
             bird_sound = AudioSegment.from_wav(audio_path)
             segment_index = 0
             for _, row in filtered_data.iterrows():
                 if row['TOP1MATCH'] != 'null':
                     start_time = float(row['OFFSET'])
-                    print("Start time in ms? Then end time in ms, then start time w padding, and end time w padding in ms")
-                    print(start_time)
                     end_time = (start_time + float(row['DURATION']))
-                    print(end_time)
                     start_time = start_time * 1000
                     end_time = end_time * 1000
                     start_time = start_time - padding
-                    print(start_time)
                     end_time = end_time + padding
-                    print(end_time)
                     segment = bird_sound[start_time:end_time]
                     output_file = os.path.join(
                         output, f'{os.path.splitext(audio_file)[0]}_segment_{segment_index}.wav'
