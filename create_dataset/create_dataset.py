@@ -14,19 +14,21 @@ to pad the labeled detections if they need consistent length segments.
 
 Usage:
 
-    python create_dataset.py /path/to/human/labeled.csv
+    python3 create_dataset.py /path/to/human/labeled.csv
     /path/to/parent/dir/of/wavs/ /path/to/desired/output/dir/
 
 """
-import walk_buow_labels
+from walk_buow_labels import setup_logger, get_paths, create_segments
+from walk_buow_labels import filter_labels_2017, filter_labels_2018
+from walk_buow_labels import create_noise_segments, create_csv
 import argparse
-
+import pandas as pd
 
 def main():
     """
     """
     # parse the inputs
-    parser = argparse.ArgumentParser(
+    '''parser = argparse.ArgumentParser(
         description='Input Directory Path'
     )
     parser.add_argument('labels', type=str,
@@ -36,25 +38,28 @@ def main():
     parser.add_argument('output_dir', type=str,
                         help='Path to desired directory for segments.')
     args = parser.parse_args()
-    main(args.labels, args.wav_dir, args.output_dir)
-
+    main(args.labels, args.wav_dir, args.output_dir)'''
+    wav_dir = "/mnt/buow/Acoustic_Recordings/2017-2018/2017/Otay/"
+    labels = "/mnt/buow/Acoustic_Recordings/2017-2018/Results/Otay/2017/all.csv"
     # walk dir to list paths to each original wav file
     wav_file_paths = get_paths(wav_dir)
     # open human label file
-    labels = csv.read(labels)
+    labels = pd.read_csv(labels)
     #iterate through each individual original wav
-
+    if "2017" in labels['DATE'].iloc[0]:
+        use_2017 = True
+    elif "2018" in labels['DATE'].iloc[0]:
+        use_2017 = False
     for wav in wav_file_paths:
         # check which label format to select parsing method
         # create dataframe of only the labels that correspond to the wav
-        if 1st row['DATE'] in labels endswith."2017":
+        if use_2017 == True:
             filtered_labels = filter_labels_2017(wav, labels)
-        elif 1st row['DATE'] in labels endswith"2018":
+        elif use_2017 == False:
             filtered_labels = filter_labels_2018(wav, labels)
-
         # output the labeled segments and return the dataframe of annotations
-        new_buow_rows = create_segments(wav, filtered_labels, output_dir)
-        # get the number of labeled  detections for that wav
+        #new_buow_rows = create_segments(wav, filtered_labels, output_dir)
+        '''# get the number of labeled  detections for that wav
         num = num rows in new_rows
         # create same number of noise segments from the same wav file randomly
         new_noise_rows = create_noise_segments(wav, filtered_labels, num, output_dir)
@@ -63,4 +68,7 @@ def main():
         # add the annotations to the csv of metadata for the dataset
         create_csv(new_rows)
 
-        logging.info(f"Added " {int(new_rows)*2} "new segments from {wav}")
+        logging.info(f"Added " {int(new_rows)*2} "new segments from {wav}")'''
+
+
+main()
