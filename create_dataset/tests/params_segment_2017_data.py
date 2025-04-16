@@ -22,7 +22,7 @@ import argparse
 import yaml
 import os
 import pandas as pd
-from pydub import AudioSegment
+from pydub import AudioSegment, exceptions
 
 
 def read_configs(config):
@@ -62,7 +62,11 @@ def create_bird_segments(labels, wavs, output, config):
             audio_path = os.path.join(wavs, audio_file)
 
             filtered_data = scored_data[scored_data['IN FILE'] == audio_file]
-            bird_sound = AudioSegment.from_wav(audio_path)
+            try:
+                bird_sound = AudioSegment.from_wav(audio_path)
+            except exceptions.CouldntDecodeError:
+                print(f"Counldn't decode: {audio_path}, moving to next file.")
+                continue
             segment_index = 0
             for _, row in filtered_data.iterrows():
                 if row['TOP1MATCH'] != 'null':
