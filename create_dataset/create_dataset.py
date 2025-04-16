@@ -13,14 +13,14 @@ noise will be fixed and consistent. The user of the dataset may choose
 to pad the labeled detections if they need consistent length segments.
 
 Usage:
-
+/
     python3 create_dataset.py /path/to/human/labeled.csv
     /path/to/parent/dir/of/wavs/ /path/to/desired/output/dir/
 
 """
-from walk_buow_labels import setup_logger, get_paths, create_segments
-from walk_buow_labels import filter_labels_2017, filter_labels_2018
-from walk_buow_labels import create_noise_segments, create_csv
+from create_segments import setup_logger, get_paths, create_segments
+from create_segments import create_noise_segments, create_csv
+from filter_labels import filter_labels_2017, filter_labels_2018
 import argparse
 import pandas as pd
 
@@ -31,16 +31,27 @@ def main():
     '''parser = argparse.ArgumentParser(
         description='Input Directory Path'
     )
-    parser.add_argument('labels', type=str,
+    parser.add_argument('-labels', type=str,
                         help='Path to human labeled csv')
-    parser.add_argument('wav_dir', type=str,
+    parser.add_argument('-wav_dir', type=str,
                         help='Path to directory containing wav files.')
-    parser.add_argument('output_dir', type=str,
+    parser.add_argument('-output_dir', type=str,
                         help='Path to desired directory for segments.')
+    parser.add_argument('-l', '--lengthen', type=int, default=0,
+                        help='ms of padding for front and end of detection segment')
+    parser.add_argument('-e', '--equalize', type=int,
+                        help='each detection segment and noise segment will be the same length, not zero padded')
     args = parser.parse_args()
     main(args.labels, args.wav_dir, args.output_dir)'''
     wav_dir = "/mnt/buow/Acoustic_Recordings/2017-2018/2017/Otay/"
     labels = "/mnt/buow/Acoustic_Recordings/2017-2018/Results/Otay/2017/all.csv"
+    output_dir = "/home/katiegarwood/create_dataset/"
+    if output dir exists
+        good, if not make
+    if labels exist, good
+        if not tell user
+    if wav dir exists
+        if not tell user
     # walk dir to list paths to each original wav file
     wav_file_paths = get_paths(wav_dir)
     # open human label file
