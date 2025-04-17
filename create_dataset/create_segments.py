@@ -4,10 +4,11 @@
 """
 import pandas as pd
 import os
-from pydub import AudioSegment
+from pydub import AudioSegment, exceptions
 import logging
 from pathlib import Path
 import ntpath
+import uuid
 
 def setup_logger(level, filename=None):
     """
@@ -25,13 +26,38 @@ def get_paths(home_dir):
                 wavs_file_paths.append(new_file)
     return wavs_file_paths
 
-def create_segments(wav, filtered_labels, out_path):
+def create_segments(wav, filtered_labels, out_path, class_list):
     """
     """
-    audio = AudioSegment.from_wav(wav)
-    for _, row in filtered_labels.iterrows():
-
-        logging.info(f"Created segment {segment}")
+    if filtered_labels is None:
+        print(f"skipping segment creation for {wav} because it does not have labels or is not a file of interest")
+        return None
+    output_rows = pd.DataFrame(columns=['segment', 'label', 'segment_path', 'original_path', 'segment_duration_ms'])
+    with open(class_list, 'r') as file:
+        classes = file.read()
+    class_list = classes.split(',')
+    try:
+        audio = AudioSegment.from_wav(wav)
+    except exceptions.CouldntDecodeError:
+        print(f"Couldn't decode: {audio}, moving to next file")
+    rows_with_none = filtered_labels[filtered_labels['MANUAL ID*'].isnull()]
+    filtered_labels['MANUAL ID*'] = filtered_labels['MANUAL ID*'].str.lower()
+    df_row = 0
+    for index, row in filtered_labels.iterrows():
+        for call_type in class_list:
+            if row['MANUAL ID*'] == call_type:
+                start_time = float(row['OFFSET'])
+                end_time = (start_time + float(row['DURATION']))
+                start_time = start_time * 1000
+                end_time = end_time * 1000
+                segment = audio[start_time:end_time]
+                id = uuid.uuid4()
+                id = str(id) + '.wav'
+                segment_path = os.path.join(out_path, id)
+                segment.export(segment_path, format='wav')
+                output_rows.loc[df_row] = [id, call_type, segment_path, wav, float(row['DURATION'])]
+                df_row += 1
+        print(f"Created segment {segment_path}")
     return output_rows
 
 def create_noise_segments(wav, filtered_labels, num, out_path):

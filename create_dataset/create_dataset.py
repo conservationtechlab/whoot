@@ -37,15 +37,18 @@ def main():
                         help='Path to directory containing wav files.')
     parser.add_argument('-output_dir', type=str,
                         help='Path to desired directory for segments.')
+    parser.add_argument('-class_list', type=str, 
+                        help='Path to txt file of list of labeled classes')
     parser.add_argument('-l', '--lengthen', type=int, default=0,
                         help='ms of padding for front and end of detection segment')
     parser.add_argument('-e', '--equalize', type=int,
                         help='each detection segment and noise segment will be the same length, not zero padded')
     args = parser.parse_args()
     main(args.labels, args.wav_dir, args.output_dir)'''
-    wav_dir = "/mnt/buow/Acoustic_Recordings/2017-2018/2018/Otay/Lonestar/"
+    wav_dir = "/mnt/buow/Acoustic_Recordings/2017-2018/2018/Otay/Lonestar/EarlyBreeding/LS128/SM10/"
     labels = "/mnt/buow/Acoustic_Recordings/2017-2018/Results/Otay/2018/allpks2018.csv"
-    output_dir = "/home/katiegarwood/create_dataset/"
+    output_dir = "/home/katie/create_dataset/"
+    class_list = "/home/katie/class_list.txt"
     '''if output dir exists
         good, if not make
     if labels exist, good
@@ -69,9 +72,9 @@ def main():
         elif use_2017 == False:
             filtered_labels = filter_labels_2018(wav, labels)
         # output the labeled segments and return the dataframe of annotations
-        #new_buow_rows = create_segments(wav, filtered_labels, output_dir)
-        '''# get the number of labeled  detections for that wav
-        num = num rows in new_rows
+        new_buow_rows = create_segments(wav, filtered_labels, output_dir, class_list)
+        # get the number of labeled  detections for that wav
+        '''num = num rows in new_rows
         # create same number of noise segments from the same wav file randomly
         new_noise_rows = create_noise_segments(wav, filtered_labels, num, output_dir)
         # combine the buow and noise annotations created
