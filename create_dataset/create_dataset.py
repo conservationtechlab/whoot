@@ -43,15 +43,15 @@ def main():
                         help='each detection segment and noise segment will be the same length, not zero padded')
     args = parser.parse_args()
     main(args.labels, args.wav_dir, args.output_dir)'''
-    wav_dir = "/mnt/buow/Acoustic_Recordings/2017-2018/2017/Otay/"
-    labels = "/mnt/buow/Acoustic_Recordings/2017-2018/Results/Otay/2017/all.csv"
+    wav_dir = "/mnt/buow/Acoustic_Recordings/2017-2018/2018/Otay/Lonestar/"
+    labels = "/mnt/buow/Acoustic_Recordings/2017-2018/Results/Otay/2018/allpks2018.csv"
     output_dir = "/home/katiegarwood/create_dataset/"
-    if output dir exists
+    '''if output dir exists
         good, if not make
     if labels exist, good
         if not tell user
     if wav dir exists
-        if not tell user
+        if not tell user'''
     # walk dir to list paths to each original wav file
     wav_file_paths = get_paths(wav_dir)
     # open human label file
