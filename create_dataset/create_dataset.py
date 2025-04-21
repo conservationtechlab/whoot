@@ -14,8 +14,9 @@ to pad the labeled detections if they need consistent length segments.
 
 Usage:
 /
-    python3 create_dataset.py /path/to/human/labeled.csv
-    /path/to/parent/dir/of/wavs/ /path/to/desired/output/dir/
+    python3 create_dataset.py -labels /path/to/human/labeled.csv
+    -wav_dir /path/to/parent/dir/of/wavs/ -output_dir /path/to/desired/output/dir/
+    -class_list /path/to/classes.txt
 
 """
 from create_segments import setup_logger, get_paths, create_segments
@@ -73,11 +74,9 @@ def main():
             filtered_labels = filter_labels_2018(wav, labels)
         # output the labeled segments and return the dataframe of annotations
         new_buow_rows = create_segments(wav, filtered_labels, output_dir, class_list)
-        # get the number of labeled  detections for that wav
-        '''num = num rows in new_rows
         # create same number of noise segments from the same wav file randomly
-        new_noise_rows = create_noise_segments(wav, filtered_labels, num, output_dir)
-        # combine the buow and noise annotations created
+        new_noise_rows = create_noise_segments(wav, new_buow_rows, output_dir)
+        '''# combine the buow and noise annotations created
         new_rows = new_buow_rows + new_noise_rows
         # add the annotations to the csv of metadata for the dataset
         create_csv(new_rows)

@@ -9,6 +9,8 @@ import logging
 from pathlib import Path
 import ntpath
 import uuid
+import numpy as np
+import random
 
 def setup_logger(level, filename=None):
     """
@@ -32,7 +34,7 @@ def create_segments(wav, filtered_labels, out_path, class_list):
     if filtered_labels is None:
         print(f"skipping segment creation for {wav} because it does not have labels or is not a file of interest")
         return None
-    output_rows = pd.DataFrame(columns=['segment', 'label', 'segment_path', 'original_path', 'segment_duration_ms'])
+    output_rows = pd.DataFrame(columns=['segment', 'label', 'segment_path', 'original_path', 'segment_duration_s', 'segment_rel_start_ms'])
     with open(class_list, 'r') as file:
         classes = file.read()
     class_list = classes.split(',')
@@ -55,15 +57,34 @@ def create_segments(wav, filtered_labels, out_path, class_list):
                 id = str(id) + '.wav'
                 segment_path = os.path.join(out_path, id)
                 segment.export(segment_path, format='wav')
-                output_rows.loc[df_row] = [id, call_type, segment_path, wav, float(row['DURATION'])]
+                output_rows.loc[df_row] = [id, call_type, segment_path, wav, float(row['DURATION']), start_time]
                 df_row += 1
         print(f"Created segment {segment_path}")
     return output_rows
 
-def create_noise_segments(wav, filtered_labels, num, out_path):
-    """
-    """
+# def create_birdnet_segments(wav, out_path, birdnet_class_list=None):
 
+def create_noise_segments(wav, new_buow_rows, out_path):
+    """
+    Randomly select an equal number of 3s noise segments to
+    the number of detections per audio file, a buffer length
+    away from all of the detections in the file.
+    """
+    try:
+        audio = AudioSegment.from_wav(wav)
+        # duration in seconds, cutting off the ms
+        duration = int(len(audio) / 1000)
+    except exceptions.CouldntDecodeError:
+        print(f"Couldn't decode: {audio}, moving to next file")
+
+    num = len(new_buow_rows)
+    seconds_array = np.zeros(duration)
+    for index, row in new_buow_rows.iterrows():
+        start = int((row['segment_rel_start_ms'] / 1000) - 1)
+        end = int((row['segment_rel_start_ms'] / 1000) + row['segment_duration_s'])
+        mask_start = max(0, start - 30)
+        mask_end = min(len(seconds_array), end + 30 + 1)
+        seconds_array[mask_start:mask_end] = 1
 
 def create_csv(new_rows):
     """
