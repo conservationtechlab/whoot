@@ -11,6 +11,7 @@ import ntpath
 import uuid
 import numpy as np
 import random
+import ntpath
 
 def setup_logger(level, filename=None):
     """
@@ -45,6 +46,7 @@ def create_segments(wav, filtered_labels, out_path, class_list):
     rows_with_none = filtered_labels[filtered_labels['MANUAL ID*'].isnull()]
     filtered_labels['MANUAL ID*'] = filtered_labels['MANUAL ID*'].str.lower()
     df_row = 0
+    path = ntpath.dirname(wav)
     for index, row in filtered_labels.iterrows():
         for call_type in class_list:
             if row['MANUAL ID*'] == call_type:
@@ -88,24 +90,23 @@ def create_noise_segments(wav, new_buow_rows, out_path):
     new_sample = num / 2
     while num > new_sample:
         random_index = np.random.choice(len(seconds_array))
-        if seconds_array[random_index] == 0:
-            if seconds_array[random_index + 1] == 0:
-               if seconds_array[random_index + 2] == 0:
-                   start_time = random_index + 1 * 1000
-                   end_time = random_index + 4 * 1000
-                   segment = audio[start_time:end_time]
-                   duration_of_segment = len(segment) / 1000
-                   id = uuid.uuid4()
-                   id = str(id) + '.wav'
-                   segment_path = os.path.join(out_path, id)
-                   segment.export(segment_path, format='wav')
-                   new_buow_rows.loc[new_sample] = [id, call_type, segment_path, wav, duration_of_segment, start_time]
-                   new_sample += 1
+        if seconds_array[random_index] == 0 and seconds_array[random_index + 3] == 0:
+           start_time = random_index + 1 * 1000
+           end_time = random_index + 4 * 1000
+           segment = audio[start_time:end_time]
+           duration_of_segment = len(segment) / 1000
+           id = uuid.uuid4()
+           id = str(id) + '.wav'
+           segment_path = os.path.join(out_path, id)
+           segment.export(segment_path, format='wav')
+           new_buow_rows.loc[new_sample] = [id, call_type, segment_path, wav, duration_of_segment, start_time]
+           new_sample += 1
 
-    print(f"Dataframe with added noise samples {new_buow_rows}")
-    return new_buow_rows
+    all_buow_rows = new_buow_rows
+    return all_buow_rows
 
-def create_csv(new_rows):
+def create_csv(new_rows, output_dir):
     """
     """
-
+    if os.path.exists(output_dir):
+        pd.con
