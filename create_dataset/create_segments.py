@@ -76,8 +76,8 @@ def create_noise_segments(wav, new_buow_rows, out_path):
         duration = int(len(audio) / 1000)
     except exceptions.CouldntDecodeError:
         print(f"Couldn't decode: {audio}, moving to next file")
-
-    num = len(new_buow_rows)
+    call_type = "no_buow"
+    num = len(new_buow_rows) * 2
     seconds_array = np.zeros(duration)
     for index, row in new_buow_rows.iterrows():
         start = int((row['segment_rel_start_ms'] / 1000) - 1)
@@ -85,6 +85,25 @@ def create_noise_segments(wav, new_buow_rows, out_path):
         mask_start = max(0, start - 30)
         mask_end = min(len(seconds_array), end + 30 + 1)
         seconds_array[mask_start:mask_end] = 1
+    new_sample = num / 2
+    while num > new_sample:
+        random_index = np.random.choice(len(seconds_array))
+        if seconds_array[random_index] == 0:
+            if seconds_array[random_index + 1] == 0:
+               if seconds_array[random_index + 2] == 0:
+                   start_time = random_index + 1 * 1000
+                   end_time = random_index + 4 * 1000
+                   segment = audio[start_time:end_time]
+                   duration_of_segment = len(segment) / 1000
+                   id = uuid.uuid4()
+                   id = str(id) + '.wav'
+                   segment_path = os.path.join(out_path, id)
+                   segment.export(segment_path, format='wav')
+                   new_buow_rows.loc[new_sample] = [id, call_type, segment_path, wav, duration_of_segment, start_time]
+                   new_sample += 1
+
+    print(f"Dataframe with added noise samples {new_buow_rows}")
+    return new_buow_rows
 
 def create_csv(new_rows):
     """
