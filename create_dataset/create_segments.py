@@ -42,8 +42,7 @@ def create_segments(wav, filtered_labels, out_path, class_list):
     try:
         audio = AudioSegment.from_wav(wav)
     except exceptions.CouldntDecodeError:
-        print(f"Couldn't decode: {audio}, moving to next file")
-    rows_with_none = filtered_labels[filtered_labels['MANUAL ID*'].isnull()]
+        print(f"Couldn't decode: {wav}, moving to next file")
     filtered_labels['MANUAL ID*'] = filtered_labels['MANUAL ID*'].str.lower()
     df_row = 0
     path = ntpath.dirname(wav)
@@ -72,12 +71,16 @@ def create_noise_segments(wav, new_buow_rows, out_path):
     the number of detections per audio file, a buffer length
     away from all of the detections in the file.
     """
+    if new_buow_rows is None:
+        print(f"not creating noise segments from {wav} because there were no labels or no associated labels")
+        all_buow_rows = pd.DataFrame()
+        return all_buow_rows
     try:
         audio = AudioSegment.from_wav(wav)
         # duration in seconds, cutting off the ms
         duration = int(len(audio) / 1000)
     except exceptions.CouldntDecodeError:
-        print(f"Couldn't decode: {audio}, moving to next file")
+        print(f"Couldn't decode: {wav}, moving to next file")
     call_type = "no_buow"
     num = len(new_buow_rows) * 2
     seconds_array = np.zeros(duration)
@@ -88,11 +91,12 @@ def create_noise_segments(wav, new_buow_rows, out_path):
         mask_end = min(len(seconds_array), end + 30 + 1)
         seconds_array[mask_start:mask_end] = 1
     new_sample = num / 2
+    print(f"length of seconds array: {len(seconds_array)}")
     while num > new_sample:
-        random_index = np.random.choice(len(seconds_array))
+        random_index = np.random.choice(len(seconds_array)-3)
         if seconds_array[random_index] == 0 and seconds_array[random_index + 3] == 0:
-           start_time = random_index + 1 * 1000
-           end_time = random_index + 4 * 1000
+           start_time = (random_index + 1) * 1000
+           end_time = (random_index + 4) * 1000
            segment = audio[start_time:end_time]
            duration_of_segment = len(segment) / 1000
            id = uuid.uuid4()
