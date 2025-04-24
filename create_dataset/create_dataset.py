@@ -65,7 +65,7 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
         all_buow_rows = create_noise_segments(wav, new_buow_rows, output_dir)
         # add the annotations to the csv of metadata for the dataset
         
-        all_data = pd.concat([all_data, all_buow_rows])
+        all_data = pd.concat([all_data, all_buow_rows], ignore_index=True)
         print(all_data)
 
         print(f"Added  {len(all_buow_rows)} new segments from {wav}")
