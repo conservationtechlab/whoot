@@ -79,6 +79,12 @@ def filter_labels_2018(wav, labels):
         # just felt like more steps
         if os.path.isfile(check_path):
             continue
+        elif row['Fled_2018_LS133_SM1.csv '].strip() == 'EarBreed_2018_LS128_SM10A.csv':
+            check_path = os.path.join(path_to_results, 'EarBreed_LS128_SM10A.csv')
+            if os.path.isfile(check_path):
+                continue
+            else:
+                index_to_drop.append(index)
         else:
             index_to_drop.append(index)
     # if there were labels associated with a different wav file that happened to have the same
