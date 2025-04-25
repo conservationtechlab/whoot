@@ -1,35 +1,42 @@
 """
 """
+from k_fold_split_copy import calculate_cost, generate_search_space
+from k_fold_split_copy import solution_to_str, generate_initial_solution
+from k_fold_split_copy import solve, select_move
 import pandas as pd
 import argparse
+import numpy as np
+
 
 def create_strat_folds(df):
     """
     """
-    cluck_df = df[df['label'] == 'cluck']
-    coocoo_df = df[df['label'] == 'coocoo']
-    twitter_df = df[df['label'] == 'twitter']
-    alarm_df = df[df['label'] == 'alarm']
-    chick_beg_df = df[df['label'] == 'chick_begging']
-    no_buow_df = df[df['label'] == 'no_buow']
-    # amount needed per fold
-    print(f"{chick_beg_df}")
-    len_cluck = len(cluck_df) / 5
-    len_coocoo = len(coocoo_df) / 5
-    len_twitter = len(twitter_df) / 5
-    len_alarm = len(alarm_df) / 5
-    len_chick = len(chick_beg_df) / 5
-    len_no_buow = len(no_buow_df) / 5
-    print(f"len_cluck: {len_cluck} len_coocoo: {len_coocoo} len_twitter: {len_twitter} len_alarm: {len_alarm} len_chick: {len_chick} len_no_buow: {len_no_buow}")
-    
-
+    num_classes = 6
+    df['label'] = df['label'].replace('cluck', 0)
+    df['label'] = df['label'].replace('coocoo', 1)
+    df['label'] = df['label'].replace('twitter', 2)
+    df['label'] = df['label'].replace('alarm', 3)
+    df['label'] = df['label'].replace('chick_begging', 4)
+    df['label'] = df['label'].replace('no_buow', 5)
+    # group is the subset of the index which is the wav file they all come from
     grouped = df.groupby('original_path')
+    group_names = []
+    group_matrix = []
     for index, group in grouped:
-        print(f"group {index}")
-        print(group)
-    '''if i create a df that has the wav path, the distribution of calls in a column. i can randomly add different ones
-    together until i get about that disribution per class. then i can go in and add a column to the df that has the fold it's in. donezo
-    what combination of these properites will give me the closest distribution to a balanced set?''' 
+        counts = np.zeros(num_classes, dtype=int)
+        label_counts = group['label'].value_counts()
+        for label, count in label_counts.items():
+            counts[int(label)] = count
+        group_matrix.append(counts)
+        group_names.append(index)
+    problem = np.array(group_matrix)
+    print(problem)
+    solution = solve(problem, k=5, verbose=True)
+    print(f"solution {solution}")
+    print(np.sum(problem, axis=0) / np.sum(problem))
+    folds = [problem[solution == i] for i in range(5)]
+    fold_percents = np.array([np.sum(folds[i], axis=0) / np.sum(folds[i]) for i in range(5)])
+    print(folds) 
 
 def main(meta):
     """
