@@ -12,6 +12,7 @@ def create_strat_folds(df):
     """
     """
     num_classes = 6
+    original_df = df
     df['label'] = df['label'].replace('cluck', 0)
     df['label'] = df['label'].replace('coocoo', 1)
     df['label'] = df['label'].replace('twitter', 2)
@@ -29,6 +30,7 @@ def create_strat_folds(df):
             counts[int(label)] = count
         group_matrix.append(counts)
         group_names.append(index)
+    print(group_names)
     problem = np.array(group_matrix)
     print(problem)
     solution = solve(problem, k=5, verbose=True)
@@ -36,13 +38,22 @@ def create_strat_folds(df):
     print(np.sum(problem, axis=0) / np.sum(problem))
     folds = [problem[solution == i] for i in range(5)]
     fold_percents = np.array([np.sum(folds[i], axis=0) / np.sum(folds[i]) for i in range(5)])
-    print(folds) 
+    print(folds)
+    grouped = original_df.groupby('original_path')
+    df_with_folds = pd.DataFrame()
+    count = 0
+    for i, group in grouped:
+        group['fold'] = solution[count]
+        df_with_folds = pd.concat([df_with_folds, group], ignore_index=True)
+        count += 1
+    return df_with_folds
 
 def main(meta):
     """
     """
     df = pd.read_csv(meta)
-    create_strat_folds(df)
+    df_with_folds = create_strat_folds(df)
+    df_with_folds.to_csv("5-fold_metadata.csv")
 
 
 if __name__=="__main__":
