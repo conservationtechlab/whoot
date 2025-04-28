@@ -101,7 +101,11 @@ def create_noise_segments(wav, new_buow_rows, out_path):
         seconds_array[mask_start:mask_end] = 1
     new_sample = num / 2
     while num > new_sample:
-        random_index = np.random.choice(len(seconds_array)-3)
+        try:
+            random_index = np.random.choice(len(seconds_array)-3)
+        except:
+            print(f"{wav} is not long enough to generate no_buow sounds, keeping the detection segment but adding no no_buow")
+            return new_buow_rows
         if seconds_array[random_index] == 0 and seconds_array[random_index + 3] == 0:
            start_time = (random_index + 1) * 1000
            end_time = (random_index + 4) * 1000
