@@ -24,8 +24,7 @@ def filter_labels_2017(wav, labels):
             print(f"{site} is not in {wav}")
             index_drop.append(index)
 
-    filtered_labels.drop(index_drop)
-
+    filtered_labels = filtered_labels.drop(index_drop)
     return filtered_labels
 
 def filter_labels_2018(wav, labels):
