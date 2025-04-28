@@ -40,7 +40,7 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
     out_file = ntpath.dirname(output_dir)
     result_file = os.path.join(out_file, "metadata.csv")
     if os.path.exists(result_file):
-        all_data = pd.read_csv(result_file)
+        all_data = pd.read_csv(result_file, index_col=0)
     else:
         all_data = pd.DataFrame()
     # walk dir to list paths to each original wav file
@@ -52,6 +52,8 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
         use_2017 = True
     elif "2018" in labels['DATE'].iloc[0]:
         use_2017 = False
+    wav_files = []
+    num_samples = []
     for wav in wav_file_paths:
         # check which label format to select parsing method
         # create dataframe of only the labels that correspond to the wav
@@ -64,12 +66,20 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
         # create same number of noise segments from the same wav file randomly
         all_buow_rows = create_noise_segments(wav, new_buow_rows, output_dir)
         # add the annotations to the csv of metadata for the dataset
-        
+        if not all_buow_rows.empty:
+            wavv = str(wav)
+            wav_files.append(wavv)
+            num_samples.append(len(all_buow_rows))
         all_data = pd.concat([all_data, all_buow_rows], ignore_index=True)
+        print("printing concated data")
         print(all_data)
 
-        print(f"Added  {len(all_buow_rows)} new segments from {wav}")
+    all_data.index = all_data.index.astype(int)
     all_data.to_csv(result_file)
+    intt = 0
+    for wavs in wav_files:
+        print(f"{wavs} had {num_samples[intt]} including noise segments")
+        intt +=1
     print(f"Created results: {result_file}")
 
 def main(labels, wav_dir, output_dir, class_list):
