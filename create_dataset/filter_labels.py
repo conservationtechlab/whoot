@@ -90,7 +90,6 @@ def filter_labels_2018(wav, labels):
     # if there were labels associated with a different wav file that happened to have the same
     # name, this will drop the labels associated with a different burrow/site
     filtered_labels = filtered_labels.drop(index_to_drop)
-
     return filtered_labels
 
 
