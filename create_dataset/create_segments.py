@@ -12,6 +12,8 @@ import uuid
 import numpy as np
 import random
 import ntpath
+import csv
+
 
 def setup_logger(level, filename=None):
     """
@@ -32,22 +34,28 @@ def get_paths(home_dir):
 def create_segments(wav, filtered_labels, out_path, class_list):
     """
     """
+    print(f"creating segments for {wav}")
     if filtered_labels is None:
         print(f"skipping segment creation for {wav} because it does not have labels or is not a file of interest")
         return None
+    if filtered_labels.empty:
+        print(f"filtered labels is an empty dataframe, meaning either the sound file was not labeled or has no detections")
+        return None
     output_rows = pd.DataFrame(columns=['segment', 'label', 'segment_path', 'original_path', 'segment_duration_s', 'segment_rel_start_ms'])
-    with open(class_list, 'r') as file:
-        classes = file.read()
-    class_list = classes.split(',')
+    with open(class_list, 'r', newline='') as file:
+        reader = csv.reader(file)
+        classes = next(reader)
+    print(classes)
     try:
         audio = AudioSegment.from_wav(wav)
     except exceptions.CouldntDecodeError:
         print(f"Couldn't decode: {wav}, moving to next file")
     filtered_labels['MANUAL ID*'] = filtered_labels['MANUAL ID*'].str.lower()
+    print(filtered_labels)
     df_row = 0
     path = ntpath.dirname(wav)
     for index, row in filtered_labels.iterrows():
-        for call_type in class_list:
+        for call_type in classes:
             if row['MANUAL ID*'] == call_type:
                 start_time = float(row['OFFSET'])
                 end_time = (start_time + float(row['DURATION']))
@@ -60,7 +68,8 @@ def create_segments(wav, filtered_labels, out_path, class_list):
                 segment.export(segment_path, format='wav')
                 output_rows.loc[df_row] = [id, call_type, segment_path, wav, float(row['DURATION']), start_time]
                 df_row += 1
-        print(f"Created segment {segment_path}")
+            else:
+                continue
     return output_rows
 
 # def create_birdnet_segments(wav, out_path, birdnet_class_list=None):
@@ -91,7 +100,6 @@ def create_noise_segments(wav, new_buow_rows, out_path):
         mask_end = min(len(seconds_array), end + 30 + 1)
         seconds_array[mask_start:mask_end] = 1
     new_sample = num / 2
-    print(f"length of seconds array: {len(seconds_array)}")
     while num > new_sample:
         random_index = np.random.choice(len(seconds_array)-3)
         if seconds_array[random_index] == 0 and seconds_array[random_index + 3] == 0:
