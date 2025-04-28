@@ -51,7 +51,7 @@ def create_strat_folds(df):
 def main(meta):
     """
     """
-    df = pd.read_csv(meta)
+    df = pd.read_csv(meta, index_col=0)
     df_with_folds = create_strat_folds(df)
     df_with_folds.to_csv("5-fold_metadata.csv")
 
