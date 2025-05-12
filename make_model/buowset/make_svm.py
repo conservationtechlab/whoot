@@ -34,6 +34,9 @@ def make_x_and_y(data, embeds):
                           header=None)
         dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
         flattened = dfb_stripped.values.flatten()
+        if len(flattened) > 1024:
+            print(f"filename {filename} has extra features for some reason. trunicating it")
+            flattened = flattened[:1024]
         if 0 <= row['fold'] <= 3:
             x_train.append(flattened)
             if 0 <= row['label'] <= 4:
@@ -52,10 +55,13 @@ def make_x_and_y(data, embeds):
             print(f"Item {i} is weird! Type: {type(item)}")
         else:
             continue
+    for i, item in enumerate(x_train):
+        if item.shape[0] != 1024:
+            print(f"Bad item at index {i}: length {item.shape[0]}")
 
-    x_train = np.array(x_train, dtype=np.float32)
+    x_train = np.vstack(x_train).astype(np.float16)
     y_train = np.array(y_train)
-    x_test = np.array(x_test, dtype=np.float32)
+    x_test = np.vstack(x_test).astype(np.float16)
     y_test = np.array(y_test)
     return x_train, y_train, x_test, y_test
 
