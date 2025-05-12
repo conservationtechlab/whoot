@@ -17,7 +17,23 @@ import csv
 
 
 def make_x_and_y(data, embeds):
-    """
+    """Custom train/test split based on folds
+
+    The buowset data is in 5 stratified group folds.
+    This means we must create train test splits ourselves,
+    because they are not random but based on creating 5
+    groups with a relatively equal class distribution
+    among them. This current version uses the 5th fold
+    as the test set and separates all burrowing owl
+    vocalizations from no_buow class.
+
+    # TODO: Allow user to easily select which fold will be
+            the test set, and which classes are x and y
+
+    Args:
+        data (pd.Dataframe): The metadata with the fold and class info.
+
+        embeds (str): The path to the folder containing all birdnet embeddings.
     """
     x_train = [] # 4 of the folds
     y_train = [] # 4 of the folds
@@ -35,7 +51,7 @@ def make_x_and_y(data, embeds):
         dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
         flattened = dfb_stripped.values.flatten()
         if len(flattened) > 1024:
-            print(f"filename {filename} has extra features for some reason. trunicating it")
+            print(f"filename {filename} has extra lines. Trunicating")
             flattened = flattened[:1024]
         if 0 <= row['fold'] <= 3:
             x_train.append(flattened)
@@ -50,23 +66,25 @@ def make_x_and_y(data, embeds):
             else:
                 y_test.append(0)
         print(f"added segment: {filename} to dataset")
-    for i, item in enumerate(x_train):
-        if not isinstance(item, (np.ndarray, list)):
-            print(f"Item {i} is weird! Type: {type(item)}")
-        else:
-            continue
-    for i, item in enumerate(x_train):
-        if item.shape[0] != 1024:
-            print(f"Bad item at index {i}: length {item.shape[0]}")
 
     x_train = np.vstack(x_train).astype(np.float16)
     y_train = np.array(y_train)
     x_test = np.vstack(x_test).astype(np.float16)
     y_test = np.array(y_test)
+
     return x_train, y_train, x_test, y_test
 
 def make_svm(meta, embeds):
-    """
+    """Make the svm and save it out
+
+    This script takes the custom split train and test sets
+    and trains an SVM. It prints the classification report
+    and saves the model.
+
+    Args:
+        meta (str): The metadata with the fold and class info.
+
+        embeds (str): The path to the folder containing all birdnet embeddings.
     """
     data = pd.read_csv(meta, index_col=0)
     x_train, y_train, x_test, y_test = make_x_and_y(data, embeds)
@@ -78,12 +96,16 @@ def make_svm(meta, embeds):
     saved_model = 'model.pkl'
     with open(saved_model, 'wb') as file:
         pickle.dump(svm, file)
-
     print("Classification report with default threshold:")
     print(classification_report(y_test, y_pred_default))
 
 def main(meta, embeds):
-    """
+    """Main function
+
+    Args:
+        meta (str): The metadata with the fold and class info.
+
+        embeds (str): The path to the folder containing all birdnet embeddings.
     """
     make_svm(meta, embeds)
 
