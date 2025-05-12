@@ -17,7 +17,7 @@ def create_strat_folds(df):
     df['label'] = df['label'].replace('coocoo', 1)
     df['label'] = df['label'].replace('twitter', 2)
     df['label'] = df['label'].replace('alarm', 3)
-    df['label'] = df['label'].replace('chick_begging', 4)
+    df['label'] = df['label'].replace('chick begging', 4)
     df['label'] = df['label'].replace('no_buow', 5)
     # group is the subset of the index which is the wav file they all come from
     grouped = df.groupby('original_path')
@@ -39,10 +39,10 @@ def create_strat_folds(df):
     folds = [problem[solution == i] for i in range(5)]
     fold_percents = np.array([np.sum(folds[i], axis=0) / np.sum(folds[i]) for i in range(5)])
     print(folds)
-    grouped = original_df.groupby('original_path')
+    grouped_original = original_df.groupby('original_path')
     df_with_folds = pd.DataFrame()
     count = 0
-    for i, group in grouped:
+    for i, group in grouped_original:
         group['fold'] = solution[count]
         df_with_folds = pd.concat([df_with_folds, group], ignore_index=True)
         count += 1
@@ -53,7 +53,7 @@ def main(meta):
     """
     df = pd.read_csv(meta, index_col=0)
     df_with_folds = create_strat_folds(df)
-    df_with_folds.to_csv("5-fold_metadata.csv")
+    df_with_folds.to_csv("5-fold_meta.csv")
 
 
 if __name__=="__main__":
