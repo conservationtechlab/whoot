@@ -3,7 +3,8 @@
 This script can be run to create an SVM from buowset data.
 
 Usage: python3 make_svm.py -meta /path/to/fold/metadata.csv
-    -embeds /path/to/birdnet/embedding/directory/
+    -embeds /path/to/embedding/directory/or/file -source birdnet (or perch)
+    -model_file /path/of/model.pkl
 
 """
 import pandas as pd
