@@ -46,7 +46,7 @@ def obtain_birdnet_embeddings(embeds):
         dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
         flattened = dfb_stripped.values.flatten()
         if len(flattened) > 1024:
-            print(f"filename {filename} has extra features for some reason. trunicating it")
+            print(f"filename {filename} has extra lines. Trunicating")
             flattened = flattened[:1024]
         embed_dict[filename] = flattened
 
@@ -103,12 +103,15 @@ def make_x_and_y(data, embed_df):
             print(f"Item {i} is weird! Type: {type(item)}")
         else:
             continue
+        print(f"added segment: {filename} to dataset")
 
     x_train = np.array(x_train).astype(np.float32)
     y_train = np.array(y_train)
     x_test = np.array(x_test).astype(np.float32)
     y_test = np.array(y_test)
+
     return x_train, y_train, x_test, y_test
+
 
 def make_svm(meta, embeds, source, model_file):
     """Obtain embeddings, train test split, and create an SVM
@@ -138,9 +141,9 @@ def make_svm(meta, embeds, source, model_file):
     y_pred_default = svm.predict(x_test)
     with open(model_file, 'wb') as file:
         pickle.dump(svm, file)
-
     print("Classification report with default threshold:")
     print(classification_report(y_test, y_pred_default))
+
 
 def main(meta, embeds, source, model_file):
     """
