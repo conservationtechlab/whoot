@@ -7,21 +7,24 @@ Usage: python3 make_svm.py -meta /path/to/fold/metadata.csv
     -model_file /path/of/model.pkl
 
 """
-import pandas as pd
 import argparse
-import pickle
-from sklearn.svm import SVC
-from sklearn.metrics import classification_report
 import os
-import numpy as np
-import csv
 import glob
 import ntpath
+import pickle
+import pandas as pd
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report
+import numpy as np
 
 
 def obtain_perch_embeddings(embeds):
+    """Create dict dataframe with filename and embedding list
     """
-    """
+    # placeholder for actual function
+    embeddings_df = embeds
+
+    return embeddings_df
 
 
 def obtain_birdnet_embeddings(embeds):
@@ -52,44 +55,52 @@ def obtain_birdnet_embeddings(embeds):
         embed_dict[filename] = flattened
 
     embed_df = pd.DataFrame({
-              'filename': list(embed_dict.keys()),
-              'embeddings': list(embed_dict.values())
+        'filename': list(embed_dict.keys()),
+        'embeddings': list(embed_dict.values())
     })
     # for debug
-    embed_df.to_csv("birdnet_df_embed_with_filename.csv", encoding='utf-8', index=False)
+    embed_df.to_csv("birdnet_df_embed_with_filename.csv",
+                    encoding='utf-8', index=False)
     return embed_df
+
 
 def make_x_and_y(data, embed_df):
     """Create train and test split based on existing folds
 
-    Default, this will create an 80% train 20% test split with the 5th fold
-    data as the test data, with the buow segments as 1 and the no_buow segments as 0.
+    Default, this will create an 80% train 20% test split with
+    the 5th fold data as the test data, with the buow segments
+    as 1 and the no_buow segments as 0.
 
     Args:
-        data (pd.Dataframe): Metadata file for buowset with fold info and labels as ints.
+        data (pd.Dataframe): Metadata file for buowset with fold info and
+                             labels as ints.
 
-        embed_df (pd.Dataframe): Dictionary inside a dataframe with the filename as the
-                                 key and the list of floats (embeddings) as the value.
+        embed_df (pd.Dataframe): Dictionary inside a dataframe with the
+                                 filename as the key and the list of
+                                 floats (embeddings) as the value.
 
     Returns:
-        x_train (np.array): all of the burrowing owl detection embeddings to train
+        x_train (np.array): all of the burrowing owl detection
+                            embeddings to train
 
         y_train (np.array): all of the no_buow detection embeddings to train
 
-        x_test (np.array): all of the burrowing owl detection embeddings to test
+        x_test (np.array): all of the burrowing owl detection
+                           embeddings to test
 
         y_test (np.array): all of the no_buow detection embeddings to test
     """
-    x_train = [] # 4 of the folds
-    y_train = [] # 4 of the folds
-    x_test = [] # the small one 20%, 1 folds worth
-    y_test = [] # the small one 20%, 1 folds worth
-    for m_index, m_row in data.iterrows():
-        embedding = embed_df.loc[embed_df['filename'] == m_row['segment'], 'embeddings'].values[0]
+    x_train = []  # 4 of the folds
+    y_train = []  # 4 of the folds
+    x_test = []  # the small one 20%, 1 folds worth
+    y_test = []  # the small one 20%, 1 folds worth
+    for m_index, m_row in data.iterrows():  # pylint: disable=unused-variable
+        embedding = embed_df.loc[embed_df['filename'] == m_row['segment'],
+                                 'embeddings'].values[0]
         if 0 <= m_row['fold'] <= 3:
             x_train.append(embedding)
             if 0 <= m_row['label'] <= 4:
-                 y_train.append(1)
+                y_train.append(1)
             else:
                 y_train.append(0)
         else:
@@ -104,7 +115,6 @@ def make_x_and_y(data, embed_df):
             print(f"Item {i} is weird! Type: {type(item)}")
         else:
             continue
-        print(f"added segment: {filename} to dataset")
 
     x_train = np.array(x_train).astype(np.float32)
     y_train = np.array(y_train)
@@ -122,7 +132,8 @@ def make_svm(meta, embeds, source, model_file):
 
         embeds (str): the path to your embeddings folds/files
 
-        source (str): what format your embeddings are in (currently either perch or birdnet)
+        source (str): what format your embeddings are in (currently
+                      either perch or birdnet)
 
         model_file (str): Path to desired model output file, must be a .pkl
     """
@@ -133,7 +144,7 @@ def make_svm(meta, embeds, source, model_file):
     elif source == 'perch':
         embeddings_df = obtain_perch_embeddings(embeds)
     else:
-        print(f"unable to obtain embeddings, ensure you selected perch or birdnet")
+        print(f"Can't obtain embeddings, ensure you selected perch or birdnet")
     x_train, y_train, x_test, y_test = make_x_and_y(data, embeddings_df)
     print("beginning model training")
     svm = SVC(class_weight='balanced', probability=True)
@@ -147,22 +158,32 @@ def make_svm(meta, embeds, source, model_file):
 
 
 def main(meta, embeds, source, model_file):
-    """
+    """Main script to run
+
+    Args:
+        meta (str): The metadata file containing fold and label id as an int.
+
+        embeds (str): The path to your embeddings folds/files.
+
+        source (str): What format your embeddings are in (currently
+                      either perch or birdnet).
+
+        model_file (str): Path to desired model output file, must be a .pkl.
     """
     make_svm(meta, embeds, source, model_file)
 
-if __name__=="__main__":
-    parser = argparse.ArgumentParser(
+
+if __name__ == "__main__":
+    PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
     )
-    parser.add_argument('-meta', type=str,
+    PARSER.add_argument('-meta', type=str,
                         help='Path to fold metadata')
-    parser.add_argument('-embeds', type=str,
+    PARSER.add_argument('-embeds', type=str,
                         help='Path to directory with embeddings files')
-    parser.add_argument('-source', type=str,
+    PARSER.add_argument('-source', type=str,
                         help='Source of embeddings (birdnet or perch)')
-    parser.add_argument('-model_file', type=str,
-                        help='File name and location where the model will be saved, must be .pkl')
-    args = parser.parse_args()
-    main(args.meta, args.embeds, args.source, args.model_file)
-
+    PARSER.add_argument('-model_file', type=str,
+                        help='File name and location of saved model.pkl')
+    ARGS = PARSER.parse_args()
+    main(ARGS.meta, ARGS.embeds, ARGS.source, ARGS.model_file)
