@@ -16,6 +16,8 @@ import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
 import numpy as np
+from embeddings_to_df import obtain_birdnet_embeddings
+from embeddings_to_df import obtain_perch_embeddings
 
 
 def obtain_perch_embeddings(embeds):
