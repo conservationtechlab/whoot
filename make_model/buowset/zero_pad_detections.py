@@ -9,32 +9,31 @@ so we must save out these new files, and we also duplicate the
 original so we're essentially creating a copy of the dataset
 but with no segments less than 3s.
 
-Usage: python3 zero_pad_detections.py -i /path/to/dir/wavs/
-    -o /path/to/new/dataset/
+Usage: python3 zero_pad_detections.py -path /path/to/dir/wavs/
+    -output /path/to/new/dataset/ -length 3000
 """
 import argparse
 import os
 from pydub import AudioSegment
 
 
-def pad_segments(path, output):
-    """Pad segments with silence to reach 3s
+def pad_segments(path, output, length):
+    """Pad segments with silence to reach desired duration
 
-    For segments shorter than 3 seconds, we add silence to the
-    end to reach 3s in length minimum.
+    For segments shorter than min duration, we add silence to the
+    end to reach the desired length.
 
     Args:
 
         path (str): Path to all of the audio segments.
 
         output (str): Path to desired output for all segments
-                      now lengthened to 3s minimum
+                      now lengthened.
     """
     for file in os.listdir(path):
         filepath = os.path.join(path, file)
-        pad_ms = 3000  # Add here the fix length you want (in milliseconds)
         audio = AudioSegment.from_wav(filepath)
-        if len(audio) < pad_ms:
+        if len(audio) < length:
             silence = AudioSegment.silent(duration=pad_ms-len(audio)+1)
             padded = audio + silence  # Adding silence after the audio
             full_path = os.path.join(output, file)
@@ -44,7 +43,7 @@ def pad_segments(path, output):
             audio.export(full_path, format='wav')
 
 
-def main(path, output):
+def main(path, output, length):
     """Main function
 
     Runs pad segments.
@@ -54,9 +53,12 @@ def main(path, output):
         path (str): Path to all of the audio segments.
 
         output (str): Path to desired output for all segments
-                      now lengthened to 3s minimum
+                      now lengthened to desired duration
+
+        length (int): Minimum duration of the resulting audio
+                      segments, in milliseconds
     """
-    pad_segments(path, output)
+    pad_segments(path, output, length)
 
 
 if __name__ == "__main__":
@@ -65,10 +67,12 @@ if __name__ == "__main__":
     )
     parser.add_argument('-path', type=str,
                         help='Path to dataset audio clips')
-    parser.add_argument('-o', type=str,
+    parser.add_argument('-output', type=str,
                         help='Path to desired output directory for all clips')
+    parser.add_argument('-length', type=int, default=3000,
+                        help='Minimum duration (ms) of the resulting audio clips, default 3000')
     args = parser.parse_args()
-    main(args.path, args.o)
+    main(args.path, args.output, args.length)
 
 # TODO: There are some buow vocalizations longer than 3s.
 # Currently, the make_svm just trunicates the birdnet embeddings longer than
