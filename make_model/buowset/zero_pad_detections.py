@@ -10,14 +10,15 @@ original so we're essentially creating a copy of the dataset
 but with no segments less than 3s.
 
 Usage: python3 zero_pad_detections.py -path /path/to/dir/wavs/
-    -output /path/to/new/dataset/ -length 3000
+    -output /path/to/new/dataset/ -length 3000 -randomize
 """
 import argparse
 import os
 from pydub import AudioSegment
+import random
 
 
-def pad_segments(path, output, length):
+def pad_segments(path, output, length, randomize):
     """Pad segments with silence to reach desired duration
 
     For segments shorter than min duration, we add silence to the
@@ -29,13 +30,27 @@ def pad_segments(path, output, length):
 
         output (str): Path to desired output for all segments
                       now lengthened.
+
+        length (int): Desired minimum duration of padded segments in ms.
+                      Default 3000ms.
+
+        randomize (bool): Flag for if location of padded silence is randomized
+                          within the length of the segment.
     """
     for file in os.listdir(path):
         filepath = os.path.join(path, file)
         audio = AudioSegment.from_wav(filepath)
         if len(audio) < length:
-            silence = AudioSegment.silent(duration=pad_ms-len(audio)+1)
-            padded = audio + silence  # Adding silence after the audio
+            if randomize:
+                max_begin_silence = length - len(audio)
+                begin_silence = random.uniform(0.0, max_begin_silence)
+                end_silence = length - (len(audio) + begin_silence)
+                begin_silence = AudioSegment.silent(duration=begin_silence)
+                end_silence = AudioSegment.silent(duration=end_silence)
+                padded = begin_silence + audio + end_silence
+            else:
+                silence = AudioSegment.silent(duration=length-len(audio)+1)
+                padded = audio + silence  # Adding silence after the audio
             full_path = os.path.join(output, file)
             padded.export(full_path, format='wav')
         else:
@@ -43,7 +58,7 @@ def pad_segments(path, output, length):
             audio.export(full_path, format='wav')
 
 
-def main(path, output, length):
+def main(path, output, length, randomize):
     """Main function
 
     Runs pad segments.
@@ -57,8 +72,12 @@ def main(path, output, length):
 
         length (int): Minimum duration of the resulting audio
                       segments, in milliseconds
+
+        randomize (bool): Flag for if the location of the padded
+                          silence is randomized within the length
+                          of the segment.
     """
-    pad_segments(path, output, length)
+    pad_segments(path, output, length, randomize)
 
 
 if __name__ == "__main__":
@@ -71,8 +90,10 @@ if __name__ == "__main__":
                         help='Path to desired output directory for all clips')
     parser.add_argument('-length', type=int, default=3000,
                         help='Minimum duration (ms) of the resulting audio clips, default 3000')
+    parser.add_argument('-randomize', action='store_true',
+                        help='Randomize location of the sample within the silence added')
     args = parser.parse_args()
-    main(args.path, args.output, args.length)
+    main(args.path, args.output, args.length, args.randomize)
 
 # TODO: There are some buow vocalizations longer than 3s.
 # Currently, the make_svm just trunicates the birdnet embeddings longer than
