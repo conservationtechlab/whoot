@@ -1,4 +1,4 @@
-"""Zero padding human labeled detections
+"""Zero padding human labeled detections.
 
 In order to obtain birdnet embeddings, each sample
 must be 3s long at least. The human labeled detections are
@@ -14,12 +14,12 @@ Usage: python3 zero_pad_detections.py -path /path/to/dir/wavs/
 """
 import argparse
 import os
-from pydub import AudioSegment
 import random
+from pydub import AudioSegment
 
 
 def pad_segments(path, output, length, randomize):
-    """Pad segments with silence to reach desired duration
+    """Pad segments with silence to reach desired duration.
 
     For segments shorter than min duration, we add silence to the
     end to reach the desired length.
@@ -59,7 +59,7 @@ def pad_segments(path, output, length, randomize):
 
 
 def main(path, output, length, randomize):
-    """Main function
+    """Main function.
 
     Runs pad segments.
 
@@ -68,10 +68,10 @@ def main(path, output, length, randomize):
         path (str): Path to all of the audio segments.
 
         output (str): Path to desired output for all segments
-                      now lengthened to desired duration
+                      now lengthened to desired duration.
 
         length (int): Minimum duration of the resulting audio
-                      segments, in milliseconds
+                      segments, in milliseconds.
 
         randomize (bool): Flag for if the location of the padded
                           silence is randomized within the length
@@ -81,19 +81,19 @@ def main(path, output, length, randomize):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
     )
-    parser.add_argument('-path', type=str,
+    PARSER.add_argument('-path', type=str,
                         help='Path to dataset audio clips')
-    parser.add_argument('-output', type=str,
-                        help='Path to desired output directory for all clips')
-    parser.add_argument('-length', type=int, default=3000,
-                        help='Minimum duration (ms) of the resulting audio clips, default 3000')
-    parser.add_argument('-randomize', action='store_true',
-                        help='Randomize location of the sample within the silence added')
-    args = parser.parse_args()
-    main(args.path, args.output, args.length, args.randomize)
+    PARSER.add_argument('-output', type=str,
+                        help='Path to desired output directory for all clips.')
+    PARSER.add_argument('-length', type=int, default=3000,
+                        help='Minimum length(ms) of the clips, default 3000.')
+    PARSER.add_argument('-randomize', action='store_true',
+                        help='Randomize location of the audio amidst silence.')
+    ARGS = PARSER.parse_args()
+    main(ARGS.path, ARGS.output, ARGS.length, ARGS.randomize)
 
 # TODO: There are some buow vocalizations longer than 3s.
 # Currently, the make_svm just trunicates the birdnet embeddings longer than
