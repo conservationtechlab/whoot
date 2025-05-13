@@ -14,21 +14,32 @@ from sklearn.metrics import classification_report
 import os
 import numpy as np
 import csv
+import glob
+import ntpath
 
 
-def make_x_and_y(data, embeds):
+def obtain_perch_embeddings(embeds):
     """
     """
-    x_train = [] # 4 of the folds
-    y_train = [] # 4 of the folds
-    x_test = [] # the small one 20%, 1 folds worth
-    y_test = [] # the small one 20%, 1 folds worth
-    for index, row in data.iterrows():
-        filename = row['segment']
-        filename = filename.replace(".wav", "")
-        embed_name = filename + ".birdnet.embeddings.txt"
-        embedpath = os.path.join(embeds, embed_name)
-        dfb = pd.read_csv(embedpath,
+
+
+def obtain_birdnet_embeddings(embeds):
+    """Create a dict dataframe with filename and embedding list
+
+    Args:
+        embeds (str): Path to directory where embeddings files are.
+
+    Returns:
+        embed_df (pd.Dateframe): A dictonary with the filename as the
+                                 key and the list of floats (embeddings)
+                                 as the value
+    """
+    embed_dict = {}
+    text_files = glob.glob(os.path.join(embeds, "*.txt"))
+    for embed in text_files:
+        filename = ntpath.basename(embed)
+        filename = filename.replace(".birdnet.embeddings.txt", ".wav")
+        dfb = pd.read_csv(embed,
                           delimiter="[,\t]",
                           engine='python',
                           header=None)
@@ -37,55 +48,104 @@ def make_x_and_y(data, embeds):
         if len(flattened) > 1024:
             print(f"filename {filename} has extra features for some reason. trunicating it")
             flattened = flattened[:1024]
-        if 0 <= row['fold'] <= 3:
-            x_train.append(flattened)
-            if 0 <= row['label'] <= 4:
-                y_train.append(1)
+        embed_dict[filename] = flattened
+
+    embed_df = pd.DataFrame({
+              'filename': list(embed_dict.keys()),
+              'embeddings': list(embed_dict.values())
+    })
+    # for debug
+    embed_df.to_csv("birdnet_df_embed_with_filename.csv", encoding='utf-8', index=False)
+    return embed_df
+
+def make_x_and_y(data, embed_df):
+    """Create train and test split based on existing folds
+
+    Default, this will create an 80% train 20% test split with the 5th fold
+    data as the test data, with the buow segments as 1 and the no_buow segments as 0.
+
+    Args:
+        data (pd.Dataframe): Metadata file for buowset with fold info and labels as ints.
+
+        embed_df (pd.Dataframe): Dictionary inside a dataframe with the filename as the
+                                 key and the list of floats (embeddings) as the value.
+
+    Returns:
+        x_train (np.array): all of the burrowing owl detection embeddings to train
+
+        y_train (np.array): all of the no_buow detection embeddings to train
+
+        x_test (np.array): all of the burrowing owl detection embeddings to test
+
+        y_test (np.array): all of the no_buow detection embeddings to test
+    """
+    x_train = [] # 4 of the folds
+    y_train = [] # 4 of the folds
+    x_test = [] # the small one 20%, 1 folds worth
+    y_test = [] # the small one 20%, 1 folds worth
+    for m_index, m_row in data.iterrows():
+        embedding = embed_df.loc[embed_df['filename'] == m_row['segment'], 'embeddings'].values[0]
+        if 0 <= m_row['fold'] <= 3:
+            x_train.append(embedding)
+            if 0 <= m_row['label'] <= 4:
+                 y_train.append(1)
             else:
                 y_train.append(0)
         else:
-            x_test.append(flattened)
-            if 0 <= row['label'] <= 4:
+            x_test.append(embedding)
+            if 0 <= m_row['label'] <= 4:
                 y_test.append(1)
             else:
                 y_test.append(0)
-        print(f"added segment: {filename} to dataset")
+        print(f"added segment: {m_row['segment']} to dataset")
     for i, item in enumerate(x_train):
         if not isinstance(item, (np.ndarray, list)):
             print(f"Item {i} is weird! Type: {type(item)}")
         else:
             continue
-    for i, item in enumerate(x_train):
-        if item.shape[0] != 1024:
-            print(f"Bad item at index {i}: length {item.shape[0]}")
 
-    x_train = np.vstack(x_train).astype(np.float16)
+    x_train = np.array(x_train).astype(np.float32)
     y_train = np.array(y_train)
-    x_test = np.vstack(x_test).astype(np.float16)
+    x_test = np.array(x_test).astype(np.float32)
     y_test = np.array(y_test)
     return x_train, y_train, x_test, y_test
 
-def make_svm(meta, embeds):
-    """
+def make_svm(meta, embeds, source, model_file):
+    """Obtain embeddings, train test split, and create an SVM
+
+    Args:
+        meta (str): the metadata file containing fold and label id as an int
+
+        embeds (str): the path to your embeddings folds/files
+
+        source (str): what format your embeddings are in (currently either perch or birdnet)
+
+        model_file (str): Path to desired model output file, must be a .pkl
     """
     data = pd.read_csv(meta, index_col=0)
-    x_train, y_train, x_test, y_test = make_x_and_y(data, embeds)
+    embeddings_df = None
+    if source == 'birdnet':
+        embeddings_df = obtain_birdnet_embeddings(embeds)
+    elif source == 'perch':
+        embeddings_df = obtain_perch_embeddings(embeds)
+    else:
+        print(f"unable to obtain embeddings, ensure you selected perch or birdnet")
+    x_train, y_train, x_test, y_test = make_x_and_y(data, embeddings_df)
     print("beginning model training")
     svm = SVC(class_weight='balanced', probability=True)
     svm.fit(x_train, y_train)
 
     y_pred_default = svm.predict(x_test)
-    saved_model = 'model.pkl'
-    with open(saved_model, 'wb') as file:
+    with open(model_file, 'wb') as file:
         pickle.dump(svm, file)
 
     print("Classification report with default threshold:")
     print(classification_report(y_test, y_pred_default))
 
-def main(meta, embeds):
+def main(meta, embeds, source, model_file):
     """
     """
-    make_svm(meta, embeds)
+    make_svm(meta, embeds, source, model_file)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(
@@ -95,6 +155,10 @@ if __name__=="__main__":
                         help='Path to fold metadata')
     parser.add_argument('-embeds', type=str,
                         help='Path to directory with embeddings files')
+    parser.add_argument('-source', type=str,
+                        help='Source of embeddings (birdnet or perch)')
+    parser.add_argument('-model_file', type=str,
+                        help='File name and location where the model will be saved, must be .pkl')
     args = parser.parse_args()
-    main(args.meta, args.embeds)
+    main(args.meta, args.embeds, args.source, args.model_file)
 
