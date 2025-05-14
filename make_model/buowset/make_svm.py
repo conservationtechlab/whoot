@@ -171,10 +171,10 @@ def main(meta, embeds, source, embed_df, model_file):
         embeddings_df = pd.read_csv(embed_df)
 
     if model_file is not True:
+        make_svm(metadata, embeddings_df)
+    else:
         svm = make_svm(metadata, embeddings_df)
         save_out_model(svm, model_file)
-    else:
-        make_svm(metadata, embeddings_df)
 
 
 if __name__ == "__main__":
@@ -189,7 +189,7 @@ if __name__ == "__main__":
                         help='Source of embeddings (birdnet or perch).')
     PARSER.add_argument('-embed_df', type=str, default=False,
                         help='Path to your premade embeddings dataframe.')
-    PARSER.add_argument('-model_file', type=str,
+    PARSER.add_argument('-model_file', type=str, default=False,
                         help='File name and location of saved model.pkl.')
     ARGS = PARSER.parse_args()
     main(ARGS.meta, ARGS.embeds, ARGS.source, ARGS.embed_df, ARGS.model_file)
