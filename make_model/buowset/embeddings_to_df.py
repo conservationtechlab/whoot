@@ -14,8 +14,8 @@ Usage:
 import glob
 import os
 import ntpath
-import pandas as pd
 import argparse
+import pandas as pd
 
 
 def obtain_perch_embeddings(embeds):
@@ -62,7 +62,14 @@ def obtain_birdnet_embeddings(embeds):
 
 
 def main(embeds, source, path):
-    """
+    """Main script to create and save out embedding df.
+
+    Args:
+        embeds (str): Path to the embeddings folder/file info.
+
+        source (str): birdnet or perch?
+
+        path (str): Path to output embeddings dataframe.csv.
     """
     if source == 'birdnet':
         embed_df = obtain_birdnet_embeddings(embeds)
@@ -87,4 +94,3 @@ if __name__ == "__main__":
                         help='Path to output dataframe')
     ARGS = PARSER.parse_args()
     main(ARGS.embeds, ARGS.source, ARGS.path)
-
