@@ -11,6 +11,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 import numpy as np
 from tqdm import tqdm
+from embeddings_to_df import obtain_birdnet_embeddings
 from make_svm import make_x_and_y
 
 
@@ -51,7 +52,8 @@ def main(meta, embeds):
 
         embeds (str): Path to birdnet embeddings.
     """
-    permutation_test(meta, embeds)
+    embeddings_df = obtain_birdnet_embeddings(embeds)
+    permutation_test(meta, embeddings_df)
 
 
 if __name__ == "__main__":
