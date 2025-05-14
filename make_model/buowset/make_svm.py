@@ -5,7 +5,7 @@ This script can be run to create an SVM from buowset data.
 If you already have an embeddings dataframe where the key is the filename
 and the value is the embedding for that file:
 
-Usage: python3 make_svm.py -df /path/to/premade/df.csv
+Usage: python3 make_svm.py -embed_df /path/to/premade/df.csv
     -meta /path/to/metadata.csv
 
 If you would like the embeddings dataframe to be created for you and passed
