@@ -8,7 +8,7 @@ Usage:
 import argparse
 import pandas as pd
 from sklearn.svm import SVC
-from sklearn.metrics import  accuracy_score
+from sklearn.metrics import accuracy_score
 import numpy as np
 from tqdm import tqdm
 from make_svm import make_x_and_y
@@ -36,8 +36,10 @@ def permutation_test(meta, embeds):
         svm = SVC(class_weight='balanced', probability=True)
         svm.fit(x_train, y_train)
         y_pred_default = svm.predict(x_test)
-        permutated_accuracies.append(accuracy_score(y_pred_default, y_test)*100)
+        permutated_accuracies.append(accuracy_score(y_pred_default,
+                                                    y_test)*100)
     print(f"Average permutated accuracy is: {np.mean(permutated_accuracies)}")
+
 
 def main(meta, embeds):
     """Main script.
@@ -50,6 +52,7 @@ def main(meta, embeds):
         embeds (str): Path to birdnet embeddings.
     """
     permutation_test(meta, embeds)
+
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
