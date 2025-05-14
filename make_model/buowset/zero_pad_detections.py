@@ -11,6 +11,9 @@ but with no segments less than 3s.
 
 Usage: python3 zero_pad_detections.py -path /path/to/dir/wavs/
     -output /path/to/new/dataset/ -length 3000 -randomize
+
+Omitting -length and -randomize will default to 3000ms and NON
+random padding (padding added to end of sample)
 """
 import argparse
 import os
