@@ -2,9 +2,20 @@
 
 This script can be run to create an SVM from buowset data.
 
+If you already have an embeddings dataframe where the key is the filename
+and the value is the embedding for that file:
+
+Usage: python3 make_svm.py -df /path/to/premade/df.csv
+    -meta /path/to/metadata.csv
+
+If you would like the embeddings dataframe to be created for you and passed
+to the script to make the svm:
+
 Usage: python3 make_svm.py -meta /path/to/fold/metadata.csv
     -embeds /path/to/embedding/directory/or/file -source birdnet (or perch)
-    -model_file /path/of/model.pkl
+
+If you would like to save our your resulting model file, add
+    -model_file /path/to/save/model.pkl
 
 """
 import argparse
@@ -18,52 +29,6 @@ from sklearn.metrics import classification_report
 import numpy as np
 from embeddings_to_df import obtain_birdnet_embeddings
 from embeddings_to_df import obtain_perch_embeddings
-
-
-def obtain_perch_embeddings(embeds):
-    """Create dict dataframe with filename and embedding list
-    """
-    # placeholder for actual function
-    embeddings_df = embeds
-
-    return embeddings_df
-
-
-def obtain_birdnet_embeddings(embeds):
-    """Create a dict dataframe with filename and embedding list
-
-    Args:
-        embeds (str): Path to directory where embeddings files are.
-
-    Returns:
-        embed_df (pd.Dateframe): A dictonary with the filename as the
-                                 key and the list of floats (embeddings)
-                                 as the value
-    """
-    embed_dict = {}
-    text_files = glob.glob(os.path.join(embeds, "*.txt"))
-    for embed in text_files:
-        filename = ntpath.basename(embed)
-        filename = filename.replace(".birdnet.embeddings.txt", ".wav")
-        dfb = pd.read_csv(embed,
-                          delimiter="[,\t]",
-                          engine='python',
-                          header=None)
-        dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
-        flattened = dfb_stripped.values.flatten()
-        if len(flattened) > 1024:
-            print(f"filename {filename} has extra lines. Trunicating")
-            flattened = flattened[:1024]
-        embed_dict[filename] = flattened
-
-    embed_df = pd.DataFrame({
-        'filename': list(embed_dict.keys()),
-        'embeddings': list(embed_dict.values())
-    })
-    # for debug
-    embed_df.to_csv("birdnet_df_embed_with_filename.csv",
-                    encoding='utf-8', index=False)
-    return embed_df
 
 
 def make_x_and_y(data, embed_df):
@@ -96,9 +61,12 @@ def make_x_and_y(data, embed_df):
     y_train = []  # 4 of the folds
     x_test = []  # the small one 20%, 1 folds worth
     y_test = []  # the small one 20%, 1 folds worth
+    embedding_lookup = {
+        row['filename']: row.drop('filename').values
+        for idx, row in embed_df.iterrows()
+    }
     for m_index, m_row in data.iterrows():  # pylint: disable=unused-variable
-        embedding = embed_df.loc[embed_df['filename'] == m_row['segment'],
-                                 'embeddings'].values[0]
+        embedding = embedding_lookup[m_row['segment']]
         if 0 <= m_row['fold'] <= 3:
             x_train.append(embedding)
             if 0 <= m_row['label'] <= 4:
@@ -126,40 +94,35 @@ def make_x_and_y(data, embed_df):
     return x_train, y_train, x_test, y_test
 
 
-def make_svm(meta, embeds, source, model_file):
+def make_svm(meta, embeddings_df):
     """Obtain embeddings, train test split, and create an SVM
 
     Args:
         meta (str): the metadata file containing fold and label id as an int
 
-        embeds (str): the path to your embeddings folds/files
-
-        source (str): what format your embeddings are in (currently
-                      either perch or birdnet)
-
-        model_file (str): Path to desired model output file, must be a .pkl
+        embeddings_df (str): the path to your embeddings folds/files
     """
-    data = pd.read_csv(meta, index_col=0)
-    embeddings_df = None
-    if source == 'birdnet':
-        embeddings_df = obtain_birdnet_embeddings(embeds)
-    elif source == 'perch':
-        embeddings_df = obtain_perch_embeddings(embeds)
-    else:
-        print(f"Can't obtain embeddings, ensure you selected perch or birdnet")
-    x_train, y_train, x_test, y_test = make_x_and_y(data, embeddings_df)
+    x_train, y_train, x_test, y_test = make_x_and_y(meta, embeddings_df)
     print("beginning model training")
     svm = SVC(class_weight='balanced', probability=True)
     svm.fit(x_train, y_train)
 
     y_pred_default = svm.predict(x_test)
-    with open(model_file, 'wb') as file:
-        pickle.dump(svm, file)
+
     print("Classification report with default threshold:")
     print(classification_report(y_test, y_pred_default))
 
 
-def main(meta, embeds, source, model_file):
+def save_out_model(svm, model_file):
+    """
+    """
+    with open(model_file, 'wb') as file:
+        pickle.dump(svm, file)
+
+    print(f"Saved model path: {model_file}")
+
+
+def main(meta, embeds, source, df, model_file):
     """Main script to run
 
     Args:
@@ -170,10 +133,34 @@ def main(meta, embeds, source, model_file):
         source (str): What format your embeddings are in (currently
                       either perch or birdnet).
 
+        df (str): If you have a premade dataframe with the keys
+                             as the filename and the values as the embedding
+                             list, use this argument and leave embeds and source
+                             empty.
+
         model_file (str): Path to desired model output file, must be a .pkl.
     """
-    make_svm(meta, embeds, source, model_file)
+    metadata = pd.read_csv(meta, index_col=0)
+    if df == False:
+        if embeds == False:
+            print("Found no path to embeddings folder/file. Please add "
+                  "-embeds arg when running script.")
+            sys.exit()
+        if source == 'birdnet':
+            embeddings_df = obtain_birdnet_embeddings(embeds)
+        elif source == 'perch':
+            embeddings_df = obtain_perch_embeddings(embeds)
+        else:
+            print(f"Cannot create embeddings without knowing the source,"
+                   " ensure you selected -source perch or birdnet")
+            sys.exit()
+    else:
+        embeddings_df = pd.read_csv(df)
 
+    svm = make_svm(metadata, embeddings_df)
+
+    if model_file == False:
+        save_out_model(svm)
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
@@ -181,11 +168,13 @@ if __name__ == "__main__":
     )
     PARSER.add_argument('-meta', type=str,
                         help='Path to fold metadata')
-    PARSER.add_argument('-embeds', type=str,
-                        help='Path to directory with embeddings files')
-    PARSER.add_argument('-source', type=str,
-                        help='Source of embeddings (birdnet or perch)')
+    PARSER.add_argument('-embeds', type=str, default=False,
+                        help='Path to directory with embeddings files.')
+    PARSER.add_argument('-source', type=str, default=False,
+                        help='Source of embeddings (birdnet or perch).')
+    PARSER.add_argument('-df', type=str, default=False,
+                        help='Path to your premade embeddings dataframe.')
     PARSER.add_argument('-model_file', type=str,
-                        help='File name and location of saved model.pkl')
+                        help='File name and location of saved model.pkl.')
     ARGS = PARSER.parse_args()
-    main(ARGS.meta, ARGS.embeds, ARGS.source, ARGS.model_file)
+    main(ARGS.meta, ARGS.embeds, ARGS.source, ARGS.df, ARGS.model_file)
