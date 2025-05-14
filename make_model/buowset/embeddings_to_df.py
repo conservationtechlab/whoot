@@ -1,5 +1,21 @@
+"""Creating a standardized dataframe with embeddings.
 
+As there are multiple types and formats that can produce embeddings,
+to train an SVM we need a consistent format for the data to be injested.
+Here we have two functions so far to obtain and translate embedding info
+from two different sources, perch and birdnet. These functions can
+be called from main to save the dataframe to disk, and can be called
+elsewhere to return these dataframes programatically.
 
+Usage:
+    python3 embeddings_to_df.py -embeds /path/to/embeddings/
+        -source birdnet (or perch) -path /path/to/output.csv
+"""
+import glob
+import os
+import ntpath
+import pandas as pd
+import argparse
 
 
 def obtain_perch_embeddings(embeds):
@@ -38,10 +54,9 @@ def obtain_birdnet_embeddings(embeds):
             flattened = flattened[:1024]
         embed_dict[filename] = flattened
 
-    embed_df = pd.DataFrame({
-        'filename': list(embed_dict.keys()),
-        'embeddings': list(embed_dict.values())
-    })
+    embed_df = pd.DataFrame.from_dict(embed_dict, orient='index')
+    embed_df.index.name = 'filename'
+    embed_df.reset_index(inplace=True)
 
     return embed_df
 
@@ -56,7 +71,7 @@ def main(embeds, source, path):
     else:
         print("cannot obtain embeddings, check source")
 
-    embed_df.to_csv(path, encoding='utf-8', index=False)
+    embed_df.to_csv(path, index=False)
     print(f"Created dataframe file: {path}")
 
 
