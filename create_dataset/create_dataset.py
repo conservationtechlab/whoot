@@ -13,30 +13,44 @@ noise will be fixed and consistent. The user of the dataset may choose
 to pad the labeled detections if they need consistent length segments.
 
 Usage:
-/
     python3 create_dataset.py -labels /path/to/human/labeled.csv
-    -wav_dir /path/to/parent/dir/of/wavs/ -output_dir /path/to/desired/output/dir/
+    -wav_dir /path/to/parent/dir/of/wavs/
+    -output_dir /path/to/desired/output/dir/
     -class_list /path/to/classes.txt
 
 """
-from create_segments import setup_logger, get_paths, create_segments
-from create_segments import create_noise_segments, create_csv
-from filter_labels import filter_labels_2017, filter_labels_2018
 import argparse
-import pandas as pd
 import ntpath
 import os
+import pandas as pd
+from create_segments import get_paths, create_segments
+from create_segments import create_noise_segments
+from filter_labels import filter_labels_2017, filter_labels_2018
+
 
 def create_dataset(labels, wav_dir, output_dir, class_list):
-    """
+    """Creates labeled and non labeled segments and metadata.
+
+    Creates segments based on human labeled data of a detection,
+    and then creates an equal number of randomized 'non-detection'
+    segments at fixed length. It cretaes a uuid for each segment
+    and spits out a metadata file that matches the segment to its
+    label, original wav file, relative start time to original wav,
+    and duration.
+
+    Args:
+        labels (str): Path to label file.
+
+        wav_dir (str): Path to original wav segments of audio.
+
+        output_dir (str): Path to where the segments and metadata
+                          will go.
+
+        class_list (str): Path to file containing the classes
+                          seen in the human labels file that you
+                          want to create segments for.
     """
     # parse the inputs
-    '''if output dir exists
-        good, if not make
-    if labels exist, good
-        if not tell user
-    if wav dir exists
-        if not tell user'''
     out_file = ntpath.dirname(output_dir)
     result_file = os.path.join(out_file, "metadata.csv")
     if os.path.exists(result_file):
@@ -47,7 +61,7 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
     wav_file_paths = get_paths(wav_dir)
     # open human label file
     labels = pd.read_csv(labels)
-    #iterate through each individual original wav
+    # iterate through each individual original wav
     if "2017" in labels['DATE'].iloc[0]:
         use_2017 = True
     elif "2018" in labels['DATE'].iloc[0]:
@@ -57,14 +71,21 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
     for wav in wav_file_paths:
         # check which label format to select parsing method
         # create dataframe of only the labels that correspond to the wav
-        if use_2017 == True:
-            filtered_labels = filter_labels_2017(wav, labels)
-        elif use_2017 == False:
-            filtered_labels = filter_labels_2018(wav, labels)
+        if use_2017:
+            filtered_labels = filter_labels_2017(wav,
+                                                 labels)
+        else:
+            filtered_labels = filter_labels_2018(wav,
+                                                 labels)
         # output the labeled segments and return the dataframe of annotations
-        new_buow_rows = create_segments(wav, filtered_labels, output_dir, class_list)
+        new_buow_rows = create_segments(wav,
+                                        filtered_labels,
+                                        output_dir,
+                                        class_list)
         # create same number of noise segments from the same wav file randomly
-        all_buow_rows = create_noise_segments(wav, new_buow_rows, output_dir)
+        all_buow_rows = create_noise_segments(wav,
+                                              new_buow_rows,
+                                              output_dir)
         # add the annotations to the csv of metadata for the dataset
         if not all_buow_rows.empty:
             wavv = str(wav)
@@ -79,29 +100,39 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
     intt = 0
     for wavs in wav_files:
         print(f"{wavs} had {num_samples[intt]} including noise segments")
-        intt +=1
+        intt += 1
     print(f"Created results: {result_file}")
 
+
 def main(labels, wav_dir, output_dir, class_list):
-    """
+    """Main script to run create dataset.
+
+    Args:
+        labels (str): Path to label file.
+
+        wav_dir (str): Path to original wav segments of audio.
+
+        output_dir (str): Path to where the segments and metadata
+                          will go.
+
+        class_list (str): Path to file containing the classes
+                          seen in the human labels file that you
+                          want to create segments for.
     """
     create_dataset(labels, wav_dir, output_dir, class_list)
 
-if __name__=="__main__":
-    parser = argparse.ArgumentParser(
+
+if __name__ == "__main__":
+    PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
     )
-    parser.add_argument('-labels', type=str,
+    PARSER.add_argument('-labels', type=str,
                         help='Path to human labeled csv')
-    parser.add_argument('-wav_dir', type=str,
+    PARSER.add_argument('-wav_dir', type=str,
                         help='Path to directory containing wav files.')
-    parser.add_argument('-output_dir', type=str,
+    PARSER.add_argument('-output_dir', type=str,
                         help='Path to desired directory for segments.')
-    parser.add_argument('-class_list', type=str,
+    PARSER.add_argument('-class_list', type=str,
                         help='Path to txt file of list of labeled classes')
-    #parser.add_argument('-l', '--lengthen', type=int, default=0,
-        #                help='ms of padding for front and end of detection segment')
-    # parser.add_argument('-e', '--equalize', type=int,
-      #                   help='each detection segment and noise segment will be the same length, not zero padded')
-    args = parser.parse_args()
-    main(args.labels, args.wav_dir, args.output_dir, args.class_list)
+    ARGS = PARSER.parse_args()
+    main(ARGS.labels, ARGS.wav_dir, ARGS.output_dir, ARGS.class_list)
