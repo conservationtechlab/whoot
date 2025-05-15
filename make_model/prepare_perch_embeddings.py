@@ -1,28 +1,31 @@
 '''
-Convert Perch Embedding Output to usabale .csvs
+Convert Perch Embedding Output to standard embeddings .csv
+for easy training of various models
 
 This script processes the outputs of the perch embedding
-scripts and converst to a usable .csv file of all embeddings
-with labels to use for training a binary SVM classifier
+scripts and converst to a usable .csv file that stores
+filename and embedding
 
-Usage: python make_perch_svm_dataset.py /path/to/db/dir label
+Usage: python prepare_perch_embeddings \
+           /path/to/db/dir \
+           /path/to/output/dir \
+           embeddings_description
 
 Arguments:
     database_directory (str): path to directory that contains
         hoplite.sqlite & usearch.index
-    label (str): label for all embeddings in hoplite.sqlite
+    outout_directory (str): path to directory to store output
+        csv
 
 Outputs:
-    label_embeddings_forSVM.csv
+    <description>_perch_embeddings.csv
 
 '''
 
 
-import argparse
-import sqlite3
-import pandas as pd
-import sys
 import os
+import argparse
+import pandas as pd
 from perch_hoplite.db import sqlite_usearch_impl
 
 
@@ -62,7 +65,7 @@ def main(sqlite_dir, output_dir, embeddings_description):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-                  description='Input Perch Embeddings sqlite database and output directory')
+        description='Input Perch Embeddings sqlite database and output directory')
 
     parser.add_argument('sqlite_dir', type=str,
                         help='Path to directory that contains '
