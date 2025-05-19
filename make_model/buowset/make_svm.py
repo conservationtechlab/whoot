@@ -154,8 +154,8 @@ def main(meta, embeds, source, embed_df, model_file):
         model_file (str): Path to desired model output file, must be a .pkl.
     """
     metadata = pd.read_csv(meta, index_col=0)
-    if embed_df is not True:
-        if embeds is not True:
+    if embed_df is None:
+        if embeds is None:
             print("Found no path to embeddings folder/file. Please add "
                   "-embeds arg when running script.")
             sys.exit()
@@ -170,7 +170,7 @@ def main(meta, embeds, source, embed_df, model_file):
     else:
         embeddings_df = pd.read_csv(embed_df)
 
-    if model_file is not True:
+    if model_file is None:
         make_svm(metadata, embeddings_df)
     else:
         svm = make_svm(metadata, embeddings_df)
@@ -183,13 +183,13 @@ if __name__ == "__main__":
     )
     PARSER.add_argument('-meta', type=str,
                         help='Path to fold metadata')
-    PARSER.add_argument('-embeds', type=str, default=False,
+    PARSER.add_argument('-embeds', type=str, default=None,
                         help='Path to directory with embeddings files.')
-    PARSER.add_argument('-source', type=str, default=False,
+    PARSER.add_argument('-source', type=str, default=None,
                         help='Source of embeddings (birdnet or perch).')
-    PARSER.add_argument('-embed_df', type=str, default=False,
+    PARSER.add_argument('-embed_df', type=str, default=None,
                         help='Path to your premade embeddings dataframe.')
-    PARSER.add_argument('-model_file', type=str, default=False,
+    PARSER.add_argument('-model_file', type=str, default=None,
                         help='File name and location of saved model.pkl.')
     ARGS = PARSER.parse_args()
     main(ARGS.meta, ARGS.embeds, ARGS.source, ARGS.embed_df, ARGS.model_file)
