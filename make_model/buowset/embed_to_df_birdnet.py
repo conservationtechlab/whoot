@@ -2,29 +2,20 @@
 
 As there are multiple types and formats that can produce embeddings,
 to train an SVM we need a consistent format for the data to be injested.
-Here we have two functions so far to obtain and translate embedding info
-from two different sources, perch and birdnet. These functions can
-be called from main to save the dataframe to disk, and can be called
-elsewhere to return these dataframes programatically.
+This function can be called from main to save the dataframe to disk,
+and can be called elsewhere to return these dataframes programatically.
+It specifically handles embeddings from running birdnet.embeddings on
+all audio files.
 
 Usage:
     python3 embeddings_to_df.py -embeds /path/to/embeddings/
-        -source birdnet (or perch) -path /path/to/output.csv
+        -path /path/to/output.csv
 """
 import glob
 import os
 import ntpath
 import argparse
 import pandas as pd
-
-
-def obtain_perch_embeddings(embeds):
-    """Create dict dataframe with filename and embedding list
-    """
-    # placeholder for actual function
-    embeddings_df = embeds
-
-    return embeddings_df
 
 
 def obtain_birdnet_embeddings(embeds):
@@ -61,22 +52,15 @@ def obtain_birdnet_embeddings(embeds):
     return embed_df
 
 
-def main(embeds, source, path):
+def main(embeds, path):
     """Main script to create and save out embedding df.
 
     Args:
         embeds (str): Path to the embeddings folder/file info.
 
-        source (str): birdnet or perch?
-
         path (str): Path to output embeddings dataframe.csv.
     """
-    if source == 'birdnet':
-        embed_df = obtain_birdnet_embeddings(embeds)
-    elif source == 'perch':
-        embed_df = obtain_perch_embeddings(embeds)
-    else:
-        print("cannot obtain embeddings, check source")
+    embed_df = obtain_birdnet_embeddings(embeds)
 
     embed_df.to_csv(path, index=False)
     print(f"Created dataframe file: {path}")
@@ -88,9 +72,7 @@ if __name__ == "__main__":
     )
     PARSER.add_argument('-embeds', type=str,
                         help='Path to directory containing embedding info.')
-    PARSER.add_argument('-source', type=str,
-                        help='birdnet or perch (for now)')
     PARSER.add_argument('-path', type=str,
                         help='Path to output dataframe')
     ARGS = PARSER.parse_args()
-    main(ARGS.embeds, ARGS.source, ARGS.path)
+    main(ARGS.embeds, ARGS.path)
