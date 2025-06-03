@@ -13,15 +13,13 @@ If you would like to save our your resulting model file, add
 """
 import argparse
 import pickle
-import sys
 import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
-import numpy as np
 
 
 # folds to use for training
-TRAINING_FOLDS = [0,1,2,3]
+TRAINING_FOLDS = [0, 1, 2, 3]
 # fold to use for testing
 TESTING_FOLDS = [4]
 # no buow is 5th class, to be marked as 0 for a binary svm, nums not listed
@@ -29,18 +27,18 @@ TESTING_FOLDS = [4]
 CLASS_0 = [5]
 
 
-def get_binary_classes(df):
+def get_binary_classes(merged_df):
     """Convert class labels to binary labels.
 
     Args:
-        df (pd.Dataframe): Dataframe with embeddings, labels, folds.
+        merged_df (pd.Dataframe): Dataframe with embeddings, labels, folds.
 
     Returns:
         pd.Dataframe: Same input with new row with binary label added.
     """
-    df['binary_label'] = (~df['label'].isin(CLASS_0)).astype(int)
+    merged_df['binary_label'] = (~merged_df['label'].isin(CLASS_0)).astype(int)
 
-    return df
+    return merged_df
 
 
 def make_x_and_y(embed_df):
