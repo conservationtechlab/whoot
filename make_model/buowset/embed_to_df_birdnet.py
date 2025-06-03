@@ -9,25 +9,25 @@ all audio files.
 
 Usage:
     python3 embeddings_to_df.py -embeds /path/to/embeddings/
-        -path /path/to/output.csv
+        -meta /path/tpo/metadata.csv -path /path/to/output.pkl
 """
 import glob
 import os
 import ntpath
 import argparse
 import pandas as pd
+import pickle
 
 
-def obtain_birdnet_embeddings(embeds):
+def obtain_birdnet_embeddings(metadata, embeds):
     """Create a dict dataframe with filename and embedding list
 
     Args:
         embeds (str): Path to directory where embeddings files are.
 
     Returns:
-        embed_df (pd.Dateframe): A dictonary with the filename as the
-                                 key and the list of floats (embeddings)
-                                 as the value
+        df_merged (pd.Dateframe): A dataframe with the embedding info
+            as a list with the fold and label info in columns.
     """
     embed_dict = {}
     text_files = glob.glob(os.path.join(embeds, "*.txt"))
@@ -46,23 +46,28 @@ def obtain_birdnet_embeddings(embeds):
         embed_dict[filename] = flattened
 
     embed_df = pd.DataFrame.from_dict(embed_dict, orient='index')
-    embed_df.index.name = 'filename'
-    embed_df.reset_index(inplace=True)
+    embed_df.index.name = 'segment'
+    df_merged = metadata.merge(embed_df, on='segment')
+    df_merged = df_merged.drop(columns=['segment_duration_s'])
 
-    return embed_df
+    return df_merged
 
 
-def main(embeds, path):
+def main(meta, embeds, path):
     """Main script to create and save out embedding df.
 
     Args:
+        meta (str): Path to metadata file.
+
         embeds (str): Path to the embeddings folder/file info.
 
         path (str): Path to output embeddings dataframe.csv.
     """
-    embed_df = obtain_birdnet_embeddings(embeds)
+    metadata = pd.read_csv(meta, index_col=0)
+    df_merged = obtain_birdnet_embeddings(metadata, embeds)
 
-    embed_df.to_csv(path, index=False)
+    df_merged.to_pickle(path)
+
     print(f"Created dataframe file: {path}")
 
 
@@ -70,9 +75,11 @@ if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
     )
+    PARSER.add_argument('-meta', type=str,
+                        help='Path to metadata with fold and label info.')
     PARSER.add_argument('-embeds', type=str,
                         help='Path to directory containing embedding info.')
     PARSER.add_argument('-path', type=str,
-                        help='Path to output dataframe')
+                        help='Path to output dataframe as .pkl')
     ARGS = PARSER.parse_args()
-    main(ARGS.embeds, ARGS.path)
+    main(ARGS.meta, ARGS.embeds, ARGS.path)

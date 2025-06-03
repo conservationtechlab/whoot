@@ -6,13 +6,6 @@ If you already have an embeddings dataframe where the key is the filename
 and the value is the embedding for that file:
 
 Usage: python3 make_svm.py -embed_df /path/to/premade/df.csv
-    -meta /path/to/metadata.csv
-
-If you would like the embeddings dataframe to be created for you and passed
-to the script to make the svm:
-
-Usage: python3 make_svm.py -meta /path/to/fold/metadata.csv
-    -embeds /path/to/embedding/directory/or/file -source birdnet (or perch)
 
 If you would like to save our your resulting model file, add
     -model_file /path/to/save/model.pkl
@@ -25,11 +18,25 @@ import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
 import numpy as np
-from embeddings_to_df import obtain_birdnet_embeddings
-from embeddings_to_df import obtain_perch_embeddings
+from embed_to_df_birdnet import obtain_birdnet_embeddings
 
 
-def make_x_and_y(data, embed_df):
+# folds to use for training
+TRAINING_FOLDS = [0,1,2,3]
+# fold to use for testing
+TESTING_FOLDS = [4]
+# no buow is 5th class, to be marked as 0 for a binary svm, nums not listed
+# will be marked as 1
+CLASS_0 = 5
+
+
+def get_binary_classes(df):
+
+    df['binary_label'] = (df['label'] != CLASS_0).astype(int)
+    return df
+
+
+def make_x_and_y(embed_df):
     """Create train and test split based on existing folds
 
     Default, this will create an 80% train 20% test split with
@@ -37,9 +44,6 @@ def make_x_and_y(data, embed_df):
     as 1 and the no_buow segments as 0.
 
     Args:
-        data (pd.Dataframe): Metadata file for buowset with fold info and
-                             labels as ints.
-
         embed_df (pd.Dataframe): Dictionary inside a dataframe with the
                                  filename as the key and the list of
                                  floats (embeddings) as the value.
@@ -55,55 +59,29 @@ def make_x_and_y(data, embed_df):
 
         y_test (np.array): all of the no_buow detection embeddings to test
     """
-    x_train = []  # 4 of the folds
-    y_train = []  # 4 of the folds
-    x_test = []  # the small one 20%, 1 folds worth
-    y_test = []  # the small one 20%, 1 folds worth
-    embedding_lookup = {
-        row['filename']: row.drop('filename').values
-        for idx, row in embed_df.iterrows()
-    }
-    for m_index, m_row in data.iterrows():  # pylint: disable=unused-variable
-        embedding = embedding_lookup[m_row['segment']]
-        if 0 <= m_row['fold'] <= 3:
-            x_train.append(embedding)
-            if 0 <= m_row['label'] <= 4:
-                y_train.append(1)
-            else:
-                y_train.append(0)
-        else:
-            x_test.append(embedding)
-            if 0 <= m_row['label'] <= 4:
-                y_test.append(1)
-            else:
-                y_test.append(0)
-        print(f"added segment: {m_row['segment']} to dataset")
-    for i, item in enumerate(x_train):
-        if not isinstance(item, (np.ndarray, list)):
-            print(f"Item {i} is weird! Type: {type(item)}")
-        else:
-            continue
+    train_df = embed_df[embed_df['fold'].isin(TRAINING_FOLDS)]
+    test_df = embed_df[embed_df['fold'].isin(TESTING_FOLDS)]
 
-    x_train = np.array(x_train).astype(np.float32)
-    y_train = np.array(y_train)
-    x_test = np.array(x_test).astype(np.float32)
-    y_test = np.array(y_test)
+    embedding_cols = embed_df.select_dtypes(include='float64').columns.tolist()
+
+    x_train = train_df[embedding_cols].values
+    y_train = train_df['binary_label'].values
+    x_test = test_df[embedding_cols].values
+    y_test = test_df['binary_label'].values
 
     return x_train, y_train, x_test, y_test
 
 
-def make_svm(meta, embeddings_df):
+def make_svm(embeddings_df):
     """Obtain embeddings, train test split, and create an SVM
 
     Args:
-        meta (str): the metadata file containing fold and label id as an int
-
         embeddings_df (str): the path to your embeddings folds/files.
 
     Returns:
         svm (model): Support vector machine model.
     """
-    x_train, y_train, x_test, y_test = make_x_and_y(meta, embeddings_df)
+    x_train, y_train, x_test, y_test = make_x_and_y(embeddings_df)
     print("beginning model training")
     svm = SVC(class_weight='balanced', probability=True)
     svm.fit(x_train, y_train)
@@ -135,17 +113,10 @@ def save_out_model(svm, model_file):
     print(f"Saved model path: {model_file}")
 
 
-def main(meta, embeds, source, embed_df, model_file):
+def main(embed_df, model_file):
     """Main script to run
 
     Args:
-        meta (str): The metadata file containing fold and label id as an int.
-
-        embeds (str): The path to your embeddings folds/files.
-
-        source (str): What format your embeddings are in (currently
-                      either perch or birdnet).
-
         embed_df (str): If you have a premade dataframe with the keys
                              as the filename and the values as the embedding
                              list, use this argument and leave embeds and
@@ -153,27 +124,14 @@ def main(meta, embeds, source, embed_df, model_file):
 
         model_file (str): Path to desired model output file, must be a .pkl.
     """
-    metadata = pd.read_csv(meta, index_col=0)
-    if embed_df is None:
-        if embeds is None:
-            print("Found no path to embeddings folder/file. Please add "
-                  "-embeds arg when running script.")
-            sys.exit()
-        if source == 'birdnet':
-            embeddings_df = obtain_birdnet_embeddings(embeds)
-        elif source == 'perch':
-            embeddings_df = obtain_perch_embeddings(embeds)
-        else:
-            print(f"Cannot create embeddings without knowing the source,"
-                  " ensure you selected -source perch or birdnet")
-            sys.exit()
-    else:
-        embeddings_df = pd.read_csv(embed_df)
+    dataset = pd.read_pickle(embed_df)
+
+    dataset = get_binary_classes(dataset)
 
     if model_file is None:
-        make_svm(metadata, embeddings_df)
+        make_svm(dataset)
     else:
-        svm = make_svm(metadata, embeddings_df)
+        svm = make_svm(dataset)
         save_out_model(svm, model_file)
 
 
@@ -181,15 +139,9 @@ if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
     )
-    PARSER.add_argument('-meta', type=str,
-                        help='Path to fold metadata')
-    PARSER.add_argument('-embeds', type=str, default=None,
-                        help='Path to directory with embeddings files.')
-    PARSER.add_argument('-source', type=str, default=None,
-                        help='Source of embeddings (birdnet or perch).')
     PARSER.add_argument('-embed_df', type=str, default=None,
                         help='Path to your premade embeddings dataframe.')
     PARSER.add_argument('-model_file', type=str, default=None,
                         help='File name and location of saved model.pkl.')
     ARGS = PARSER.parse_args()
-    main(ARGS.meta, ARGS.embeds, ARGS.source, ARGS.embed_df, ARGS.model_file)
+    main(ARGS.embed_df, ARGS.model_file)
