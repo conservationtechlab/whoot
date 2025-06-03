@@ -3,13 +3,14 @@
 As there are multiple types and formats that can produce embeddings,
 to train an SVM we need a consistent format for the data to be injested.
 This function can be called from main to save the dataframe to disk,
-and can be called elsewhere to return these dataframes programatically.
+and can be called elsewhere to return these dataframes without saving to disk.
 It specifically handles embeddings from running birdnet.embeddings on
-all audio files.
+all audio files. It joins the fold and label info from the metadata
+file with the embeddings list and wav name of origin.
 
 Usage:
-    python3 embeddings_to_df.py -embeds /path/to/embeddings/
-        -meta /path/tpo/metadata.csv -path /path/to/output.pkl
+   $  python3 embeddings_to_df.py -embeds /path/to/embeddings/
+      -meta /path/to/metadata.csv -path /path/to/output.pkl
 """
 import glob
 import os
@@ -20,14 +21,14 @@ import pickle
 
 
 def obtain_birdnet_embeddings(metadata, embeds):
-    """Create a dict dataframe with filename and embedding list
+    """Create a dict dataframe with filename and embedding list.
 
     Args:
         embeds (str): Path to directory where embeddings files are.
 
     Returns:
-        df_merged (pd.Dateframe): A dataframe with the embedding info
-            as a list with the fold and label info in columns.
+        pd.Dateframe: A dataframe with the embedding info,
+            fold and label info in columns.
     """
     embed_dict = {}
     text_files = glob.glob(os.path.join(embeds, "*.txt"))
@@ -58,9 +59,7 @@ def main(meta, embeds, path):
 
     Args:
         meta (str): Path to metadata file.
-
         embeds (str): Path to the embeddings folder/file info.
-
         path (str): Path to output embeddings dataframe.csv.
     """
     metadata = pd.read_csv(meta, index_col=0)
@@ -80,6 +79,6 @@ if __name__ == "__main__":
     PARSER.add_argument('-embeds', type=str,
                         help='Path to directory containing embedding info.')
     PARSER.add_argument('-path', type=str,
-                        help='Path to output dataframe as .pkl')
+                        help='Path to output dataframe as .pkl.')
     ARGS = PARSER.parse_args()
     main(ARGS.meta, ARGS.embeds, ARGS.path)
