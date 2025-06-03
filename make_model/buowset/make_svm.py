@@ -26,12 +26,13 @@ TRAINING_FOLDS = [0,1,2,3]
 TESTING_FOLDS = [4]
 # no buow is 5th class, to be marked as 0 for a binary svm, nums not listed
 # will be marked as 1
-CLASS_0 = 5
+CLASS_0 = [5]
 
 
 def get_binary_classes(df):
 
-    df['binary_label'] = (df['label'] != CLASS_0).astype(int)
+    df['binary_label'] = (~df['label'].isin(CLASS_0)).astype(int)
+
     return df
 
 
