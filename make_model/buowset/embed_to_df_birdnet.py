@@ -17,7 +17,6 @@ import os
 import ntpath
 import argparse
 import pandas as pd
-import pickle
 
 
 def obtain_birdnet_embeddings(metadata, embeds):
