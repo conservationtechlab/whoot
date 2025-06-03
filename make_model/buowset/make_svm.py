@@ -18,7 +18,6 @@ import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report
 import numpy as np
-from embed_to_df_birdnet import obtain_birdnet_embeddings
 
 
 # folds to use for training
