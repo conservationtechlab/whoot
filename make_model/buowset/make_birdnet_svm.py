@@ -1,13 +1,24 @@
 """Create embedding dataframe as well as SVM
 
+Create the embedding and metadata combined dataframe for Birdnet
+style embeddings output and create a binary SVM.
 
+Usage:
+    python3 make_birdnet_svm.py -meta /path/to/metadata.csv
+        -embed_path /path/to/birdnet/embeddings/
+        [OPTIONAL] -model /path/to/saved/model.pkl
 """
 from embed_to_df_birdnet import obtain_birdnet_embeddings
 from make_svm import get_binary_classes, save_out_model
 
 
 def main(embed_path, meta, model):
-    """
+    """Create svm from raw bridnet embeddings and metadata.
+
+    Args:
+        embed_path (str): Path to birdnet embeddings files.
+        meta (str): Path to metadata containing fold and labels.
+        model (str): Path to desired save location of result model.pkl.
     """
     metadata = pd.read_csv(meta, index_col=0)
     df_merged = obtain_birdnet_embeddings(metadata, embed_path)
@@ -28,7 +39,7 @@ if __name__ == "__main__":
     PARSER.add_argument('-embed_path', type=str,
                         help='Path to directory containing embedding info.')
     PARSER.add_argument('-model', type=str, default=None,
-                        help='Path to output dataframe as .pkl')
+                        help='Path to output dataframe as .pkl.')
     ARGS = PARSER.parse_args()
     main(ARGS.meta, ARGS.embed_path, ARGS.model)
 
