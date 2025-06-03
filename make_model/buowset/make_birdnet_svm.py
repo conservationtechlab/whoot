@@ -8,11 +8,14 @@ Usage:
         -embed_path /path/to/birdnet/embeddings/
         [OPTIONAL] -model /path/to/saved/model.pkl
 """
+import argparse
+import pandas as pd
+
 from embed_to_df_birdnet import obtain_birdnet_embeddings
-from make_svm import get_binary_classes, save_out_model
+from make_svm import get_binary_classes, make_svm, save_out_model
 
 
-def main(embed_path, meta, model):
+def main(meta, embed_path, model):
     """Create svm from raw bridnet embeddings and metadata.
 
     Args:
@@ -42,4 +45,3 @@ if __name__ == "__main__":
                         help='Path to output dataframe as .pkl.')
     ARGS = PARSER.parse_args()
     main(ARGS.meta, ARGS.embed_path, ARGS.model)
-
