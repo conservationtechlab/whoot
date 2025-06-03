@@ -30,7 +30,14 @@ CLASS_0 = [5]
 
 
 def get_binary_classes(df):
+    """Convert class labels to binary labels.
 
+    Args:
+        df (pd.Dataframe): Dataframe with embeddings, labels, folds.
+
+    Returns:
+        pd.Dataframe: Same input with new row with binary label added.
+    """
     df['binary_label'] = (~df['label'].isin(CLASS_0)).astype(int)
 
     return df
@@ -79,7 +86,7 @@ def make_svm(embeddings_df):
         embeddings_df (str): the path to your embeddings folds/files.
 
     Returns:
-        svm (model): Support vector machine model.
+        sklearn.svm.SVC: Support vector machine model.
     """
     x_train, y_train, x_test, y_test = make_x_and_y(embeddings_df)
     print("beginning model training")
@@ -103,7 +110,7 @@ def save_out_model(svm, model_file):
     may not want to save the model each time.
 
     Args:
-        svm (model): The support vector machine created.
+        svm (sklearn.svm.SVC): The support vector machine.
 
         model_file (str): Path to where the model will be saved .pkl.
     """
