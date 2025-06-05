@@ -11,7 +11,7 @@ Usage:
 import argparse
 import pandas as pd
 
-from embed_to_df_birdnet import obtain_birdnet_embeddings
+from embed_to_df_birdnet import obtain_birdnet_embeddings, merge_dfs
 from make_svm import get_binary_classes, make_svm, save_out_model
 
 
@@ -24,7 +24,8 @@ def main(meta, embed_path, model):
         model (str): Path to desired save location of result model.pkl.
     """
     metadata = pd.read_csv(meta, index_col=0)
-    df_merged = obtain_birdnet_embeddings(metadata, embed_path)
+    embed_dict = obtain_birdnet_embeddings(embed_path)
+    df_merged = merge_dfs(metadata, embed_dict)
     dataset = get_binary_classes(df_merged)
     if model is None:
         make_svm(dataset)
