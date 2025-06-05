@@ -20,13 +20,13 @@ import pandas as pd
 
 
 def obtain_birdnet_embeddings(metadata, embeds):
-    """Create a dict dataframe with filename and embedding list.
+    """Merge embeddings with fold and label info.
 
     Args:
         embeds (str): Path to directory where embeddings files are.
 
     Returns:
-        pd.Dateframe: A dataframe with the embedding info,
+        pd.DateFrame: A dataframe with the embedding info,
             fold and label info in columns.
     """
     embed_dict = {}
