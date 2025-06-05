@@ -2,10 +2,10 @@
 
 This script can be run to create an SVM from buowset data.
 
-If you already have an embeddings dataframe where the key is the filename
-and the value is the embedding for that file:
+If you already have an embeddings dataframe merged with the
+fold and label metadata:
 
-Usage: python3 make_svm.py -embed_df /path/to/premade/df.csv
+Usage: python3 make_svm.py -embed_df /path/to/premade/df.pkl
 
 If you would like to save our your resulting model file, add
     -model_file /path/to/save/model.pkl
@@ -31,10 +31,10 @@ def get_binary_classes(merged_df):
     """Convert class labels to binary labels.
 
     Args:
-        merged_df (pd.Dataframe): Dataframe with embeddings, labels, folds.
+        merged_df (pd.DataFrame): Dataframe with embeddings, labels, folds.
 
     Returns:
-        pd.Dataframe: Same input with new row with binary label added.
+        pd.DataFrame: Same input with new row with binary label added.
     """
     merged_df['binary_label'] = (~merged_df['label'].isin(CLASS_0)).astype(int)
 
@@ -49,20 +49,14 @@ def make_x_and_y(embed_df):
     as 1 and the no_buow segments as 0.
 
     Args:
-        embed_df (pd.Dataframe): Dictionary inside a dataframe with the
-                                 filename as the key and the list of
-                                 floats (embeddings) as the value.
+        embed_df (pd.DataFrame): Filename, embeddings as floats,
+            and the label and fold for that file.
 
     Returns:
-        x_train (np.array): all of the burrowing owl detection
-                            embeddings to train
-
-        y_train (np.array): all of the no_buow detection embeddings to train
-
-        x_test (np.array): all of the burrowing owl detection
-                           embeddings to test
-
-        y_test (np.array): all of the no_buow detection embeddings to test
+        pd.DateFrame: Training embeddings.
+        pd.DateFrame: Training labels.
+        pd.DateFrame: Testing embeddings.
+        pd.DateFrame: Testing labels.
     """
     train_df = embed_df[embed_df['fold'].isin(TRAINING_FOLDS)]
     test_df = embed_df[embed_df['fold'].isin(TESTING_FOLDS)]
@@ -78,10 +72,10 @@ def make_x_and_y(embed_df):
 
 
 def make_svm(embeddings_df):
-    """Obtain embeddings, train test split, and create an SVM
+    """Obtain embeddings, train test split, and create an SVM.
 
     Args:
-        embeddings_df (str): the path to your embeddings folds/files.
+        embeddings_df (str): The path to your embeddings folds/files.
 
     Returns:
         sklearn.svm.SVC: Support vector machine model.
@@ -109,7 +103,6 @@ def save_out_model(svm, model_file):
 
     Args:
         svm (sklearn.svm.SVC): The support vector machine.
-
         model_file (str): Path to where the model will be saved .pkl.
     """
     with open(model_file, 'wb') as file:
@@ -122,11 +115,8 @@ def main(embed_df, model_file):
     """Main script to run
 
     Args:
-        embed_df (str): If you have a premade dataframe with the keys
-                             as the filename and the values as the embedding
-                             list, use this argument and leave embeds and
-                             source empty.
-
+        embed_df (str): Merged dataframe with filename, embeddings, label,
+            and fold number.
         model_file (str): Path to desired model output file, must be a .pkl.
     """
     dataset = pd.read_pickle(embed_df)
@@ -144,7 +134,7 @@ if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
     )
-    PARSER.add_argument('-embed_df', type=str, default=None,
+    PARSER.add_argument('-embed_df', type=str,
                         help='Path to your premade embeddings dataframe.')
     PARSER.add_argument('-model_file', type=str, default=None,
                         help='File name and location of saved model.pkl.')
