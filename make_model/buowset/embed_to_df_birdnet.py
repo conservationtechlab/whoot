@@ -19,15 +19,15 @@ import argparse
 import pandas as pd
 
 
-def obtain_birdnet_embeddings(metadata, embeds):
+def obtain_birdnet_embeddings(embeds):
     """Merge embeddings with fold and label info.
 
     Args:
         embeds (str): Path to directory where embeddings files are.
 
     Returns:
-        pd.DateFrame: A dataframe with the embedding info,
-            fold and label info in columns.
+        dict: A dictionary with the filename as the key, and a list
+            of floats as the values (embeddings).
     """
     embed_dict = {}
     text_files = glob.glob(os.path.join(embeds, "*.txt"))
@@ -45,6 +45,19 @@ def obtain_birdnet_embeddings(metadata, embeds):
             flattened = flattened[:1024]
         embed_dict[filename] = flattened
 
+    return embed_dict
+
+
+def merge_dfs(metadata, embed_dict):
+    """Merge metadata with the embeddings dictionary.
+
+    Args:
+        metadata (pd.DataFrame): Filename with fold and label info.
+        embed_dict (dict): Filename key and embeddings as float list value.
+
+    Returns:
+        pd.DataFrame: Merged filename, embeddings, and fold and label info.
+    """
     embed_df = pd.DataFrame.from_dict(embed_dict, orient='index')
     embed_df.index.name = 'segment'
     df_merged = metadata.merge(embed_df, on='segment')
@@ -62,7 +75,8 @@ def main(meta, embeds, path):
         path (str): Path to output embeddings dataframe.csv.
     """
     metadata = pd.read_csv(meta, index_col=0)
-    df_merged = obtain_birdnet_embeddings(metadata, embeds)
+    embed_dict = obtain_birdnet_embeddings(embeds)
+    df_merged = merge_dfs(metadata, embed_dict)
 
     df_merged.to_pickle(path)
 
