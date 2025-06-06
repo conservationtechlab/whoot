@@ -1,6 +1,5 @@
 """Permutation testing for Birdnet embedding buowset.
 
-
 Usage:
     python3 permutation_test.py -meta /path/to/fold/metadata.csv
         -embeds /path/to/dir/with/birdnet/embeddings/
@@ -11,27 +10,28 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 import numpy as np
 from tqdm import tqdm
-from embeddings_to_df import obtain_birdnet_embeddings
-from make_svm import make_x_and_y
+from embed_to_df_birdnet import obtain_birdnet_embeddings, merge_dfs
+from make_svm import get_binary_classes, make_x_and_y
 
 
 def permutation_test(meta, embeds):
-    """Permutation test.
+    """Conduct permutation test.
 
     Conducts a 100 iteration permutation test for whatever
     current data split is defined in make_x_and_y.
 
     Args:
         meta (str): Path to metadata with fold info.
-
         embeds (str): Path to birdnet embeddings.
     """
     data = pd.read_csv(meta, index_col=0)
+    embed_dict = obtain_birdnet_embeddings(embeds)
+    df_merged = merge_dfs(data, embed_dict)
+    dataset = get_binary_classes(df_merged)
     permutated_accuracies = []
     permutation_iters = 100
-    x_train, y_train, x_test, y_test = make_x_and_y(data, embeds)
-    # pylint: disable=unused-variable
-    for i in tqdm(range(permutation_iters), desc='Test Progress'):
+    x_train, y_train, x_test, y_test = make_x_and_y(dataset)
+    for _ in tqdm(range(permutation_iters), desc='Test Progress'):
         np.random.shuffle(y_train)
         np.random.shuffle(y_test)
         svm = SVC(class_weight='balanced', probability=True)
@@ -43,17 +43,15 @@ def permutation_test(meta, embeds):
 
 
 def main(meta, embeds):
-    """Main script.
+    """Execute main script.
 
     Runs the permutation test function.
 
     Args:
         meta (str): Path to metadata with fold info.
-
         embeds (str): Path to birdnet embeddings.
     """
-    embeddings_df = obtain_birdnet_embeddings(embeds)
-    permutation_test(meta, embeddings_df)
+    permutation_test(meta, embeds)
 
 
 if __name__ == "__main__":
