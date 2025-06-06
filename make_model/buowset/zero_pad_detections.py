@@ -25,18 +25,14 @@ def pad_segments(path, output, length, randomize):
     """Pad segments with silence to reach desired duration.
 
     For segments shorter than min duration, we add silence to the
-    end to reach the desired length.
+    end or randomly at the beginning and end to reach the desired length.
 
     Args:
-
         path (str): Path to all of the audio segments.
-
         output (str): Path to desired output for all segments
                       now lengthened.
-
         length (int): Desired minimum duration of padded segments in ms.
                       Default 3000ms.
-
         randomize (bool): Flag for if location of padded silence is randomized
                           within the length of the segment.
     """
@@ -62,20 +58,16 @@ def pad_segments(path, output, length, randomize):
 
 
 def main(path, output, length, randomize):
-    """Main function.
+    """Execute main function.
 
     Runs pad segments.
 
     Args:
-
         path (str): Path to all of the audio segments.
-
         output (str): Path to desired output for all segments
                       now lengthened to desired duration.
-
         length (int): Minimum duration of the resulting audio
                       segments, in milliseconds.
-
         randomize (bool): Flag for if the location of the padded
                           silence is randomized within the length
                           of the segment.
