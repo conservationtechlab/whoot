@@ -4,7 +4,7 @@ Tools for capturing, analyzing, and parsing audio data
 # Installation Instructions
 
 ## Default Python Instructions
-1) Install Python>=3.12
+1) Install Python>=3.10
 2) Run in project root `pip install -e .`
 
 To install optional dependencies run `pip install -e .[extra1,extra2,...]`
