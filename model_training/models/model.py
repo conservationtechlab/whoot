@@ -15,9 +15,15 @@ class ModelOutput(ABC):
     Developer: Reccommend for each Model, to have an assocaited ModelOutput class
     """
 
-    def __init__(self, logits: np.array, embeddings: np.array):
+    def __init__(
+            self, 
+            logits: np.array, 
+            embeddings: np.array,
+            loss: np.array | None = None
+        ):
         self.embeddings = embeddings
         self.logits = logits
+        self.loss = loss
 
 
 class ModelInput(ABC):
@@ -32,7 +38,9 @@ class ModelInput(ABC):
     """
 
     def __init__(
-        self, waveform: np.array | None = None, spectrogram: np.array | None = None
+        self, 
+        waveform: np.array | None = None, 
+        spectrogram: np.array | None = None,
     ):
         self.waveform = waveform
         self.spectrogram = spectrogram
@@ -71,3 +79,11 @@ class Model(ABC):
     @abstractmethod
     def forward(self, x: ModelInput) -> ModelOutput:
         pass
+
+
+    """
+    Notes on design for the future
+
+    - Should model implement a way to save/load model to/form disk
+    
+    """
