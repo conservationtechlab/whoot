@@ -15,3 +15,7 @@ Current support optional dependency collections include
 - `cu128`: Installs torch and torchvision with Cuda 12.8 Binaries
 
 
+
+## Developer Notes
+
+When adding a new package, like `assess_birdnet` to the whoot toolkit, add your package name to the `[tool.setuptools]` section of `pyproject.toml` 

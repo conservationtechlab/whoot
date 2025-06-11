@@ -25,3 +25,6 @@ cu128 = [
 
 [packages.index]
 cu128 = "https://download.pytorch.org/whl/cu128"
+
+[tool.setuptools]
+packages = ["make_model", "assess_birdnet"]
