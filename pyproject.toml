@@ -1,0 +1,27 @@
+[project]
+name = "whoot"
+version = "0.0.2.dev0"
+description = "Tools for capturing, analyzing, and parsing audio data"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "librosa>=0.11.0",
+    "numpy>=2.2.6",
+    "pandas>=2.3.0",
+    "pydub>=0.25.1",
+    "scikit-learn>=1.7.0",
+    "tqdm>=4.67.1",
+]
+
+[project.optional-dependencies]
+cpu = [
+  "torch>=2.7.0",
+  "torchvision>=0.22.0",
+]
+cu128 = [
+  "torch>=2.7.0",
+  "torchvision>=0.22.0",
+]
+
+[packages.index]
+cu128 = "https://download.pytorch.org/whl/cu128"
