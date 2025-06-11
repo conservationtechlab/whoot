@@ -5,7 +5,15 @@ Tools for capturing, analyzing, and parsing audio data
 
 ## Default Python Instructions
 1) Install Python>=3.10
-2) Run in project root `pip install -e .`
+2) Create a virtual enviroment via `python -m venv`
+3) Activate the enviroment using an activate script:
+
+- Windows: `.venv\Scripts\activate`
+- macOS/Linux: `source .venv/bin/activate`
+
+If this works, you should see in your command line `(whoot)`. If not check https://docs.python.org/3/library/venv.html#how-venvs-work
+
+4) Run in project root `pip install -e .`
 
 To install optional dependencies run `pip install -e .[extra1,extra2,...]`
 
