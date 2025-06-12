@@ -23,6 +23,10 @@ cu128 = [
   "torchvision>=0.22.0",
 ]
 
+model_training = [
+  "datasets>=3.5.1",
+]
+
 [packages.index]
 cu128 = "https://download.pytorch.org/whl/cu128"
 
