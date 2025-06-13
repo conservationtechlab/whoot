@@ -3,10 +3,10 @@ name = "whoot"
 version = "0.0.2.dev0"
 description = "Tools for capturing, analyzing, and parsing audio data"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">= 3.10.0, < 3.13.0"
 dependencies = [
     "librosa>=0.10.2.post1",
-    "numpy>=2.2.6",
+    "numba==0.61.0",
     "pandas>=2.3.0",
     "pydub>=0.25.1",
     "scikit-learn>=1.7.0",
