@@ -5,8 +5,11 @@
     Using an Arrow Dataset from Hugging Face's dataset library because
     - Cool audio features https://huggingface.co/docs/datasets/en/audio_process
     - Faster than pandas, better at manging memory
+
+    # TODO Use the default stuff from pyha-anaylzer
 """
 from datasets import DatasetDict, ClassLabel
+from torch.utils.data import DataLoader
 
 DEFAULT_COLUMNS = ["label", "audio"]
 
@@ -23,7 +26,7 @@ class AudioDataset(DatasetDict):
                     f"The column `{column}` is missing from dataset split `{split}`. Required by system"
                 )
 
-    def get_number_species(self): #NOTE: Assumes all labels are mutlilabel (the extra feature note)
+    def get_num_classes(self): #NOTE: Assumes all labels are mutlilabel (the extra feature note)
         return self["train"].features["labels"].feature.num_classes
 
     def get_class_labels(self):
