@@ -7,24 +7,32 @@ from models.model import ModelInput
 Returns:
     _type_: _description_
 """
+
+
 class SpectrogramModelInputPreprocessors(MelSpectrogramPreprocessors):
     def __init__(
-            self,
-            ModelInput:ModelInput,
-            duration=5,
-            augment=None,
-            spectrogram_augments=None,
-            class_list=...,
-            n_fft=2048,
-            hop_length=256,
-            power=2,
-            n_mels=256,
-            dataset_ref=None,
-        ):
+        self,
+        ModelInput: ModelInput,
+        duration=5,
+        augment=None,
+        spectrogram_augments=None,
+        class_list=...,
+        n_fft=2048,
+        hop_length=256,
+        power=2,
+        n_mels=256,
+        dataset_ref=None,
+    ):
         super().__init__(
-            duration, augment, spectrogram_augments,
-            class_list, n_fft, hop_length, power, n_mels,
-            dataset_ref
+            duration,
+            augment,
+            spectrogram_augments,
+            class_list,
+            n_fft,
+            hop_length,
+            power,
+            n_mels,
+            dataset_ref,
         )
         self.ModelInput = ModelInput
 

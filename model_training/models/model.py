@@ -10,16 +10,20 @@ import numpy as np
     Wrapper to check to make sure everything is setup properly
     Required before using PyhaTrainer
 """
+
+
 def has_required_inputs():
     def decorator(forward):
         @wraps(forward)
         def wrapper(self, x):
-            assert(isinstance(x, self.input_format))
+            assert isinstance(x, self.input_format)
             model_output = forward(self, x)
-            assert(isinstance(model_output, self.output_format))
+            assert isinstance(model_output, self.output_format)
 
             return model_output
+
         return wrapper
+
     return decorator
 
 
@@ -36,12 +40,12 @@ class ModelOutput(ABC):
     """
 
     def __init__(
-            self, 
-            logits: np.array, 
-            embeddings: np.array,
-            labels: np.array | None = None,
-            loss: np.array | None = None
-        ):
+        self,
+        logits: np.array,
+        embeddings: np.array,
+        labels: np.array | None = None,
+        loss: np.array | None = None,
+    ):
         self.embeddings = embeddings
         self.logits = logits
         self.loss = loss
@@ -52,16 +56,15 @@ class ModelOutput(ABC):
             "predictions": self.logits,
             "label_ids": [self.labels],
         }
-    
+
     @classmethod
     def concat(list_of_outputs: list):
-        return ModelOutput( 
-            logits = torch.vstack([out.logits for out in list_of_outputs]),
-            embeddings = torch.vstack([out.embeddings for out in list_of_outputs]),
-            loss = torch.vstack([out.loss for out in list_of_outputs]),
-            labels = torch.vstack([out.labels for out in list_of_outputs]),
+        return ModelOutput(
+            logits=torch.vstack([out.logits for out in list_of_outputs]),
+            embeddings=torch.vstack([out.embeddings for out in list_of_outputs]),
+            loss=torch.vstack([out.loss for out in list_of_outputs]),
+            labels=torch.vstack([out.labels for out in list_of_outputs]),
         )
-        
 
 
 class ModelInput(ABC):
@@ -76,9 +79,9 @@ class ModelInput(ABC):
     """
 
     def __init__(
-        self, 
+        self,
         labels: np.array,
-        waveform: np.array | None = None, 
+        waveform: np.array | None = None,
         spectrogram: np.array | None = None,
     ):
         self.waveform = waveform
@@ -90,9 +93,12 @@ class ModelInput(ABC):
         self.spectrogram = Tensor(self.spectrogram, device=device)
         self.labels = Tensor(self.labels, device=device)
 
-class Model(ABC, nn.Module, BaseModel):
+"""
+BaseModel Class for Whoot
+"""
+class Model(ABC, BaseModel):
     # TODO Define required class intance variables
-    # Such as cirteron etc. 
+    # Such as cirteron etc.
     def __init__(self, *args, **kwargs):
         self.input_format = ModelInput
         self.output_format = ModelOutput
@@ -110,6 +116,7 @@ class Model(ABC, nn.Module, BaseModel):
     Returns
         embedding: np.array, some embedding vector representing the input data
     """
+
     def get_embeddings(self, x: ModelInput) -> np.array:
         return self.forward(x).embeddings
 
@@ -127,11 +134,11 @@ class Model(ABC, nn.Module, BaseModel):
     Returns:
         ModelOutput: dict, a dictionary like object that describes 
     """
+
     @abstractmethod
     @has_required_inputs
     def forward(self, x: ModelInput) -> ModelOutput:
         pass
-
 
     """
     Notes on design for the future
