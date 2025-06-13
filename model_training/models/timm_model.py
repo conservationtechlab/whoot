@@ -1,6 +1,7 @@
-from .model import Model, ModelInput, ModelOutput
 import timm 
-from torch import nn
+from torch import nn, Tensor
+
+from model import Model, ModelInput, ModelOutput, has_required_inputs
 
 """
     Wrapper around the timms model zoo 
@@ -13,14 +14,20 @@ from torch import nn
     Great repo for models, but currently using this for demoing pipeline
 """
 class TimmInputs(ModelInput):
-    def __init__(self, waveform = None, spectrogram = None):
-        # Can use inputs to verify correct shape for upstream model
-        assert spectrogram.shape[1:] == (1, 100, 100)
-        super().__init__(None, spectrogram)
+    def __init__(self, labels, waveform = None, spectrogram = None, device="cpu"):
+        # # Can use inputs to verify correct shape for upstream model
+        # assert spectrogram.shape[1:] == (1, 100, 100)
+        super().__init__(labels, waveform, spectrogram)
+        self.labels = Tensor(labels)
+        self.spectrogram = Tensor(spectrogram)
 
 
 class TimmModel(nn.Module, Model):
     def __init__(self, timm_model='resnet34', pretrained=True, in_chans=1, num_classes=6, loss=None):
+        super().__init__()
+        self.input_format = TimmInputs
+        self.output_format = ModelOutput
+
         assert num_classes > 0
 
         self.backbone = timm.create_model(timm_model, pretrained=pretrained, in_chans=in_chans)
@@ -32,14 +39,16 @@ class TimmModel(nn.Module, Model):
             self.loss = loss
         else:
             self.loss = nn.BCEWithLogitsLoss()
-    
+
+    @has_required_inputs
     def forward(self, x: TimmInputs) -> ModelOutput:
-        embedd = self.backbone(x)
+        embedd = self.backbone(x.spectrogram)
         logits = self.linear(embedd)
-        loss = self.loss(logits)
+        loss = self.loss(logits, x.labels)
 
         return ModelOutput(
             logits=logits,
             embeddings=embedd,
-            loss=loss
+            loss=loss,
+            labels = x.labels
         )
