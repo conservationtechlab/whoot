@@ -208,3 +208,6 @@ pip-selfcheck.json
 
 uv.lock
 .ruff_cache
+
+# Data Folders
+data

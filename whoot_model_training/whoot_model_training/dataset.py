@@ -12,7 +12,7 @@ Using an Arrow Dataset from Hugging Face's dataset library because
 from datasets import DatasetDict, ClassLabel
 from torch.utils.data import DataLoader
 
-DEFAULT_COLUMNS = ["label", "audio"]
+DEFAULT_COLUMNS = ["labels", "audio"]
 
 
 class AudioDataset(DatasetDict):
@@ -32,9 +32,15 @@ class AudioDataset(DatasetDict):
         self,
     ):  # NOTE: Assumes all labels are mutlilabel (the extra feature note)
         return self["train"].features["labels"].feature.num_classes
+    
+    """
+        Legacy code had the method name `get_number_species`
+    """
+    def get_number_species(self):
+        return self.get_num_classes()
 
     def get_class_labels(self):
         """
         Returns a new ClassLabel Object to make mapping easier between datasets
         """
-        return ClassLabel(names=self["train"].features["labels"].names)
+        return ClassLabel(names=self["train"].features["labels"].feature.names)

@@ -1,7 +1,7 @@
 import timm
 from torch import nn, Tensor
 
-from model import Model, ModelInput, ModelOutput, has_required_inputs
+from .model import Model, ModelInput, ModelOutput, has_required_inputs
 
 """
     Wrapper around the timms model zoo 
@@ -51,10 +51,10 @@ class TimmModel(nn.Module, Model):
         else:
             self.loss = nn.BCEWithLogitsLoss()
 
-    @has_required_inputs
-    def forward(self, x: TimmInputs) -> ModelOutput:
-        embedd = self.backbone(x.spectrogram)
+    @has_required_inputs()
+    def forward(self, data: TimmInputs) -> ModelOutput:
+        embedd = self.backbone(data.spectrogram)
         logits = self.linear(embedd)
-        loss = self.loss(logits, x.labels)
+        loss = self.loss(logits, data.labels)
 
-        return ModelOutput(logits=logits, embeddings=embedd, loss=loss, labels=x.labels)
+        return ModelOutput(logits=logits, embeddings=embedd, loss=loss, labels=data.labels)

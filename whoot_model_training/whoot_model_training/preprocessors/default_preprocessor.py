@@ -1,5 +1,5 @@
-from pyha_analyzer.preprocessors import MelSpectrogramPreprocessors
-from models.model import ModelInput
+from .spectrogram_preprocessors import BuowMelSpectrogramPreprocessors
+from ..models.model import ModelInput
 
 
 """_summary_
@@ -9,7 +9,7 @@ Returns:
 """
 
 
-class SpectrogramModelInputPreprocessors(MelSpectrogramPreprocessors):
+class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
     def __init__(
         self,
         ModelInput: ModelInput,
@@ -38,4 +38,4 @@ class SpectrogramModelInputPreprocessors(MelSpectrogramPreprocessors):
 
     def __call__(self, batch):
         batch = super().__call__(batch)
-        return self.ModelInput(labels=batch["labels"], spectrogram=batch["audio"])
+        return {"data": [self.ModelInput(labels=batch["labels"], spectrogram=batch["audio"])]}

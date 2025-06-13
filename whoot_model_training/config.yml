@@ -1,0 +1,3 @@
+metadata_csv: data/burrowing_owl_dataset/metadata.csv
+data_path: data/burrowing_owl_dataset/audio
+hf_cache_path: data/burrowing_owl_dataset/cache/metadata.hf

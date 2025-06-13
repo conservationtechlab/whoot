@@ -41,10 +41,10 @@ class ModelOutput(ABC):
 
     def __init__(
         self,
-        logits: np.array,
-        embeddings: np.array,
-        labels: np.array | None = None,
-        loss: np.array | None = None,
+        logits: np.ndarray,
+        embeddings: np.ndarray,
+        labels: np.ndarray | None = None,
+        loss: np.ndarray | None = None,
     ):
         self.embeddings = embeddings
         self.logits = logits
@@ -80,9 +80,9 @@ class ModelInput(ABC):
 
     def __init__(
         self,
-        labels: np.array,
-        waveform: np.array | None = None,
-        spectrogram: np.array | None = None,
+        labels: np.ndarray,
+        waveform: np.ndarray|None = None,
+        spectrogram: np.ndarray |None = None,
     ):
         self.waveform = waveform
         self.spectrogram = spectrogram
@@ -96,7 +96,7 @@ class ModelInput(ABC):
 """
 BaseModel Class for Whoot
 """
-class Model(ABC, BaseModel):
+class Model(BaseModel):
     # TODO Define required class intance variables
     # Such as cirteron etc.
     def __init__(self, *args, **kwargs):
@@ -136,7 +136,7 @@ class Model(ABC, BaseModel):
     """
 
     @abstractmethod
-    @has_required_inputs
+    @has_required_inputs()
     def forward(self, x: ModelInput) -> ModelOutput:
         pass
 

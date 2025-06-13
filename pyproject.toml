@@ -29,12 +29,17 @@ model_training = [
   "pyha-analyzer",
 ]
 
+notebooks = [
+  "ipykernel>=6.29.5",
+  "ipywidgets>=8.1.6",
+]
+
 
 [packages.index]
 cu128 = "https://download.pytorch.org/whl/cu128"
 
 [tool.setuptools]
-packages = ["make_model", "assess_birdnet", "model_training"]
+packages = ["make_model", "assess_birdnet", "whoot_model_training"]
 
 [tool.uv.sources]
 pyha-analyzer = { git = "https://github.com/UCSD-E4E/pyha-analyzer-2.0.git", branch = "support_whoot" }
