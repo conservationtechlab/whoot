@@ -1,11 +1,26 @@
-import pandas as pd
+"""Correlating the wav paths with the labels for 2017 and 2018.
+
+The label file format is different for the 2018 and 2017 label
+files. This means we use different information in those files to
+ensure the wav file we found in the folder corresponds to the
+label in the label file. Depending on the label file, one
+of these two functions gets called to ensure we're dealing
+with the proper wav file and only the labels that correspond
+to that wav file.
+"""
 import os
 import ntpath
-import logging
 
 
 def filter_labels_2017(wav, labels):
-    """
+    """Filter labels from 2017 data.
+
+    Args:
+        wav (str): The current wav file.
+        labels (pd.DataFrame): All of the labels.
+
+    Returns:
+        pd.DataFrame: The labels associated with the wav of interest.
     """
     file_name = ntpath.basename(wav)
     # isolate labels that match the wav basename
@@ -13,6 +28,7 @@ def filter_labels_2017(wav, labels):
     index_drop = []
     wav = str(wav)
     # ensure the labels match the site and burrow name of wav file
+    # this step is crucial, it catches accidential duplicates of wav files
     for index, row in filtered_labels.iterrows():
         burrow = row['Burrow']
         bur = burrow[:-1]
@@ -27,23 +43,23 @@ def filter_labels_2017(wav, labels):
     filtered_labels = filtered_labels.drop(index_drop)
     return filtered_labels
 
+
 def filter_labels_2018(wav, labels):
-    """
-    Because we do not have full file paths, we need to ensure that there
-    are not duplicate .wav file names that are associated with different burrows/sites.
-    If we just use the all label file, it would be difficult to determine which burrow/site
-    is correct for the wav file, because the file paths are inconsistent. This function
-    chooses the label file to use based on the wav name, and then obtains the labels for
-    that site/burrow within that folder so that there's no question that it's for that
-    site/burrow. 2017 is formatted very differently and we are able to back out the burrow/site
-    from the path to the wav and other information in the all labels file. 
+    """Filter labels from 2018 data.
+
+    Args:
+        wav (str): The current wav file.
+        labels (pd.DataFrame): All of the labels.
+
+    Returns:
+        pd.DataFrame: The labels associated with the wav of interest.
     """
     file_name = ntpath.basename(wav)
     path_name = ntpath.dirname(wav)
     basepath = os.path.basename(path_name)
-    if basepath == "ClassificationResults" or basepath == "Classification_Results":
+    if basepath in ('ClassificationResults', 'Classification_Results'):
         print(f"skipping {wav} because it's basepath is {basepath}")
-        # skipping extra wav files that exist as duplicates of our wavs of interest within these sub dirs
+        # skipping extra wav files that exist as duplicates in these sub dirs
         return None
     # some of the folders have an underscore and some do not
     path_labels = []
@@ -53,43 +69,28 @@ def filter_labels_2018(wav, labels):
     # checking if it's the one with an underscore vs not
     for path in path_labels:
         exists = os.path.exists(path)
-        if exists == True:
+        if exists is True:
             path_to_results = path
         else:
             print(f"{path} does not exist")
             continue
-    if path_to_results == None:
-        # skipping wav files that are an exception to this folder structure because they're
-        # not the wav files of interest
+    if path_to_results is None:
         print(f"skipping {wav} because it's not a file of interest")
         return None
     filtered_labels = labels[labels['IN FILE'] == file_name]
     index_to_drop = []
     # iterating the columns in labels that match the wav file name
     for index, row in filtered_labels.iterrows():
-        check_path = os.path.join(path_to_results, row['Fled_2018_LS133_SM1.csv '].strip())
-        # there's a column in the all labels file that has the file name of the subset label file that
-        # the all labels file was aggregated from, and if the wav file path leads us to
-        # the label file listed in the all labels file, then it will be apart of the filtered
-        # labels for that wav. this needs to be checked in case 2 wav files have the same
-        # file name, but are from different burrows/sites. 
-        # it's worth noting that this could be done a different way, using the subset label files
-        # for each burrow/site labels, but you'd still need the all labels file to validate, so it
-        # just felt like more steps
+        stripped = row['Fled_2018_LS133_SM1.csv '].strip()
+        check_path = os.path.join(path_to_results, stripped)
         if os.path.isfile(check_path):
             continue
-        elif row['Fled_2018_LS133_SM1.csv '].strip() == 'EarBreed_2018_LS128_SM10A.csv':
-            check_path = os.path.join(path_to_results, 'EarBreed_LS128_SM10A.csv')
-            if os.path.isfile(check_path):
-                continue
-            else:
+        if stripped == 'EarBreed_2018_LS128_SM10A.csv':
+            check_path = os.path.join(path_to_results,
+                                      'EarBreed_LS128_SM10A.csv')
+            if not os.path.isfile(check_path):
                 index_to_drop.append(index)
         else:
             index_to_drop.append(index)
-    # if there were labels associated with a different wav file that happened to have the same
-    # name, this will drop the labels associated with a different burrow/site
     filtered_labels = filtered_labels.drop(index_to_drop)
     return filtered_labels
-
-
-# TODO: There's one subset label file that has no column names, so that error needs to be dealt with. It will currently ignore that one
