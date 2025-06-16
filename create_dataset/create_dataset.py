@@ -61,6 +61,7 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
     wav_file_paths = get_paths(wav_dir)
     # open human label file
     labels = pd.read_csv(labels)
+    use_2017 = None
     # iterate through each individual original wav
     if "2017" in labels['DATE'].iloc[0]:
         use_2017 = True
