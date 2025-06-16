@@ -40,15 +40,12 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
 
     Args:
         labels (str): Path to label file.
-
         wav_dir (str): Path to original wav segments of audio.
-
         output_dir (str): Path to where the segments and metadata
-                          will go.
-
+            will go.
         class_list (str): Path to file containing the classes
-                          seen in the human labels file that you
-                          want to create segments for.
+            seen in the human labels file that you want to create
+            segments for.
     """
     # parse the inputs
     out_file = ntpath.dirname(output_dir)
@@ -110,15 +107,12 @@ def main(labels, wav_dir, output_dir, class_list):
 
     Args:
         labels (str): Path to label file.
-
         wav_dir (str): Path to original wav segments of audio.
-
         output_dir (str): Path to where the segments and metadata
-                          will go.
-
+            will go.
         class_list (str): Path to file containing the classes
-                          seen in the human labels file that you
-                          want to create segments for.
+            seen in the human labels file that you want to
+            create segments for.
     """
     create_dataset(labels, wav_dir, output_dir, class_list)
 
