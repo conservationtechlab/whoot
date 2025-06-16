@@ -48,8 +48,8 @@ def calculate_cost(problem: np.ndarray,
         cost += (fold_sum / total - 1.0 / k) ** 2
 
         # Now calculate the cost associated with the class imbalances
-        # Katie: had to add division by 0 error for if fold_sums equal 0, during testing with subset
-        # there were no chick begging calls so this row was 0
+        # Katie: had to add division by 0 error for if fold_sums equal 0
+        # there were no chick begging calls during test so this row was 0
         for j in range(num_classes):
             if fold_sum == 0:
                 cost += (0 - class_sums[j] / total) ** 2
