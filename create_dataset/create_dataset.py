@@ -45,7 +45,8 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
             will go.
         class_list (str): Path to file containing the classes
             seen in the human labels file that you want to create
-            segments for.
+            segments for. Current format is ',' delimited list
+            in a .txt file.
     """
     # parse the inputs
     out_file = ntpath.dirname(output_dir)
