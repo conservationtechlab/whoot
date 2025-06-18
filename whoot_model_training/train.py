@@ -41,6 +41,9 @@ def train(config_path):
     args = PyhaTrainingArguments(working_dir="working_dir")
     args.num_train_epochs = 2
     args.eval_steps = 20
+    args.dataloader_num_workers = 36
+    args.per_device_train_batch_size = 32
+    args.per_device_eval_batch_size = 32
     args.run_name = "testing"
     args.report_to="none" #Blocks wandb
 
@@ -48,8 +51,7 @@ def train(config_path):
         model=model,
         dataset=ds,
         training_args=args,
-        logger=None,
-        data_collator=lambda x: x
+        logger=None,     
     )
     trainer.train()
     trainer.evaluate(eval_dataset=ds["test"], metric_key_prefix="Soundscape")

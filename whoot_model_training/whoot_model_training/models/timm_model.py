@@ -1,5 +1,6 @@
 import timm
 from torch import nn, Tensor
+import numpy as np
 
 from .model import Model, ModelInput, ModelOutput, has_required_inputs
 
@@ -20,8 +21,8 @@ class TimmInputs(ModelInput):
         # # Can use inputs to verify correct shape for upstream model
         # assert spectrogram.shape[1:] == (1, 100, 100)
         super().__init__(labels, waveform, spectrogram)
-        self.labels = Tensor(labels)
-        self.spectrogram = Tensor(spectrogram)
+        self.labels = Tensor(np.array(labels))
+        self.spectrogram = Tensor(np.array(spectrogram))
 
 
 class TimmModel(nn.Module, Model):
@@ -51,10 +52,10 @@ class TimmModel(nn.Module, Model):
         else:
             self.loss = nn.BCEWithLogitsLoss()
 
-    @has_required_inputs()
-    def forward(self, data: TimmInputs) -> ModelOutput:
-        embedd = self.backbone(data.spectrogram)
+    @has_required_inputs() #data: TimmInputs
+    def forward(self, spectrogram, labels=None) -> ModelOutput:
+        embedd = self.backbone(spectrogram)
         logits = self.linear(embedd)
-        loss = self.loss(logits, data.labels)
-
-        return ModelOutput(logits=logits, embeddings=embedd, loss=loss, labels=data.labels)
+        loss = self.loss(logits, labels)
+        out = ModelOutput(logits=logits, embeddings=embedd, loss=loss, labels=labels)
+        return out

@@ -68,7 +68,6 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
             if self.spectrogram_augments is not None:
                 mels = self.spectrogram_augments(mels)
 
-            # print(mels.shape, int(start * sr), y.shape)
             new_audio.append(mels)
             new_labels.append(label)
     

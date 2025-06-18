@@ -38,4 +38,4 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
 
     def __call__(self, batch):
         batch = super().__call__(batch)
-        return {"data": [self.ModelInput(labels=batch["labels"], spectrogram=batch["audio"])]}
+        return self.ModelInput(labels=batch["labels"], spectrogram=batch["audio"])

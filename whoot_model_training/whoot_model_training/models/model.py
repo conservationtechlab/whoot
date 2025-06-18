@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import wraps
+from collections import UserDict
 
 from pyha_analyzer.models.base_model import BaseModel
 import torch
@@ -15,10 +16,10 @@ import numpy as np
 def has_required_inputs():
     def decorator(forward):
         @wraps(forward)
-        def wrapper(self, x):
-            assert isinstance(x, self.input_format)
-            model_output = forward(self, x)
-            assert isinstance(model_output, self.output_format)
+        def wrapper(self, *args, **kwarg):
+            #assert isinstance(x, self.input_format) #TODO FIX
+            model_output = forward(self, *args, **kwarg)
+            #assert isinstance(model_output, self.output_format)
 
             return model_output
 
@@ -26,8 +27,8 @@ def has_required_inputs():
 
     return decorator
 
-
-class ModelOutput(ABC):
+# TODO: Simplify, most of this should have been done by UserDict...
+class ModelOutput(dict, UserDict):
     """ModelOutput
 
     Object that stores the output of a model
@@ -41,15 +42,30 @@ class ModelOutput(ABC):
 
     def __init__(
         self,
-        logits: np.ndarray,
-        embeddings: np.ndarray,
+        _map: dict | None = None,
+        logits: np.ndarray | None = None,
+        embeddings: np.ndarray | None = None,
         labels: np.ndarray | None = None,
         loss: np.ndarray | None = None,
-    ):
-        self.embeddings = embeddings
+    ):  
+        super(UserDict).__init__()
+        self._main_keys = ["logits", "embeddings", "labels", "loss"]
+
         self.logits = logits
-        self.loss = loss
+        self.embeddings = embeddings
         self.labels = labels
+        self.loss = loss
+        self.data = {
+            "logits": self.logits, 
+            "embeddings": self.embeddings, 
+            "labels": self.labels,
+            "loss": self.loss
+        }
+        if _map is not None:
+            for key, value in _map:
+                self[key] = value
+
+        assert isinstance(self, dict)
 
     def to_hugging_face(self):
         return {
@@ -65,9 +81,43 @@ class ModelOutput(ABC):
             loss=torch.vstack([out.loss for out in list_of_outputs]),
             labels=torch.vstack([out.labels for out in list_of_outputs]),
         )
+    
+    def __len__(self) -> int:
+        """
+            Count the number of batches in this system
+
+            returns batch_size int
+        """
+        return len(self.labels)
+    
+    def __setitem__(self, key, value):
+        if key in self._main_keys:
+            self.__setattr__(key, value)
+            self.data[key] = value
+    
+    def __getitem__(self, key):
+        return self.__getattribute__(key)
+    
+    def __repr__(self):
+        return str(self.data)
+    
+    def items(self):
+        data = self.data.items()
+        return ((col, value) for col, value in data if value is not None )
+    
+    def keys(self):
+        return [key for key, _ in self.items()]
+    
+    def __iter__(self):
+        return iter(self.keys())
+    
+    def __contains__(self, key):
+        return key in self.data
+    
+    
 
 
-class ModelInput(ABC):
+class ModelInput(ABC, UserDict):
     """ModelInput
 
     Spefifies Input Types
@@ -87,11 +137,42 @@ class ModelInput(ABC):
         self.waveform = waveform
         self.spectrogram = spectrogram
         self.labels = labels
+        self.data = {
+            "labels": self.labels, 
+            "waveform": self.waveform, 
+            "spectrogram": self.spectrogram
+        }
+        self._main_keys = ["labels", "spectrogram", "waveform"]
+
 
     def to_tensor(self, device="cpu"):
         self.waveform = Tensor(self.waveform, device=device)
         self.spectrogram = Tensor(self.spectrogram, device=device)
         self.labels = Tensor(self.labels, device=device)
+
+    def __len__(self) -> int:
+        """
+            Count the number of batches in this system
+
+            returns batch_size int
+        """
+        return len(self.labels)
+    
+    def __setitem__(self, key, value):
+        if key in self._main_keys:
+            self.__setattr__(key, value)
+            self.data[key] = value
+    
+    # TODO: There might be a smarter way to do something like this...
+    def __getitem__(self, key):
+        return self.__getattribute__(key)
+    
+    def __repr__(self):
+        return str(self.data)
+    
+    def items(self):
+        data = super().items()
+        return ((col, value) for col, value in data if value is not None )
 
 """
 BaseModel Class for Whoot
