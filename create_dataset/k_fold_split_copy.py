@@ -153,7 +153,7 @@ def solve(problem: np.ndarray,
     """Solve the problem.
 
     Args:
-        problem (np.ndarray):
+        problem (np.ndarray): The problem matrix.
         k (int): Number of folds, default 5.
         min_cost (float): The largest the cost can be for an
             acceptable solution. Default 1e-5.
