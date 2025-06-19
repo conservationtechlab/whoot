@@ -56,8 +56,9 @@ def train(config_path):
         logger=None,
         ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
+    trainer.train()
     print(trainer.evaluate(eval_dataset=ds["test"], metric_key_prefix="Soundscape"))
-   
+    
 
 
 if __name__ == '__main__':
