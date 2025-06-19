@@ -40,7 +40,12 @@ def train(config_path):
     # Run training
     args = PyhaTrainingArguments(working_dir="working_dir")
     args.num_train_epochs = 2
+    args.remove_unused_columns = False
+    args.label_names = ["labels"]
     args.eval_steps = 20
+    args.per_device_train_batch_size = 1
+    args.per_device_eval_batch_size = 1
+    args.dataloader_num_workers = 0
     args.run_name = "testing"
     args.report_to="none" #Blocks wandb
 
@@ -49,10 +54,10 @@ def train(config_path):
         dataset=ds,
         training_args=args,
         logger=None,
-        data_collator=lambda x: x
+        ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
-    trainer.train()
-    trainer.evaluate(eval_dataset=ds["test"], metric_key_prefix="Soundscape")
+    print(trainer.evaluate(eval_dataset=ds["test"], metric_key_prefix="Soundscape"))
+   
 
 
 if __name__ == '__main__':

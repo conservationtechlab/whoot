@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import wraps
+from collections import UserDict
 
 from pyha_analyzer.models.base_model import BaseModel
 import torch
@@ -15,10 +16,10 @@ import numpy as np
 def has_required_inputs():
     def decorator(forward):
         @wraps(forward)
-        def wrapper(self, x):
-            assert isinstance(x, self.input_format)
-            model_output = forward(self, x)
-            assert isinstance(model_output, self.output_format)
+        def wrapper(self, *args, **kwargs):
+            #assert isinstance(x, self.input_format)
+            model_output = forward(self, *args, **kwargs)
+            #assert isinstance(model_output, self.output_format)
 
             return model_output
 
@@ -27,7 +28,7 @@ def has_required_inputs():
     return decorator
 
 
-class ModelOutput(ABC):
+class ModelOutput(dict, UserDict):
     """ModelOutput
 
     Object that stores the output of a model
@@ -46,28 +47,20 @@ class ModelOutput(ABC):
         labels: np.ndarray | None = None,
         loss: np.ndarray | None = None,
     ):
-        self.embeddings = embeddings
-        self.logits = logits
-        self.loss = loss
-        self.labels = labels
+        super().__init__({
+                "predictions": logits,
+                "logits": logits,
+                "labels": [labels],
+                # "label_ids": [labels],
+                "embeddings": embeddings,
+                "loss": loss
+            })
 
-    def to_hugging_face(self):
-        return {
-            "predictions": self.logits,
-            "label_ids": [self.labels],
-        }
-
-    @classmethod
-    def concat(list_of_outputs: list):
-        return ModelOutput(
-            logits=torch.vstack([out.logits for out in list_of_outputs]),
-            embeddings=torch.vstack([out.embeddings for out in list_of_outputs]),
-            loss=torch.vstack([out.loss for out in list_of_outputs]),
-            labels=torch.vstack([out.labels for out in list_of_outputs]),
-        )
+    def items(self):
+        return [(key, value) for (key, value) in super().items() if value is not None]
 
 
-class ModelInput(ABC):
+class ModelInput(UserDict, dict):
     """ModelInput
 
     Spefifies Input Types
@@ -84,9 +77,20 @@ class ModelInput(ABC):
         waveform: np.ndarray|None = None,
         spectrogram: np.ndarray |None = None,
     ):
-        self.waveform = waveform
-        self.spectrogram = spectrogram
-        self.labels = labels
+        super().__init__({
+            "labels": labels,
+            "waveform": waveform,
+            "spectrogram": spectrogram
+        })
+
+    def items(self):
+        return [(key, value) for (key, value) in super().items() if value is not None]
+
+    # def __setattr__(self, name, value):
+    #     self[name] = value
+    
+    # def __getattribute__(self, name):
+    #     return self[name]
 
     def to_tensor(self, device="cpu"):
         self.waveform = Tensor(self.waveform, device=device)
