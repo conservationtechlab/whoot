@@ -1,25 +1,35 @@
+"""Abstract Model Class for training
+
+Any model trained with this repo SHOULD inherit from these classes found here
+
+There are 3 main classes
+- ModelInput: dict-like class that define required input params to function
+- ModelOutput: dict-like class that defines the output from the model
+- Model: A PyTorch nn.Module class
+
+See timm_model.py for example about how these classes can be implemented. 
+"""
+
 from abc import ABC, abstractmethod
 from functools import wraps
 from collections import UserDict
 
 from pyha_analyzer.models.base_model import BaseModel
 import torch
-from torch import nn, Tensor
+from torch import Tensor
 import numpy as np
 
-"""
-    Wrapper to check to make sure everything is setup properly
-    Required before using PyhaTrainer
-"""
-
-
 def has_required_inputs():
+    """
+        Wrapper to check to make sure everything is setup properly
+        Required before using PyhaTrainer
+    """
     def decorator(forward):
         @wraps(forward)
-        def wrapper(self, *args, **kwargs):
-            #assert isinstance(x, self.input_format)
-            model_output = forward(self, *args, **kwargs)
-            #assert isinstance(model_output, self.output_format)
+        def wrapper(self, *args, **kwarg):
+            # assert isinstance(x, self.input_format) #TODO FIX
+            model_output = forward(self, *args, **kwarg)
+            # assert isinstance(model_output, self.output_format)
 
             return model_output
 
@@ -42,8 +52,9 @@ class ModelOutput(dict, UserDict):
 
     def __init__(
         self,
-        logits: np.ndarray,
-        embeddings: np.ndarray,
+        _map: dict | None = None,
+        logits: np.ndarray | None = None,
+        embeddings: np.ndarray | None = None,
         labels: np.ndarray | None = None,
         loss: np.ndarray | None = None,
     ):
@@ -61,6 +72,7 @@ class ModelOutput(dict, UserDict):
 
 
 class ModelInput(UserDict, dict):
+
     """ModelInput
 
     Spefifies Input Types
@@ -69,13 +81,14 @@ class ModelInput(UserDict, dict):
     Inspired by HuggingFace Models and Tokenizers
 
     Developer: Reccommend for each Model, to have an assocaited ModelInput class
+    ALWAYS HAS A LABEL CATEGORY
     """
 
     def __init__(
         self,
         labels: np.ndarray,
-        waveform: np.ndarray|None = None,
-        spectrogram: np.ndarray |None = None,
+        waveform: np.ndarray | None = None,
+        spectrogram: np.ndarray | None = None,
     ):
         super().__init__({
             "labels": labels,
@@ -86,21 +99,11 @@ class ModelInput(UserDict, dict):
     def items(self):
         return [(key, value) for (key, value) in super().items() if value is not None]
 
-    # def __setattr__(self, name, value):
-    #     self[name] = value
-    
-    # def __getattribute__(self, name):
-    #     return self[name]
 
-    def to_tensor(self, device="cpu"):
-        self.waveform = Tensor(self.waveform, device=device)
-        self.spectrogram = Tensor(self.spectrogram, device=device)
-        self.labels = Tensor(self.labels, device=device)
-
-"""
-BaseModel Class for Whoot
-"""
 class Model(BaseModel):
+    """
+        BaseModel Class for Whoot
+    """
     # TODO Define required class intance variables
     # Such as cirteron etc.
     def __init__(self, *args, **kwargs):
