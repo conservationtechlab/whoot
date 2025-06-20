@@ -38,7 +38,6 @@ def has_required_inputs():
     return decorator
 
 
-# TODO: Simplify, most of this should have been done by UserDict...
 class ModelOutput(dict, UserDict):
     """ModelOutput
 
@@ -59,74 +58,21 @@ class ModelOutput(dict, UserDict):
         labels: np.ndarray | None = None,
         loss: np.ndarray | None = None,
     ):
-        super(UserDict).__init__()
-        self._main_keys = ["logits", "embeddings", "labels", "loss"]
-
-        self.logits = logits
-        self.embeddings = embeddings
-        self.labels = labels
-        self.loss = loss
-        self.data = {
-            "logits": self.logits,
-            "embeddings": self.embeddings,
-            "labels": self.labels,
-            "loss": self.loss,
-        }
-        if _map is not None:
-            for key, value in _map:
-                self[key] = value
-
-        assert isinstance(self, dict)
-
-    def to_hugging_face(self):
-        return {
-            "predictions": self.logits,
-            "label_ids": [self.labels],
-        }
-
-    @classmethod
-    def concat(list_of_outputs: list):
-        return ModelOutput(
-            logits=torch.vstack([out.logits for out in list_of_outputs]),
-            embeddings=torch.vstack([out.embeddings for out in list_of_outputs]),
-            loss=torch.vstack([out.loss for out in list_of_outputs]),
-            labels=torch.vstack([out.labels for out in list_of_outputs]),
-        )
-
-    def __len__(self) -> int:
-        """
-        Count the number of batches in this system
-
-        returns batch_size int
-        """
-        return len(self.labels)
-
-    def __setitem__(self, key, value):
-        if key in self._main_keys:
-            self.__setattr__(key, value)
-            self.data[key] = value
-
-    def __getitem__(self, key):
-        return self.__getattribute__(key)
-
-    def __repr__(self):
-        return str(self.data)
+        super().__init__({
+                "predictions": logits,
+                "logits": logits,
+                "labels": [labels],
+                # "label_ids": [labels],
+                "embeddings": embeddings,
+                "loss": loss
+            })
 
     def items(self):
-        data = self.data.items()
-        return ((col, value) for col, value in data if value is not None)
-
-    def keys(self):
-        return [key for key, _ in self.items()]
-
-    def __iter__(self):
-        return iter(self.keys())
-
-    def __contains__(self, key):
-        return key in self.data
+        return [(key, value) for (key, value) in super().items() if value is not None]
 
 
-class ModelInput(UserDict):
+class ModelInput(UserDict, dict):
+
     """ModelInput
 
     Spefifies Input Types
@@ -144,55 +90,15 @@ class ModelInput(UserDict):
         waveform: np.ndarray | None = None,
         spectrogram: np.ndarray | None = None,
     ):
-        self.waveform = waveform
-        self.spectrogram = spectrogram
-        self.labels = labels
-        self.data = {
-            "labels": self.labels,
-            "waveform": self.waveform,
-            "spectrogram": self.spectrogram,
-        }
-        self._main_keys = ["labels", "spectrogram", "waveform"]
-
-    def to_tensor(self, device="cpu"):
-        self.waveform = Tensor(self.waveform, device=device)
-        self.spectrogram = Tensor(self.spectrogram, device=device)
-        self.labels = Tensor(self.labels, device=device)
-
-    def __len__(self) -> int:
-        """
-        Count the number of batches in this system
-
-        returns batch_size int
-        """
-        return len(self.labels)
-
-    def __setitem__(self, key, value):
-        if key in self._main_keys:
-            self.__setattr__(key, value)
-            self.data[key] = value
-
-    def __getitem__(self, key):
-        return self.__getattribute__(key)
-
-    def __repr__(self):
-        return str(self.data)
+        super().__init__({
+            "labels": labels,
+            "waveform": waveform,
+            "spectrogram": spectrogram
+        })
 
     def items(self):
-        data = self.data.items()
-        return ((col, value) for col, value in data if value is not None)
-    
-    def keys(self):
-        return [key for key, _ in self.items()]
+        return [(key, value) for (key, value) in super().items() if value is not None]
 
-    def __iter__(self):
-        return iter(self.keys())
-
-    def __contains__(self, key):
-        return key in self.data
-    
-    def get(self, key):
-        return self.__getattribute__(key)
 
 class Model(BaseModel):
     """

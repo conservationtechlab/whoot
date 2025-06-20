@@ -66,11 +66,11 @@ class TimmModel(nn.Module, Model):
         else:
             self.loss = nn.BCEWithLogitsLoss()
 
-    @has_required_inputs()  # data: TimmInputs
-    def forward(self, spectrogram, labels=None) -> ModelOutput:
-        # print(len(spectrogram)) # batch size
+
+    @has_required_inputs() #data: TimmInputs TODO FIX
+    def forward(self, labels=None, spectrogram=None) -> ModelOutput:
         embedd = self.backbone(spectrogram)
         logits = self.linear(embedd)
         loss = self.loss(logits, labels)
-        out = ModelOutput(logits=logits, embeddings=embedd, loss=loss, labels=labels)
-        return out
+
+        return ModelOutput(logits=logits, embeddings=embedd, loss=loss, labels=labels)
