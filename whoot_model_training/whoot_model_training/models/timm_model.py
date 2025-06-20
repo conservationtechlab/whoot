@@ -18,7 +18,7 @@ from .model import Model, ModelInput, ModelOutput, has_required_inputs
 class TimmInputs(ModelInput):
     """Input for TimmModel's
 
-    Spefifies TimmModels needs labels and spectrograms that are Tensors
+    Specifies TimmModels needs labels and spectrograms that are Tensors
     """
     def __init__(self, labels, waveform=None, spectrogram=None, device="cpu"):
         # # Can use inputs to verify correct shape for upstream model
@@ -40,7 +40,8 @@ class TimmModel(nn.Module, Model):
         num_classes=6,
         loss=None,
     ):
-        """
+        """Init for TimmModel
+        
         kwargs:
             timm_model (str): name of model backbone from timms to use, Default: "resnet34" 
             pretrained (bool): use a pretrained model from timms, Default: True
@@ -54,13 +55,18 @@ class TimmModel(nn.Module, Model):
 
         assert num_classes > 0
 
+        # Deep learning CNN backbone
         self.backbone = timm.create_model(
             timm_model, pretrained=pretrained, in_chans=in_chans
         )
-        # Unsure if 1000 is default for all models. Need to check this
+        
+        # Unsure if 1000 is default for all timm models. Need to check this
         self.linear = nn.Linear(1000, num_classes)
 
-        # Models might need different losses during training!
+        ## different losses if you want to train for different problems
+        ## BCEWithLogitsLoss is default as for Bioacoustics, the problem tends mutlilabel!
+        ## the probability of class A occurring doesn't change the probability of Class B
+        ## Many individuals can make calls at the same time!
         if loss is not None:
             self.loss = loss
         else:
@@ -69,6 +75,15 @@ class TimmModel(nn.Module, Model):
 
     @has_required_inputs() #data: TimmInputs TODO FIX
     def forward(self, labels=None, spectrogram=None) -> ModelOutput:
+        """Model forward function
+
+        Args:
+            labels=None (Torch.Tensor): the ground truth labels for computing loss
+            spectrogram=None (Torch.Tensor): spectrograms inputs into model
+
+        Returns
+            (ModelOutput): The model output (logits), latent space representations (embeddings), loss and labels. 
+        """
         embedd = self.backbone(spectrogram)
         logits = self.linear(embedd)
         loss = self.loss(logits, labels)

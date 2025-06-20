@@ -43,11 +43,11 @@ class ModelOutput(dict, UserDict):
 
     Object that stores the output of a model
     This allows for standardizing model outputs
-    So upstream applications don't need to change for spefific models
+    So upstream applications don't need to change for specific models
 
     Inspired by HuggingFace Models
 
-    Developer: Reccommend for each Model, to have an assocaited ModelOutput class
+    Developer: recommended for each Model, to have an associated ModelOutput class
     """
 
     def __init__(
@@ -75,12 +75,12 @@ class ModelInput(UserDict, dict):
 
     """ModelInput
 
-    Spefifies Input Types
+    Specifies Input Types
     Hopefully should help standardize formatting for models
 
     Inspired by HuggingFace Models and Tokenizers
 
-    Developer: Reccommend for each Model, to have an assocaited ModelInput class
+    Developer: recommended for each Model, to have an assocaited ModelInput class
     ALWAYS HAS A LABEL CATEGORY
     """
 
@@ -101,18 +101,16 @@ class ModelInput(UserDict, dict):
 
 
 class Model(BaseModel):
+    """BaseModel Class for Whoot
     """
-        BaseModel Class for Whoot
-    """
-    # TODO Define required class intance variables
-    # Such as cirteron etc.
+    # TODO Define required class instance variables
+    # Such as criterion etc.
     def __init__(self, *args, **kwargs):
         self.input_format = ModelInput
         self.output_format = ModelOutput
         super().__init__(*args, **kwargs)
 
-    """
-    Gets an embedding for the model
+    """Gets an embedding for the model
 
     This can be the final layer of a model backbone
     or a set of useful features

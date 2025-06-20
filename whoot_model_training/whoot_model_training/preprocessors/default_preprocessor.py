@@ -31,6 +31,22 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
         n_mels=256,
         dataset_ref=None,
     ):
+        """ Creates a Online preprocessor for MelSpectrograms Based Models
+        
+        Formats input into spefific ModelInput format. 
+
+        Args:
+            ModelInput (ModelInput): How the model like input data formatted
+            Duration (int): Length in seconds of input
+            augment (none): See TODO WORK ON AUGMENTATIONS
+            spectrogram_augments (none): TODO WORK ON AUGMENTATIONS
+            class_list (list): the classes we are working with (used for one hot encoding)
+            n_fft (int): number of ffts
+            hop_length (int): hop length
+            power (int): power, defined by librosa
+            n_mels (int): number of mels for a melspectrogram
+            dataset_ref (AudioDataset): a external ref to the rest of the dataset
+        """
         super().__init__(
             duration,
             augment,
@@ -45,5 +61,10 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
         self.ModelInput = ModelInput
 
     def __call__(self, batch: dict) -> ModelInput:
+        """Processes a batch of AudioDataset rows
+
+        For this specific preprocessor, it creates a spectrogram then
+        Formats the data as a ModelInput
+        """
         batch = super().__call__(batch)
         return self.ModelInput(labels=batch["labels"], spectrogram=batch["audio"])

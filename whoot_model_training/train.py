@@ -86,8 +86,8 @@ def train(config_path):
     # OPTIONAL ARGS
     args.num_train_epochs = 2
     args.eval_steps = 20
-    args.per_device_train_batch_size = 1
-    args.per_device_eval_batch_size = 1
+    args.per_device_train_batch_size = 32
+    args.per_device_eval_batch_size = 32
     args.dataloader_num_workers = 36
     args.run_name = "testing"
     args.report_to = "comet_ml"  # Blocks wandb
@@ -103,7 +103,7 @@ def train(config_path):
         logger=None,
         ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
-    #trainer.train()
+    trainer.train()
     print(trainer.evaluate(eval_dataset=ds["valid"], metric_key_prefix="TEST FOR METRICS"))
     
 

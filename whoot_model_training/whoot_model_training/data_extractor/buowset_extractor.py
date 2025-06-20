@@ -36,6 +36,21 @@ def buowset_extractor(
     sr=32_000,
     filepath="segment",
 ):
+    """Extracts raw data in the buowset format into an AudioDataset
+
+    Args:
+        Metdata_csv (str): Path to csv containing buowset metadata
+        parent_path (str): Path to the parent folder for all audio data. 
+            Note its assumed the audio filepath in the csv is relative to parent_path
+        output_path (str): Path to where HF cache for this dataset should live
+        validation_fold (int): which fold is considered the validation set Default 4
+        test_fold (int): Which fold is considered the test set Default 3
+        sr (int): Sample Rate of the audio files Default: 32_000
+        filepath (str): Name of the column in the dataset containing the filepaths Default: segment
+
+    Returns:
+        (AudioDataset): See dataset.py, AudioDatasets are consider the universal dataset for the training pipeline. 
+    """
     # if os.path.exists(output_path):
     #     ds = load_from_disk(output_path)
     #     return AudioDataset(ds)
@@ -53,7 +68,6 @@ def buowset_extractor(
     )
 
     # Get audio into uniform format
-
     ds = ds.add_column(
         "audio", [os.path.join(parent_path, file) for file in ds[filepath]]
     )
