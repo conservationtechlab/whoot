@@ -211,3 +211,14 @@ uv.lock
 
 # Data Folders
 data
+
+# Model Storage
+working_dir
+
+
+# testing/debugging notebooks
+test.ipynb
+buowset.ipynb
+
+# Question: do we want to commit vscode setting.json files?
+settings.json
