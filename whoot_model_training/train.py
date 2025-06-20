@@ -88,7 +88,7 @@ def train(config):
     args.per_device_train_batch_size = 32
     args.per_device_eval_batch_size = 32
     args.dataloader_num_workers = 36
-    args.run_name = model_type
+    args.run_name = model_type + "_BINARY_CLASS"
     args.report_to = "comet_ml"  # Blocks wandb
 
 

@@ -95,12 +95,34 @@ def binarize_data(row, target_col=0):
     row["labels"] = [row["labels"][target_col], 1-row["labels"][target_col]]
     return row
 
-def buowset_binary_extractor():
-    ads = buowset_binary_extractor()
-    binary_class_label = Sequence(ClassLabel(names=["no_buow, buow"]))
+def buowset_binary_extractor(
+        metadata_csv,
+        parent_path,
+        output_path,  # TODO what does output do?
+        validation_fold=4,
+        test_fold=3,
+        sr=32_000,
+        filepath="segment",
+        target_col = 0
+    ):
+
+
+    ads = buowset_extractor(metadata_csv,
+        parent_path,
+        output_path,
+        validation_fold=validation_fold,
+        test_fold=test_fold,
+        sr=sr,
+        filepath=filepath
+    )
+
+    binary_class_label = Sequence(ClassLabel(names=["no_buow", "buow"]))
+    print(binary_class_label.feature.num_classes)
     for split in ads:
-        ads[split] = ads[split].map(lambda row: binarize_data(row, target_col=0)).cast_column(
+        ads[split] = ads[split].map(lambda row: binarize_data(row, target_col=target_col)).cast_column(
             "labels", binary_class_label
         )
+    
+    print(ads.get_num_classes())
 
     return ads
