@@ -17,7 +17,7 @@ import yaml
 
 from pyha_analyzer import PyhaTrainer, PyhaTrainingArguments
 
-from whoot_model_training.data_extractor import buowset_extractor
+from whoot_model_training.data_extractor import buowset_binary_extractor
 from whoot_model_training.models import TimmModel, TimmInputs
 from whoot_model_training.preprocessors import SpectrogramModelInputPreprocessors
 
@@ -55,14 +55,15 @@ def train(config):
     """
 
     # Extract the dataset
-    ds = buowset_extractor(
+    ds = buowset_binary_extractor(
         metadata_csv=config["metadata_csv"],
         parent_path=config["data_path"],
         output_path=config["hf_cache_path"],
     )
 
     # Create the model
-    model = TimmModel(timm_model="efficientnet_b0", num_classes=ds.get_num_classes())
+    model_type = "efficientnet_b0"
+    model = TimmModel(timm_model=model_type, num_classes=ds.get_num_classes())
 
     # Preprocessors (No augmentation)!
     # We define here what the model reads
@@ -87,7 +88,7 @@ def train(config):
     args.per_device_train_batch_size = 32
     args.per_device_eval_batch_size = 32
     args.dataloader_num_workers = 36
-    args.run_name = "efficientnet_b0"
+    args.run_name = model_type
     args.report_to = "comet_ml"  # Blocks wandb
 
 

@@ -15,7 +15,7 @@ import numpy as np
 from datasets import load_dataset, Audio, DatasetDict, ClassLabel, Sequence, load_from_disk
 from ..dataset import AudioDataset
 
-
+# MAKE LOG OF DATASET USED
 def one_hot_encode(row: dict, classes: list):
     """One hot Encodes a list of labels
     Args:
@@ -58,6 +58,7 @@ def buowset_extractor(
     # Hugging face by default defines a train split
     ds = load_dataset("csv", data_files=metadata_csv)["train"]
     ds = ds.rename_column("label", "labels")  # Convention here is labels
+    
 
     # Convert to a uniform one_hot encoding for classes
     ds = ds.class_encode_column("labels")
@@ -87,3 +88,19 @@ def buowset_extractor(
     ds.save_to_disk(output_path)
 
     return ds
+
+
+
+def binarize_data(row, target_col=0):
+    row["labels"] = [row["labels"][target_col], 1-row["labels"][target_col]]
+    return row
+
+def buowset_binary_extractor():
+    ads = buowset_binary_extractor()
+    binary_class_label = Sequence(ClassLabel(names=["no_buow, buow"]))
+    for split in ads:
+        ads[split] = ads[split].map(lambda row: binarize_data(row, target_col=0)).cast_column(
+            "labels", binary_class_label
+        )
+
+    return ads
