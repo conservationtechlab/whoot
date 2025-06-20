@@ -24,7 +24,7 @@ from whoot_model_training.preprocessors import SpectrogramModelInputPreprocessor
 ## TODO ALLOW USER TO SELECT THIS
 ## TODO MAKE DISTRIBUTED TRAINING POSSIBLE
 import os 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 
 def parse_config(config_path: str) -> dict:
     """wrapper to parse config
@@ -40,7 +40,7 @@ def parse_config(config_path: str) -> dict:
     return config
 
 
-def train(config_path):
+def train(config):
     """Highest level logic for training
 
     Does the following:
@@ -51,10 +51,8 @@ def train(config_path):
     - Runs evaluation 
 
     Args: 
-        config_path (str): path to config file for training!
+        config (dict): the config used for training. Defined in yaml file
     """
-    
-    config = parse_config(config_path)
 
     # Extract the dataset
     ds = buowset_extractor(
@@ -64,7 +62,7 @@ def train(config_path):
     )
 
     # Create the model
-    model = TimmModel(num_classes=ds.get_num_classes())
+    model = TimmModel(timm_model="efficientnet_b0", num_classes=ds.get_num_classes())
 
     # Preprocessors (No augmentation)!
     # We define here what the model reads
@@ -89,7 +87,7 @@ def train(config_path):
     args.per_device_train_batch_size = 32
     args.per_device_eval_batch_size = 32
     args.dataloader_num_workers = 36
-    args.run_name = "testing"
+    args.run_name = "efficientnet_b0"
     args.report_to = "comet_ml"  # Blocks wandb
 
 
@@ -107,9 +105,17 @@ def train(config_path):
     print(trainer.evaluate(eval_dataset=ds["valid"], metric_key_prefix="TEST FOR METRICS"))
     
 
+def init_env(config: dict):
+    print(config)
+    os.environ["COMET_PROJECT_NAME"] = config["COMET_PROJECT_NAME"]
+    os.environ["CUDA_VISIBLE_DEVICES"] = config["CUDA_VISIBLE_DEVICES"]
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")
     parser.add_argument("config", type=str, help="Path to config.yml")
     args = parser.parse_args()
-    train(args.config)
+    config = parse_config(args.config)
+
+    init_env(config)
+    train(config)
