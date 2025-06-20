@@ -223,3 +223,6 @@ buowset.ipynb
 # Question: do we want to commit vscode setting.json files?
 settings.json
 
+# Block all configs besides the example config
+whoot_model_training/configs
+!whoot_model_training/configs/config.yml
