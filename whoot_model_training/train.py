@@ -15,11 +15,12 @@ config.yml should contain frequently changed hyperparameters
 import argparse
 import yaml
 
-from pyha_analyzer import PyhaTrainer, PyhaTrainingArguments
-
+from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.data_extractor import buowset_extractor
 from whoot_model_training.models import TimmModel, TimmInputs
 from whoot_model_training.preprocessors import SpectrogramModelInputPreprocessors
+
+import comet_ml
 
 ## TODO ALLOW USER TO SELECT THIS
 ## TODO MAKE DISTRIBUTED TRAINING POSSIBLE
@@ -62,7 +63,8 @@ def train(config):
     )
 
     # Create the model
-    model = TimmModel(timm_model="efficientnet_b0", num_classes=ds.get_num_classes())
+    run_name =  "efficientnet_b1_redo_for_weights"
+    model = TimmModel(timm_model="efficientnet_b1", num_classes=ds.get_num_classes())
 
     # Preprocessors (No augmentation)!
     # We define here what the model reads
@@ -75,7 +77,7 @@ def train(config):
     ds["test"].set_transform(preprocessor)
 
     # Run training
-    args = PyhaTrainingArguments(working_dir="working_dir")
+    args = WhootTrainingArguments(run_name=run_name)
     
     # REQUIRED ARGS (DO NOT CHANGE VALUES TODO ADD TO TRAINER DIRECTLY)
     args.label_names = ["labels"]
@@ -87,22 +89,23 @@ def train(config):
     args.per_device_train_batch_size = 32
     args.per_device_eval_batch_size = 32
     args.dataloader_num_workers = 36
-    args.run_name = "efficientnet_b0"
+    args.run_name = run_name
     args.report_to = "comet_ml"  # Blocks wandb
 
 
     print(args.accelerator_config.even_batches)
    
 
-    trainer = PyhaTrainer(
+    trainer = WhootTrainer(
         model=model,
         dataset=ds,
         training_args=args,
         logger=None,
         ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
+
     trainer.train()
-    print(trainer.evaluate(eval_dataset=ds["valid"], metric_key_prefix="TEST FOR METRICS"))
+    # print(trainer.evaluate(eval_dataset=ds["valid"], metric_key_prefix="TEST FOR METRICS"))
     
 
 def init_env(config: dict):
