@@ -13,10 +13,11 @@ class CometMLLoggerSupplement():
     - etc
     """
 
-    def __init__(self, dataset_info, githash, ):
+    def __init__(self, augmentations):
         comet_ml.login()
         self.experiment = comet_ml.start()
-        print("experiment key", self.experiment.id)
+
+        self.experiment.log_parameter("augmentations", augmentations)
 
         #TODO add these logs to comet_ml
         #TODO Check to make sure training doesn't create a new experiment

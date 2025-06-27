@@ -18,7 +18,11 @@ import yaml
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.data_extractor import buowset_extractor
 from whoot_model_training.models import TimmModel, TimmInputs
+from whoot_model_training import CometMLLoggerSupplement
+
 from whoot_model_training.preprocessors import SpectrogramModelInputPreprocessors
+from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
+from audiomentations import Compose, AddColorNoise, AddBackgroundNoise, PolarityInversion, Gain
 
 import comet_ml
 
@@ -63,16 +67,45 @@ def train(config):
     )
 
     # Create the model
-    run_name =  "efficientnet_b1_redo_for_weights"
+    run_name =  "efficientnet_b1_augmented_mixitup_gain"
     model = TimmModel(timm_model="efficientnet_b1", num_classes=ds.get_num_classes())
 
-    # Preprocessors (No augmentation)!
+    # Preprocessors
+
+    # Augmentations
+    # TODO: Design better system for saving and reproducing augmentation parameters
+    wav_augs = ComposeAudioLabel([
+        # AddBackgroundNoise( #We don't have background noise yet...
+        #     sounds_path="data_birdset/background_noise",
+        #     min_snr_db=10,
+        #     max_snr_db=30,
+        #     noise_transform=PolarityInversion(),
+        #     p=0.8
+        # ),
+        Gain(
+            min_gain_db = -12,
+            max_gain_db = 12,
+            p = 0.8
+        ),
+        MixItUp(
+            dataset_ref=ds["train"],
+            min_snr_db=10,
+            max_snr_db=30,
+            noise_transform=PolarityInversion(),
+            p=0.8
+        )
+    ])
+
     # We define here what the model reads
+    train_preprocessor = SpectrogramModelInputPreprocessors(
+        TimmInputs, duration=3, class_list=ds.get_class_labels(), augment=wav_augs
+    )
+
     preprocessor = SpectrogramModelInputPreprocessors(
         TimmInputs, duration=3, class_list=ds.get_class_labels()
     )
 
-    ds["train"].set_transform(preprocessor)
+    ds["train"].set_transform(train_preprocessor)
     ds["valid"].set_transform(preprocessor)
     ds["test"].set_transform(preprocessor)
 
@@ -100,7 +133,9 @@ def train(config):
         model=model,
         dataset=ds,
         training_args=args,
-        logger=None,
+        logger=CometMLLoggerSupplement(
+            augmentations = wav_augs
+        ),
         ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
 

@@ -72,6 +72,8 @@ def buowset_extractor(
         "audio", [os.path.join(parent_path, file) for file in ds[filepath]]
     )
 
+    ds = ds.add_column("filepath", ds["audio"])
+
     ds = ds.cast_column("audio", Audio(sampling_rate=sr))
 
     # Create splits of the data
