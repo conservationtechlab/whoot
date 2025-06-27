@@ -134,7 +134,8 @@ def train(config):
         dataset=ds,
         training_args=args,
         logger=CometMLLoggerSupplement(
-            augmentations = wav_augs
+            augmentations = wav_augs,
+            name = args.run_name
         ),
         ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
