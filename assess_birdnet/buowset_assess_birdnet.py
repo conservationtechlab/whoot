@@ -8,39 +8,43 @@ Usage:
     python3 buowset_assess_birdnet.py /path/to/birdnet/output/
     /path/to/buowset/metadata.csv
 """
+import argparse
+import pandas as pd
 
 
 def organize_birdnet_output(birdnet_results):
     """
     """
-    open up the pkl as dataframe
+    birdnet_df = pd.read_pickle(birdnet_results)
     return birdnet_df
 
 def merge_metadata(metadata, birdnet_df):
     """
     """
-    open metadata as a df and merge on the filename
-    with column of the real_label and a column 
-    forthe birdnet label
-    return merged_data
+    meta = pd.read_csv(metadata, index_col=0)
+    df_merged = meta.merge(birdnet_df, on='segment')
+    df_merged = df_merged.drop(columns=['segment_duration_s', 'fold'])
+
+    return df_merged
 
 def assess_birdnet(merged_data):
     """
     """
-    create an x of the ground truth labels and a y of the
-    birdnet labels and just run metrics on them
+    #create an x of the ground truth labels and a y of the
+    #birdnet labels and just run metrics on them
 
 def main(birdnet_results, metadata):
     """Assess birdnet.
     """
     print("Starting")
-    print*"Aggregating BirdNET results.")
+    print("Aggregating BirdNET results.")
     birdnet_df = organize_birdnet_output(birdnet_results)
     print(f"Aggregated {len(birdnet_df)} BirdNET results.")
     print(f"Matching ground truth labels to BirdNET results.")
     merged_data = merge_metadata(metadata, birdnet_df)
-    print("Comparing BirdNET labels to ground truth.")
-    assess_birdnet(merged_data)
+    print(merged_data)
+    #print("Comparing BirdNET labels to ground truth.")
+    #assess_birdnet(merged_data)
 
 
 if __name__ == '__main__':

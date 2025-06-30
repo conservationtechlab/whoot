@@ -10,16 +10,31 @@ Usage:
     python3 aggregate_birdnet_buowset.py /path/to/birdnet/
     analyzer/folder/ /path/to/output.pkl
 """
+import argparse
+import pandas as pd
+import glob
+import os
+import ntpath
 
 
 def parse_birdnet_analysis(birdnet):
     """Create dataframe from individual birdnet result files.
     """
-    open each txt file in directory and obtain the label for
-    the segment, and associate it with a key value where the
-    key is the filename minus the birdnet stuff and then the
-    label is the value
-    convert that whole thing to a df.
+    bn_dict = {}
+    result_files = glob.glob(os.path.join(birdnet, "*.txt"))
+    for txt_file in result_files:
+        filename = ntpath.basename(txt_file)
+        filename = filename.replace("BirdNET.selection.table.txt", "wav")
+        with open(txt_file, 'r') as f:
+            header = f.readline().strip().split('\t')
+            data = pd.read_csv(f, header=None, names=header, delimiter='\t')
+        if 'burowl' in data['Species Code']:
+            bn_dict[filename] = 1
+        else:
+            bn_dict[filename] = 0
+    print("finished dict")
+    birdnet_df = pd.DataFrame.from_dict(bn_dict, orient='index', columns=['bn_label'])
+    birdnet_df.index.name = 'segment'
     return birdnet_df
 
 
@@ -27,9 +42,10 @@ def main(birdnet, output):
     """Save out birdnet results to a dataframe.
     """
     birdnet_df = parse_birdnet_analysis(birdnet)
-    save birdnet_df as "output".pkl
+    birdnet_df.to_pickle(output)
+    print(birdnet_df)
 
-if __name__ = '__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Input CSV and model output'
         )
