@@ -35,9 +35,10 @@ def obtain_birdnet_embeddings(embeds):
         filename = ntpath.basename(embed)
         filename = filename.replace(".birdnet.embeddings.txt", ".wav")
         dfb = pd.read_csv(embed,
-                          delimiter="[,\t]",
+                          delimiter="[\t]",
                           engine='python',
                           header=None)
+        dfb[2] = dfb[2].apply(lambda x: [float(i) for i in x.split(',') if i])
         dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
         flattened = dfb_stripped.values.flatten()
         if len(flattened) > 1024:
@@ -62,7 +63,7 @@ def merge_dfs(metadata, embed_dict):
     embed_df.index.name = 'segment'
     df_merged = metadata.merge(embed_df, on='segment')
     df_merged = df_merged.drop(columns=['segment_duration_s'])
-
+    df_merged = df_merged.rename(columns={0: 'embedding'})
     return df_merged
 
 
