@@ -64,6 +64,8 @@ def prepare_perch_embeddings(sqlite_dir,
 
     embeddings_df = pd.DataFrame(embeddings_data)
     merged_df = pd.merge(embeddings_df, metadata, on='segment')
+    merged_df = merged_df.drop('segment_duration_s', axis=1)
+    merged_df = merged_df[['segment', 'label', 'fold', 'embedding']]
 
     output_filename = os.path.join(output_dir, f'{embeddings_description}_perch_embeddings.pkl')
     merged_df.to_pickle(output_filename)
