@@ -21,6 +21,7 @@ def parse_birdnet_analysis(birdnet):
     """Create dataframe from individual birdnet result files.
     """
     bn_dict = {}
+    burowl_count = 0
     result_files = glob.glob(os.path.join(birdnet, "*.txt"))
     for txt_file in result_files:
         filename = ntpath.basename(txt_file)
@@ -28,8 +29,10 @@ def parse_birdnet_analysis(birdnet):
         with open(txt_file, 'r') as f:
             header = f.readline().strip().split('\t')
             data = pd.read_csv(f, header=None, names=header, delimiter='\t')
-        if 'burowl' in data['Species Code']:
+        if any(data['Species Code'].str.lower() == 'burowl'):
             bn_dict[filename] = 1
+            burowl_count += 1
+            print(f"Found another burrowing owl, new burowl count is {burowl_count}")
         else:
             bn_dict[filename] = 0
     print("finished dict")
