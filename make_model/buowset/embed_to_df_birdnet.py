@@ -39,7 +39,7 @@ def obtain_birdnet_embeddings(embeds):
                           engine='python',
                           header=None)
         dfb[2] = dfb[2].apply(lambda x: [float(i) for i in x.split(',') if i])
-        dfb_stripped = dfb.drop(dfb.columns[:2], axis=1)
+        dfb_stripped = dfb.iloc[:, 2:]
         flattened = dfb_stripped.values.flatten()
         if len(flattened) > 1024:
             print(f"filename {filename} has extra lines. Trunicating")
