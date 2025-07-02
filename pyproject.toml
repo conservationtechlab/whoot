@@ -25,6 +25,10 @@ cu128 = [
   "torch>=2.7.0",
   "torchvision>=0.22.0",
 ]
+dev = [
+    "flake8>=7.3.0",
+    "pylint>=3.3.7",
+]
 
 [packages.index]
 cu128 = "https://download.pytorch.org/whl/cu128"
