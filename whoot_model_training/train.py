@@ -30,12 +30,6 @@ from whoot_model_training.preprocessors import (
 #   AddBackgroundNoise, PolarityInversion, Gain
 # )
 
-# import comet_ml
-
-# TODO ALLOW USER TO SELECT THIS
-# TODO MAKE DISTRIBUTED TRAINING POSSIBLE
-
-
 
 def parse_config(config_path: str) -> dict:
     """wrapper to parse config

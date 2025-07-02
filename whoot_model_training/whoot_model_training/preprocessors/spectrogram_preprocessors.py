@@ -17,6 +17,7 @@ class SpectrogramParams:
     power: float = 2.0
     n_mels: int = 256
 
+
 # TODO add mixitup augmentation support
 class BuowMelSpectrogramPreprocessors(PreProcessorBase):
     """Preprocessor for processing audio into spectrograms
@@ -30,7 +31,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         spectrogram_augments=None,
         class_list=[],
         dataset_ref=None,
-        spectrogram_params:SpectrogramParams = SpectrogramParams()
+        spectrogram_params: SpectrogramParams = SpectrogramParams()
     ):
         self.duration = duration
         self.augment = augment

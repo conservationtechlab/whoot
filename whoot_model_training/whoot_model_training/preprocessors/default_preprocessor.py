@@ -14,7 +14,9 @@ see `whoot_model_training/models/model.py` for more info.
 """
 
 
-from .spectrogram_preprocessors import BuowMelSpectrogramPreprocessors, SpectrogramParams
+from .spectrogram_preprocessors import (
+    BuowMelSpectrogramPreprocessors, SpectrogramParams
+)
 from ..models.model import ModelInput
 
 
@@ -29,7 +31,7 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
         augment=None,
         spectrogram_augments=None,
         class_list=...,
-        spectrogram_params:SpectrogramParams = SpectrogramParams(),
+        spectrogram_params: SpectrogramParams = SpectrogramParams(),
         dataset_ref=None,
     ):
         """ Creates a Online preprocessor for MelSpectrograms Based Models

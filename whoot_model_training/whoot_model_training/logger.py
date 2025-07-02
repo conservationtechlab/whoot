@@ -1,3 +1,11 @@
+""" Contains useful tools for additional logging
+
+For example, CometMLLoggerSupplement adds additional
+logging for data augmentations used compared
+to the base logging done by the HF trainer
+integration
+"""
+
 import comet_ml
 
 
@@ -19,6 +27,3 @@ class CometMLLoggerSupplement():
 
         self.experiment.log_parameter("augmentations", augmentations)
         self.experiment.set_name(name)
-
-        # TODO add these logs to comet_ml
-        # TODO Check to make sure training doesn't create a new experiment

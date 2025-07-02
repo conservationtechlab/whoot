@@ -1,3 +1,13 @@
+""" Everything needed to train
+given a model and a dataset
+
+WhootTrainingArguments: A container for the 
+    many many args for WhootTrainer
+
+WhootTrainer: The class that is going to run training
+
+"""
+
 from datetime import datetime
 import os
 
@@ -9,12 +19,12 @@ from .dataset import AudioDataset
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):
-    """Holds arguments use for training 
+    """Holds arguments use for training
     """
     def __init__(self, run_name):
-        DEFAULT_MODEL_CHECKPOINTS = "model_checkpoints"
+        default_checkpoint_path = "model_checkpoints"
         checkpoint_created_at = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
-        super().__init__(os.path.join(f"{DEFAULT_MODEL_CHECKPOINTS}",
+        super().__init__(os.path.join(f"{default_checkpoint_path}",
                                       f"{run_name}_{checkpoint_created_at}"))
 
 

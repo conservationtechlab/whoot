@@ -124,10 +124,11 @@ class Model(BaseModel):
         or a set of useful features
 
         Args
-            x: Any | Either np.array or Torch.Tensor, is the input for the model
+            x: Any | Either np.array or Torch.Tensor, the input for the model
 
         Returns
-            embedding: np.array, some embedding vector representing the input data
+            embedding: np.array,
+                some embedding vector representing the input data
         """
         return self.forward(x).embeddings
 

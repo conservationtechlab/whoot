@@ -12,6 +12,7 @@ parts of the codebase for training
 """
 
 import os
+from dataclasses import dataclass
 
 import numpy as np
 from datasets import (
@@ -36,14 +37,20 @@ def one_hot_encode(row: dict, classes: list):
     return row
 
 
+@dataclass
+class BuowsetParams():
+    """Parameters that describe the Buowset
+    """
+    validation_fold = 4
+    test_fold = 3
+    sr = 32_000
+    filepath = "segment"
+
 def buowset_extractor(
     metadata_csv,
     parent_path,
-    output_path,  # TODO what does output do?
-    validation_fold=4,
-    test_fold=3,
-    sr=32_000,
-    filepath="segment",
+    output_path,
+    params: BuowsetParams = BuowsetParams()
 ):
     """Extracts raw data in the buowset format into an AudioDataset
 
@@ -82,18 +89,18 @@ def buowset_extractor(
 
     # Get audio into uniform format
     ds = ds.add_column(
-        "audio", [os.path.join(parent_path, file) for file in ds[filepath]]
+        "audio", [os.path.join(parent_path, file) for file in ds[params.filepath]]
     )
 
     ds = ds.add_column("filepath", ds["audio"])
 
-    ds = ds.cast_column("audio", Audio(sampling_rate=sr))
+    ds = ds.cast_column("audio", Audio(sampling_rate=params.sr))
 
     # Create splits of the data
-    test_ds = ds.filter(lambda x: x["fold"] == validation_fold)
-    valid_ds = ds.filter(lambda x: x["fold"] == test_fold)
+    test_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
+    valid_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
     train_ds = ds.filter(
-        lambda x: x["fold"] != test_fold & x["fold"] != validation_fold
+        lambda x: x["fold"] != params.test_fold & x["fold"] != params.validation_fold
     )
     ds = AudioDataset(
         DatasetDict({"train": train_ds, "valid": valid_ds, "test": test_ds})
