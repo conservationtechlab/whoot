@@ -1,6 +1,11 @@
 from .default_preprocessor import (
-    SpectrogramModelInputPreprocessors as SpectrogramModelInputPreprocessors,
+    SpectrogramModelInputPreprocessors
 )
 from .spectrogram_preprocessors import (
-    BuowMelSpectrogramPreprocessors as BuowMelSpectrogramPreprocessors,
+    BuowMelSpectrogramPreprocessors
 )
+
+__all__ = [
+    "SpectrogramModelInputPreprocessors",
+    "BuowMelSpectrogramPreprocessors"
+]

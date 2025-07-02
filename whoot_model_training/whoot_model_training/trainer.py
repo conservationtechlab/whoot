@@ -9,6 +9,8 @@ from .dataset import AudioDataset
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):
+    """Holds arguments use for training 
+    """
     def __init__(self, run_name):
         DEFAULT_MODEL_CHECKPOINTS = "model_checkpoints"
         checkpoint_created_at = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
@@ -17,6 +19,9 @@ class WhootTrainingArguments(PyhaTrainingArguments):
 
 
 class WhootTrainer(PyhaTrainer):
+    """The training class
+    #TODO Improve these docstrings
+    """
     def __init__(
         self,
         model,
@@ -29,8 +34,6 @@ class WhootTrainer(PyhaTrainer):
     ):
 
         metrics = WhootMutliClassMetrics(dataset.get_class_labels().names)
-
-        print("LOGGING NEW METRICS... HOPEFULLY")
 
         super().__init__(
             model,

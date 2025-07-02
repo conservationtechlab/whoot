@@ -2,10 +2,17 @@ import comet_ml
 import torch
 from sklearn.metrics import confusion_matrix
 
-from pyha_analyzer.metrics.classification_metrics import AudioClassificationMetrics
+# from torchmetrics.classification import (
+#     MultilabelAveragePrecision,
+#     MultilabelAUROC,
+# )
+
+from pyha_analyzer.metrics.classification_metrics  \
+    import AudioClassificationMetrics
+
 
 class WhootMutliClassMetrics(AudioClassificationMetrics):
-    def __init__(self, classes:list):
+    def __init__(self, classes: list):
         self.classes = classes
         super().__init__([], len(classes), mutlilabel=True)
 
@@ -15,18 +22,22 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
 
         # For metrics that are not loggable to console
         # We can only have comet_ml for these metrics
-        experiment = comet_ml.get_running_experiment() #TODO CLEAN THIS UP WITH SAVING EXPERIMENT KEY
+        # TODO CLEAN THIS UP WITH SAVING EXPERIMENT KEY
+        experiment = comet_ml.get_running_experiment()
         if experiment is None:
             return initial_metrics
         logits = torch.Tensor(eval_pred.predictions)
         target = torch.Tensor(eval_pred.label_ids).to(torch.long)
 
         # Confusion Matrix WARNING, ONLY USE IF DATA IS MOSTLY MUTLICLASS
-        cm = confusion_matrix(torch.argmax(target, dim=1), torch.argmax(logits, dim=1))
-        experiment.log_confusion_matrix(matrix=cm.tolist(), labels=self.classes)
+        cm = confusion_matrix(
+            torch.argmax(target, dim=1),
+            torch.argmax(logits, dim=1)
+        )
+        experiment.log_confusion_matrix(
+            matrix=cm.tolist(), labels=self.classes)
+
+        # Classwise Metrics (graph based)
 
         # Return the metrics that can be logged to console AND comet-ml
         return initial_metrics
-
-        
-    

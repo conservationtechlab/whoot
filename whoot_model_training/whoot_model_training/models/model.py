@@ -7,17 +7,16 @@ There are 3 main classes
 - ModelOutput: dict-like class that defines the output from the model
 - Model: A PyTorch nn.Module class
 
-See timm_model.py for example about how these classes can be implemented. 
+See timm_model.py for example about how these classes can be implemented.
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from functools import wraps
 from collections import UserDict
 
 from pyha_analyzer.models.base_model import BaseModel
-import torch
-from torch import Tensor
 import numpy as np
+
 
 def has_required_inputs():
     """
@@ -47,7 +46,8 @@ class ModelOutput(dict, UserDict):
 
     Inspired by HuggingFace Models
 
-    Developer: recommended for each Model, to have an associated ModelOutput class
+    Developer: recommended for each Model, to have an associated
+        ModelOutput class
     """
 
     def __init__(
@@ -68,7 +68,10 @@ class ModelOutput(dict, UserDict):
             })
 
     def items(self):
-        return [(key, value) for (key, value) in super().items() if value is not None]
+        return [
+            (key, value) for (
+                key, value
+            ) in super().items() if value is not None]
 
 
 class ModelInput(UserDict, dict):
@@ -80,7 +83,8 @@ class ModelInput(UserDict, dict):
 
     Inspired by HuggingFace Models and Tokenizers
 
-    Developer: recommended for each Model, to have an assocaited ModelInput class
+    Developer: recommended for each Model, to have an
+    associated ModelInput class
     ALWAYS HAS A LABEL CATEGORY
     """
 
@@ -97,57 +101,47 @@ class ModelInput(UserDict, dict):
         })
 
     def items(self):
-        return [(key, value) for (key, value) in super().items() if value is not None]
+        return [
+            (key, value) for (
+                key, value
+            ) in super(
+            ).items() if value is not None]
 
 
 class Model(BaseModel):
     """BaseModel Class for Whoot
     """
     # TODO Define required class instance variables
-    # Such as criterion etc.
     def __init__(self, *args, **kwargs):
         self.input_format = ModelInput
         self.output_format = ModelOutput
         super().__init__(*args, **kwargs)
 
-    """Gets an embedding for the model
-
-    This can be the final layer of a model backbone
-    or a set of useful features
-
-    Args
-        x: Any | Either np.array or Torch.Tensor, is the input for the model
-
-    Returns
-        embedding: np.array, some embedding vector representing the input data
-    """
-
     def get_embeddings(self, x: ModelInput) -> np.array:
+        """Gets an embedding for the model
+
+        This can be the final layer of a model backbone
+        or a set of useful features
+
+        Args
+            x: Any | Either np.array or Torch.Tensor, is the input for the model
+
+        Returns
+            embedding: np.array, some embedding vector representing the input data
+        """
         return self.forward(x).embeddings
-
-    """
-    Runs some input x through the model
-
-    In PyTorch models, this is the same forward functionlogits
-    We just apply the convention for non Pytorch models,
-
-    TODO: Some things to concern
-    - 
-    Args:
-        x: Any 
-
-    Returns:
-        ModelOutput: dict, a dictionary like object that describes 
-    """
 
     @abstractmethod
     @has_required_inputs()
     def forward(self, x: ModelInput) -> ModelOutput:
-        pass
+        """
+        Runs some input x through the model
 
-    """
-    Notes on design for the future
+        In PyTorch models, this is the same forward function logits
+        We just apply the convention for non Pytorch models,
+        Args:
+            x: Any
 
-    - Should model implement a way to save/load model to/form disk
-    
-    """
+        Returns:
+            ModelOutput: dict, a dictionary like object that describes
+        """

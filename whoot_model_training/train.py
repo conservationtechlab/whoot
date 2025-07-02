@@ -4,14 +4,15 @@ This script can be used to run experiments with different
 models and datasets to create any model for bioacoustic classification
 
 It is intended this script to be heavily modified with each experiment
-(say one wants to use a different dataset, one should copy this and change the extractor!)
+(say one wants to use a different dataset, one should copy this and change the
+extractor!)
 
 Usage:
     $ python train.py /path/to/config.yml
 
 config.yml should contain frequently changed hyperparameters
 """
-
+import os
 import argparse
 import yaml
 
@@ -20,27 +21,33 @@ from whoot_model_training.data_extractor import buowset_extractor
 from whoot_model_training.models import TimmModel, TimmInputs
 from whoot_model_training import CometMLLoggerSupplement
 
-from whoot_model_training.preprocessors import SpectrogramModelInputPreprocessors
-from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
-from audiomentations import Compose, AddColorNoise, AddBackgroundNoise, PolarityInversion, Gain
+from whoot_model_training.preprocessors import (
+    SpectrogramModelInputPreprocessors
+)
+# from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
+# from audiomentations import (
+#   Compose, AddColorNoise,
+#   AddBackgroundNoise, PolarityInversion, Gain
+# )
 
-import comet_ml
+# import comet_ml
 
-## TODO ALLOW USER TO SELECT THIS
-## TODO MAKE DISTRIBUTED TRAINING POSSIBLE
-import os 
+# TODO ALLOW USER TO SELECT THIS
+# TODO MAKE DISTRIBUTED TRAINING POSSIBLE
+
 
 
 def parse_config(config_path: str) -> dict:
     """wrapper to parse config
 
-    Args: 
+    Args:
         config_path (str): path to config file for training!
-    
-    returns: 
-        (dict): hyperparameters parameters 
+
+    returns:
+        (dict): hyperparameters parameters
     """
-    with open(config_path, "r") as f:
+    config = {}
+    with open(config_path, "r", encoding="UTF-8") as f:
         config = yaml.safe_load(f)
     return config
 
@@ -53,9 +60,9 @@ def train(config):
     - Prepares preprocessing for each audio clip
     - Builds the model
     - Configures and runs the trainer
-    - Runs evaluation 
+    - Runs evaluation
 
-    Args: 
+    Args:
         config (dict): the config used for training. Defined in yaml file
     """
 
@@ -67,38 +74,39 @@ def train(config):
     )
 
     # Create the model
-    run_name =  "efficientnet_b1_augmented_mixitup_gain"
-    model = TimmModel(timm_model="efficientnet_b1", num_classes=ds.get_num_classes())
+    run_name = "efficientnet_b1_testing_confusion_matrix_no_data_aug"
+    model = TimmModel(timm_model="efficientnet_b1",
+                      num_classes=ds.get_num_classes())
 
     # Preprocessors
 
     # Augmentations
-    # TODO: Design better system for saving and reproducing augmentation parameters
-    wav_augs = ComposeAudioLabel([
-        # AddBackgroundNoise( #We don't have background noise yet...
-        #     sounds_path="data_birdset/background_noise",
-        #     min_snr_db=10,
-        #     max_snr_db=30,
-        #     noise_transform=PolarityInversion(),
-        #     p=0.8
-        # ),
-        Gain(
-            min_gain_db = -12,
-            max_gain_db = 12,
-            p = 0.8
-        ),
-        MixItUp(
-            dataset_ref=ds["train"],
-            min_snr_db=10,
-            max_snr_db=30,
-            noise_transform=PolarityInversion(),
-            p=0.8
-        )
-    ])
+    # TODO: Design better system for saving and reproducing augmentation
+    # wav_augs = ComposeAudioLabel([
+    #     # AddBackgroundNoise( #We don't have background noise yet...
+    #     #     sounds_path="data_birdset/background_noise",
+    #     #     min_snr_db=10,
+    #     #     max_snr_db=30,
+    #     #     noise_transform=PolarityInversion(),
+    #     #     p=0.8
+    #     # ),
+    #     Gain(
+    #         min_gain_db = -12,
+    #         max_gain_db = 12,
+    #         p = 0.8
+    #     ),
+    #     MixItUp(
+    #         dataset_ref=ds["train"],
+    #         min_snr_db=10,
+    #         max_snr_db=30,
+    #         noise_transform=PolarityInversion(),
+    #         p=0.8
+    #     )
+    # ])
 
     # We define here what the model reads
     train_preprocessor = SpectrogramModelInputPreprocessors(
-        TimmInputs, duration=3, class_list=ds.get_class_labels(), augment=wav_augs
+        TimmInputs, duration=3, class_list=ds.get_class_labels()
     )
 
     preprocessor = SpectrogramModelInputPreprocessors(
@@ -110,41 +118,43 @@ def train(config):
     ds["test"].set_transform(preprocessor)
 
     # Run training
-    args = WhootTrainingArguments(run_name=run_name)
-    
+    training_args = WhootTrainingArguments(run_name=run_name)
+
     # REQUIRED ARGS (DO NOT CHANGE VALUES TODO ADD TO TRAINER DIRECTLY)
-    args.label_names = ["labels"]
-    args.remove_unused_columns = False
+    training_args.label_names = ["labels"]
+    training_args.remove_unused_columns = False
 
     # OPTIONAL ARGS
-    args.num_train_epochs = 2
-    args.eval_steps = 20
-    args.per_device_train_batch_size = 32
-    args.per_device_eval_batch_size = 32
-    args.dataloader_num_workers = 36
-    args.run_name = run_name
-    args.report_to = "comet_ml"  # Blocks wandb
+    training_args.num_train_epochs = 2
+    training_args.eval_steps = 20
+    training_args.per_device_train_batch_size = 32
+    training_args.per_device_eval_batch_size = 32
+    training_args.dataloader_num_workers = 36
+    training_args.run_name = run_name
+    training_args.report_to = "comet_ml"
 
-
-    print(args.accelerator_config.even_batches)
-   
+    print(training_args.accelerator_config.even_batches)
 
     trainer = WhootTrainer(
         model=model,
         dataset=ds,
-        training_args=args,
+        training_args=training_args,
         logger=CometMLLoggerSupplement(
-            augmentations = wav_augs,
-            name = args.run_name
+            augmentations=None,
+            name=training_args.run_name
         ),
         ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
 
     trainer.train()
-    # print(trainer.evaluate(eval_dataset=ds["valid"], metric_key_prefix="TEST FOR METRICS"))
-    
+
 
 def init_env(config: dict):
+    """Sets up local environment for COMET-ML training logging
+
+    Args: config (dict): at a minimum this has the project name
+        and CUDA devices that are allowed to be used.
+    """
     print(config)
     os.environ["COMET_PROJECT_NAME"] = config["COMET_PROJECT_NAME"]
     os.environ["CUDA_VISIBLE_DEVICES"] = config["CUDA_VISIBLE_DEVICES"]
@@ -154,7 +164,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")
     parser.add_argument("config", type=str, help="Path to config.yml")
     args = parser.parse_args()
-    config = parse_config(args.config)
+    _config = parse_config(args.config)
 
-    init_env(config)
-    train(config)
+    init_env(_config)
+    train(_config)

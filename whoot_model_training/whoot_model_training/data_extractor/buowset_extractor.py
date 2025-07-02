@@ -1,18 +1,26 @@
 """Standardizes the format of the buowset dataset
 
-Inspired by https://github.com/UCSD-E4E/pyha-analyzer-2.0/tree/main/pyha_analyzer/extractors
+Inspired by https://github.com/UCSD-E4E/pyha-analyzer-2.0/
+    tree/main/pyha_analyzer/extractors
 
-The idea being extractors is that they take raw data, and 
+The idea being extractors is that they take raw data, and
 format it into a uniform dataset format, AudioDataset
 
-This way, it should be easier to define what a common audio dataset format is between 
+This way, it should be easier to define what a
+common audio dataset format is between
 parts of the codebase for training
 """
 
 import os
 
 import numpy as np
-from datasets import load_dataset, Audio, DatasetDict, ClassLabel, Sequence, load_from_disk
+from datasets import (
+    load_dataset,
+    Audio,
+    DatasetDict,
+    ClassLabel,
+    Sequence,
+)
 from ..dataset import AudioDataset
 
 
@@ -27,6 +35,7 @@ def one_hot_encode(row: dict, classes: list):
     row["labels"] = np.array(one_hot, dtype=float)
     return row
 
+
 def buowset_extractor(
     metadata_csv,
     parent_path,
@@ -40,16 +49,20 @@ def buowset_extractor(
 
     Args:
         Metdata_csv (str): Path to csv containing buowset metadata
-        parent_path (str): Path to the parent folder for all audio data. 
-            Note its assumed the audio filepath in the csv is relative to parent_path
+        parent_path (str): Path to the parent folder for all audio data.
+            Note its assumed the audio filepath
+            in the csv is relative to parent_path
         output_path (str): Path to where HF cache for this dataset should live
-        validation_fold (int): which fold is considered the validation set Default 4
+        validation_fold (int): which fold is considered the validation set
+            Default 4
         test_fold (int): Which fold is considered the test set Default 3
         sr (int): Sample Rate of the audio files Default: 32_000
-        filepath (str): Name of the column in the dataset containing the filepaths Default: segment
+        filepath (str): Name of the column in the dataset containing
+        the filepaths Default: segment
 
     Returns:
-        (AudioDataset): See dataset.py, AudioDatasets are consider the universal dataset for the training pipeline. 
+        (AudioDataset): See dataset.py, AudioDatasets are consider
+        the universal dataset for the training pipeline.
     """
     # if os.path.exists(output_path):
     #     ds = load_from_disk(output_path)

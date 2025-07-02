@@ -1,36 +1,46 @@
 """
 Pulled from pyha_analyzer/preprocessors/spectogram_preprocessors.py
 """
+from dataclasses import dataclass
 
 import librosa
 import numpy as np
-import torchvision.transforms as transforms
+from torchvision import transforms
 
 from pyha_analyzer.preprocessors import PreProcessorBase
 
 
+@dataclass
+class SpectrogramParams:
+    n_fft: int = 2048
+    hop_length: int = 256
+    power: float = 2.0
+    n_mels: int = 256
+
+# TODO add mixitup augmentation support
 class BuowMelSpectrogramPreprocessors(PreProcessorBase):
+    """Preprocessor for processing audio into spectrograms
+    Particularly for the buow dataset
+    """
+
     def __init__(
         self,
         duration=5,
         augment=None,
         spectrogram_augments=None,
         class_list=[],
-        n_fft=2048,
-        hop_length=256,
-        power=2.0,
-        n_mels=256,
         dataset_ref=None,
+        spectrogram_params:SpectrogramParams = SpectrogramParams()
     ):
         self.duration = duration
         self.augment = augment
         self.spectrogram_augments = spectrogram_augments
 
         # Below parameter defaults from https://arxiv.org/pdf/2403.10380 pg 25
-        self.n_fft = n_fft
-        self.hop_length = hop_length
-        self.power = power
-        self.n_mels = n_mels
+        self.n_fft = spectrogram_params.n_fft
+        self.hop_length = spectrogram_params.hop_length
+        self.power = spectrogram_params.power
+        self.n_mels = spectrogram_params.n_mels
 
         super().__init__(name="MelSpectrogramPreprocessor")
 
@@ -57,7 +67,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
                 np.array(
                     pillow_transforms(
                         librosa.feature.melspectrogram(
-                            y=y[int(start * sr) : end_sr],
+                            y=y[int(start * sr):end_sr],
                             sr=sr,
                             n_fft=self.n_fft,
                             hop_length=self.hop_length,
