@@ -1,0 +1,25 @@
+Tools to assess BirdNET performance on Buowset
+
+First, one must pad the buowset detections that are shorter than 3s, to be
+a minimum of 3s. And then run BirdNET analyze over the entire dataset with
+the desired confidence thresholding and with burrowing owl as the only class
+in the species list.
+
+Running aggregate_birdnet_buowset.py with the path to the BirdNET results and
+a .pkl file to send the result to will create a dataframe with the name of the
+wav file and a 0 for no buow and a 1 for yes buow detected by BirdNET. 
+
+Then running buowset_assess_birdnet.py with the aforementioned .pkl, the
+metadata file for buowset, and some optional paramters, you can compare the
+performance of BirdNET against the ground truth labels of buowset. By adding
+the optional arguments, you go from comparing BirdNET as a burrowing owl/
+no burrowing owl detector to assessing the BirdNET performance on a class by
+class basis. If you select to assess for the 'Coocoo' class for example, 
+it will aggregate all coocoo instances based on ground truth, and obtain
+an equal amount of randomly selected no_buow samples, and generate a confusion
+matrix comparing if BirdNET marked the instances of that class as burrowing owl. 
+
+Because BirdNET is a binary classifier for burrowing owl in this data, a class
+by class comparison only tells us if it disproportionately misses certain calls
+more than others when looking for burrowing owls in general, ie it gives us a peak
+into the likely call distribution of their training data. 
