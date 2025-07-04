@@ -62,7 +62,8 @@ for key in data:
         "step": data[key]["metrics"][0]["steps"][max_index],
     })
 
-leaderboard_df = pd.DataFrame(processed_data)
+leaderboard_df = pd.DataFrame(processed_data).sort_values(
+    selected_metric, ascending=False)
 
 leaderboard_df["users"] = leaderboard_df["experiment_key"].apply(
     lambda key: APIExperiment(previous_experiment=key).get_user()
