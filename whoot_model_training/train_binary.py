@@ -17,7 +17,7 @@ import argparse
 import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
-from whoot_model_training.data_extractor import buowset_extractor
+from whoot_model_training.data_extractor import buowset_binary_extractor
 from whoot_model_training.models import TimmModel, TimmInputs
 from whoot_model_training import CometMLLoggerSupplement
 
@@ -63,7 +63,7 @@ def train(config):
     """
 
     # Extract the dataset
-    ds = buowset_extractor(
+    ds = buowset_binary_extractor(
         metadata_csv=config["metadata_csv"],
         parent_path=config["data_path"],
         output_path=config["hf_cache_path"],
