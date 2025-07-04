@@ -112,7 +112,11 @@ def train(config):
     ds["test"].set_transform(preprocessor)
 
     # Run training
-    training_args = WhootTrainingArguments(run_name=run_name)
+    training_args = WhootTrainingArguments(
+        run_name=run_name,
+        subproject_name=config["SUBPROJECT_NAME"],
+        dataset_name=config["DATASET_NAME"],
+    )
 
     # REQUIRED ARGS (DO NOT CHANGE VALUES TODO ADD TO TRAINER DIRECTLY)
     training_args.label_names = ["labels"]

@@ -21,9 +21,24 @@ from .dataset import AudioDataset
 class WhootTrainingArguments(PyhaTrainingArguments):
     """Holds arguments use for training
     """
-    def __init__(self, run_name):
+    def __init__(self,
+                 run_name,
+                 subproject_name: str="TESTING",
+                 dataset_name: str="DS_404"
+                ):
+        
+        assert subproject_name is not None
+        assert dataset_name is not None
         default_checkpoint_path = "model_checkpoints"
         checkpoint_created_at = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
+
+        self.run_name = f"{subproject_name}_{dataset_name}_{run_name}"
+        self.task_name = f"{subproject_name}_{dataset_name}"
+
+        print(
+            f"Starting training on {dataset_name} for {subproject_name}"
+        )
+
         super().__init__(os.path.join(f"{default_checkpoint_path}",
                                       f"{run_name}_{checkpoint_created_at}"))
 
@@ -48,6 +63,9 @@ class WhootTrainer(PyhaTrainer):
     ):
 
         metrics = WhootMutliClassMetrics(dataset.get_class_labels().names)
+        print(logger, type(logger))
+        if logger is not None:
+            logger.log_task(training_args.task_name)
 
         super().__init__(
             model,

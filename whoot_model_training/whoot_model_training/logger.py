@@ -40,3 +40,9 @@ class CometMLLoggerSupplement():
         """Fully ends experiment if still running
         """
         return self.experiment.end()
+    
+    def log_task(self, task_name):
+        """Log what task this model should be listed under
+        """
+        self.experiment.log_parameter("task", task_name)
+
