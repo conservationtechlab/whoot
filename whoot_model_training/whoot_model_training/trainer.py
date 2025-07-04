@@ -23,10 +23,9 @@ class WhootTrainingArguments(PyhaTrainingArguments):
     """
     def __init__(self,
                  run_name,
-                 subproject_name: str="TESTING",
-                 dataset_name: str="DS_404"
-                ):
-        
+                 subproject_name: str = "TESTING",
+                 dataset_name: str = "DS_404"):
+
         assert subproject_name is not None
         assert dataset_name is not None
         default_checkpoint_path = "model_checkpoints"
@@ -50,6 +49,7 @@ class WhootTrainer(PyhaTrainer):
     # WhootTrainer is ment to mimic the huggingface trainer
     # Including number of arguments
     # Aside, we really should consider how useful R0913,R0917 is...
+    
     # pylint: disable-next=R0913,R0917
     def __init__(
         self,
