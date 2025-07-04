@@ -5,5 +5,12 @@ Example:
 """
 
 from .timm_model import TimmModel, TimmInputs
+from .model import Model, ModelInput, ModelOutput
 
-__all__ = ["TimmModel", "TimmInputs"]
+__all__ = [
+    "TimmModel",
+    "TimmInputs",
+    "Model",
+    "ModelInput",
+    "ModelOutput"
+]

@@ -65,6 +65,10 @@ class ModelOutput(dict, UserDict):
         ModelOutput class
     """
 
+    # ignore some of the outputs when computing metrics
+    # When overwriting DON"T FORGET TO INCLUDE THIS
+    ignore_keys=["predictions", "labels", "embeddings", "loss"]
+
     def __init__(
         self,
         _map: dict | None = None,

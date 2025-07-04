@@ -24,6 +24,8 @@ from whoot_model_training import CometMLLoggerSupplement
 from whoot_model_training.preprocessors import (
     SpectrogramModelInputPreprocessors
 )
+
+# Uncomment for use with data augmentation
 # from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
 # from audiomentations import (
 #   Compose, AddColorNoise,
@@ -74,8 +76,8 @@ def train(config):
 
     # Preprocessors
 
-    # Augmentations
-    # TODO: Design better system for saving and reproducing augmentation
+    # Uncomment if doing work with data augmentation
+    # # Augmentations
     # wav_augs = ComposeAudioLabel([
     #     # AddBackgroundNoise( #We don't have background noise yet...
     #     #     sounds_path="data_birdset/background_noise",
@@ -98,7 +100,7 @@ def train(config):
     #     )
     # ])
 
-    # We define here what the model reads
+    # Offline preprocessors prepare data for training
     train_preprocessor = SpectrogramModelInputPreprocessors(
         TimmInputs, duration=3
     )
@@ -118,16 +120,13 @@ def train(config):
         dataset_name=config["DATASET_NAME"],
     )
 
-    # OPTIONAL ARGS
+    # COMMON OPTIONAL ARGS
     training_args.num_train_epochs = 2
     training_args.eval_steps = 20
     training_args.per_device_train_batch_size = 32
     training_args.per_device_eval_batch_size = 32
     training_args.dataloader_num_workers = 36
     training_args.run_name = run_name
-    training_args.report_to = "comet_ml"
-
-    print(training_args.accelerator_config.even_batches)
 
     trainer = WhootTrainer(
         model=model,
@@ -137,7 +136,6 @@ def train(config):
             augmentations=None,
             name=training_args.run_name
         ),
-        ignore_keys=["predictions", "labels", "embeddings", "loss"]
     )
 
     trainer.train()

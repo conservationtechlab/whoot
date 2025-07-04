@@ -40,6 +40,11 @@ def one_hot_encode(row: dict, classes: list):
 @dataclass
 class BuowsetParams():
     """Parameters that describe the Buowset
+
+    validation_fold (int): label for valid split
+    test_fold (int): label for valid split
+    sample_rate (int): sample rate of the data
+    filepath (int): name of column in csv for filepaths
     """
     validation_fold = 4
     test_fold = 3
@@ -72,10 +77,6 @@ def buowset_extractor(
         (AudioDataset): See dataset.py, AudioDatasets are consider
         the universal dataset for the training pipeline.
     """
-    # if os.path.exists(output_path):
-    #     ds = load_from_disk(output_path)
-    #     return AudioDataset(ds)
-
     # Hugging face by default defines a train split
     ds = load_dataset("csv", data_files=metadata_csv)["train"]
     ds = ds.rename_column("label", "labels")  # Convention here is labels
@@ -96,7 +97,6 @@ def buowset_extractor(
     )
 
     ds = ds.add_column("filepath", ds["audio"])
-
     ds = ds.cast_column("audio", Audio(sampling_rate=params.sr))
 
     # Create splits of the data

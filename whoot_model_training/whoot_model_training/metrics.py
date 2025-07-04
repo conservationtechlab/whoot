@@ -4,16 +4,15 @@ Helps us evaluate which models do well
 
 These the metrics with HF Trainer and are called
 as part of a callback during training
+
+WhootMutliClassMetrics: Computes CMAP, ROCAUC and
+    confusion matrices each evaluation step of
+    the trainer
 """
 
 import comet_ml
 import torch
 from sklearn.metrics import confusion_matrix
-
-# from torchmetrics.classification import (
-#     MultilabelAveragePrecision,
-#     MultilabelAUROC,
-# )
 
 from pyha_analyzer.metrics.classification_metrics  \
     import AudioClassificationMetrics
@@ -29,7 +28,17 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
         super().__init__([], len(classes), mutlilabel=True)
 
     def __call__(self, eval_pred) -> dict[str, float]:
-        # CMAP / ROCAUC
+        """Log all metrics
+
+        eval_pred: package of data provided by trainer
+            contains
+                - predictions: np.array of model outputs
+                - label_ids: np.array of ground truth targets
+
+        returns:
+            (dict) key name of metric, float metric score
+        """
+        # CMAP / ROCAUC, done by AudioClassificationMetrics
         initial_metrics = super().__call__(eval_pred=eval_pred)
 
         # Confusion Matrix
@@ -39,7 +48,12 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
         return initial_metrics
 
     def log_comet_ml_only(self, eval_pred):
-        """Logs confusion matrix each eval step
+        """Logs confusion matrix
+
+        eval_pred: package of data provided by trainer
+            contains
+                - predictions: np.array of model outputs
+                - label_ids: np.array of ground truth targets
         """
         # For metrics that are not loggable to console
         # We can only have comet_ml for these metrics
@@ -49,7 +63,8 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
         logits = torch.Tensor(eval_pred.predictions)
         target = torch.Tensor(eval_pred.label_ids).to(torch.long)
 
-        # Confusion Matrix WARNING, ONLY USE IF DATA IS MOSTLY MUTLICLASS
+        # Confusion Matrix WARNING, ONLY MAKES SENSE
+        # IF DATA IS MOSTLY MUTLICLASS
         cm = confusion_matrix(
             torch.argmax(target, dim=1),
             torch.argmax(logits, dim=1)

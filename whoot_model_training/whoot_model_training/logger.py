@@ -43,5 +43,9 @@ class CometMLLoggerSupplement():
 
     def log_task(self, task_name):
         """Log what task this model should be listed under
+
+        Args:
+            task_name: usually what task the model is doing
+                and the dataset being used for training
         """
         self.experiment.log_parameter("task", task_name)
