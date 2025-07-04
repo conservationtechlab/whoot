@@ -118,10 +118,6 @@ def train(config):
         dataset_name=config["DATASET_NAME"],
     )
 
-    # REQUIRED ARGS (DO NOT CHANGE VALUES TODO ADD TO TRAINER DIRECTLY)
-    training_args.label_names = ["labels"]
-    training_args.remove_unused_columns = False
-
     # OPTIONAL ARGS
     training_args.num_train_epochs = 2
     training_args.eval_steps = 20

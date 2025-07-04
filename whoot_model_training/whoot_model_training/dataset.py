@@ -6,8 +6,6 @@ Key idea is we define a generic AudioDataset with uniform features
 Using an Arrow Dataset from Hugging Face's dataset library because
 - Cool audio features https://huggingface.co/docs/datasets/en/audio_process
 - Faster than pandas, better at managing memory
-
-# TODO Use the default stuff from pyha-analyzer
 """
 
 from datasets import DatasetDict, ClassLabel
