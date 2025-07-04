@@ -7,29 +7,43 @@ There are 3 main classes
 - ModelOutput: dict-like class that defines the output from the model
 - Model: A PyTorch nn.Module class
 
-See timm_model.py for example about how these classes can be implemented. 
+See timm_model.py for example about how these classes can be implemented.
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from functools import wraps
 from collections import UserDict
 
 from pyha_analyzer.models.base_model import BaseModel
-import torch
-from torch import Tensor
 import numpy as np
 
+
 def has_required_inputs():
-    """
-        Wrapper to check to make sure everything is setup properly
-        Required before using PyhaTrainer
+    """Wrapper for formatting input for a given Model!
+
+    Checks to make sure a model is passed in the correct input
+    format, and returns the correct output format.
+
+    Usually this is defined by `model.input_format` and
+    `model.output_format`
+
+    MUST ALWAYS WRAP FORWARD FUNCTION OF MODEL
     """
     def decorator(forward):
         @wraps(forward)
-        def wrapper(self, *args, **kwarg):
-            # assert isinstance(x, self.input_format) #TODO FIX
-            model_output = forward(self, *args, **kwarg)
-            # assert isinstance(model_output, self.output_format)
+        def wrapper(self, x=None, **kwarg):
+            # During training, data is passed in as kwargs, (**ModelInput)
+            # due to how hugging face is designed
+            # this can be confusing if you are making custom models
+            # During inference, data is passed in as x, (ModelInput)
+            if x is None:
+                # ... but during training we just have the model
+                # pretend like it was passed in a ModelInput
+                x = self.input_format.from_dict(kwarg)
+
+            assert isinstance(x, self.input_format)
+            model_output = forward(self, x)
+            assert isinstance(model_output, self.output_format)
 
             return model_output
 
@@ -47,8 +61,13 @@ class ModelOutput(dict, UserDict):
 
     Inspired by HuggingFace Models
 
-    Developer: recommended for each Model, to have an associated ModelOutput class
+    Developer: recommended for each Model, to have an associated
+        ModelOutput class
     """
+
+    # ignore some of the outputs when computing metrics
+    # When overwriting DON"T FORGET TO INCLUDE THIS
+    ignore_keys = ["predictions", "labels", "embeddings", "loss"]
 
     def __init__(
         self,
@@ -68,7 +87,10 @@ class ModelOutput(dict, UserDict):
             })
 
     def items(self):
-        return [(key, value) for (key, value) in super().items() if value is not None]
+        return [
+            (key, value) for (
+                key, value
+            ) in super().items() if value is not None]
 
 
 class ModelInput(UserDict, dict):
@@ -80,7 +102,8 @@ class ModelInput(UserDict, dict):
 
     Inspired by HuggingFace Models and Tokenizers
 
-    Developer: recommended for each Model, to have an assocaited ModelInput class
+    Developer: recommended for each Model, to have an
+    associated ModelInput class
     ALWAYS HAS A LABEL CATEGORY
     """
 
@@ -97,57 +120,64 @@ class ModelInput(UserDict, dict):
         })
 
     def items(self):
-        return [(key, value) for (key, value) in super().items() if value is not None]
+        return [
+            (key, value) for (
+                key, value
+            ) in super(
+            ).items() if value is not None]
+
+    @classmethod
+    def from_dict(cls, some_input: dict):
+        """Sometimes inputs are given as kwargs
+        So lets recreate correct inputs for model
+        via building from a dictionary!
+        """
+        spectrogram, waveform = None, None
+        labels = some_input["labels"]
+        if "spectrogram" in some_input:
+            spectrogram = some_input["spectrogram"]
+        if "waveform" in some_input:
+            waveform = some_input["waveform"]
+
+        assert spectrogram is not None or waveform is not None
+
+        return cls(labels, spectrogram=spectrogram, waveform=waveform)
 
 
 class Model(BaseModel):
     """BaseModel Class for Whoot
     """
-    # TODO Define required class instance variables
-    # Such as criterion etc.
     def __init__(self, *args, **kwargs):
         self.input_format = ModelInput
         self.output_format = ModelOutput
         super().__init__(*args, **kwargs)
 
-    """Gets an embedding for the model
-
-    This can be the final layer of a model backbone
-    or a set of useful features
-
-    Args
-        x: Any | Either np.array or Torch.Tensor, is the input for the model
-
-    Returns
-        embedding: np.array, some embedding vector representing the input data
-    """
-
     def get_embeddings(self, x: ModelInput) -> np.array:
-        return self.forward(x).embeddings
+        """Gets an embedding for the model
 
-    """
-    Runs some input x through the model
+        This can be the final layer of a model backbone
+        or a set of useful features
 
-    In PyTorch models, this is the same forward functionlogits
-    We just apply the convention for non Pytorch models,
+        Args
+            x: Any | Either np.array or Torch.Tensor, the input for the model
 
-    TODO: Some things to concern
-    - 
-    Args:
-        x: Any 
-
-    Returns:
-        ModelOutput: dict, a dictionary like object that describes 
-    """
+        Returns
+            embedding: np.array,
+                some embedding vector representing the input data
+        """
+        return self.forward(**x).embeddings
 
     @abstractmethod
     @has_required_inputs()
     def forward(self, x: ModelInput) -> ModelOutput:
-        pass
+        """
+        Runs some input x through the model
 
-    """
-    Notes on design for the future
+        In PyTorch models, this is the same forward function logits
+        We just apply the convention for non Pytorch models,
+        Args:
+            x: Any
 
-    - Should model implement a way to save/load model to/form disk
-    
-    """
+        Returns:
+            ModelOutput: dict, a dictionary like object that describes
+        """

@@ -213,7 +213,7 @@ uv.lock
 data
 
 # Model Storage
-working_dir
+model_checkpoints/*
 
 
 # testing/debugging notebooks
