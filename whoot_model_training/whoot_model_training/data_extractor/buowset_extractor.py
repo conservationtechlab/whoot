@@ -9,6 +9,8 @@ format it into a uniform dataset format, AudioDataset
 This way, it should be easier to define what a
 common audio dataset format is between
 parts of the codebase for training
+
+Supports both mutlilabel and binary labels
 """
 
 import os
@@ -24,7 +26,7 @@ from datasets import (
 )
 from ..dataset import AudioDataset
 
-# MAKE LOG OF DATASET USED
+
 def one_hot_encode(row: dict, classes: list):
     """One hot Encodes a list of labels
     Args:
@@ -51,6 +53,7 @@ class BuowsetParams():
     sr = 32_000
     filepath = "segment"
 
+## Multilabel Extractor
 
 def buowset_extractor(
     metadata_csv,
@@ -80,7 +83,6 @@ def buowset_extractor(
     # Hugging face by default defines a train split
     ds = load_dataset("csv", data_files=metadata_csv)["train"]
     ds = ds.rename_column("label", "labels")  # Convention here is labels
-    
 
     # Convert to a uniform one_hot encoding for classes
     ds = ds.class_encode_column("labels")
@@ -116,40 +118,63 @@ def buowset_extractor(
 
     return ds
 
-
+## Binary Extractor
 
 def binarize_data(row, target_col=0):
+    """ Convert a mutlilabel label into a binary one
+
+    Args:
+        row (dict): an example of data
+        target_col (int): which index is the label for no_buow
+
+    returns
+        row (dict): now with a binary label instead
+    """
     row["labels"] = [row["labels"][target_col], 1-row["labels"][target_col]]
     return row
+
 
 def buowset_binary_extractor(
         metadata_csv,
         parent_path,
-        output_path,  # TODO what does output do?
-        validation_fold=4,
-        test_fold=3,
-        sr=32_000,
-        filepath="segment",
-        target_col = 0
-    ):
+        output_path,
+        target_col=0):
+    """Extracts raw data in the buowset format into an AudioDataset
+        BUT only allows for two classes: no_buow, yes_buow
 
+     Args:
+        Metdata_csv (str): Path to csv containing buowset metadata
+        parent_path (str): Path to the parent folder for all audio data.
+            Note its assumed the audio filepath
+            in the csv is relative to parent_path
+        output_path (str): Path to where HF cache for this dataset should live
+        validation_fold (int): which fold is considered the validation set
+            Default 4
+        test_fold (int): Which fold is considered the test set Default 3
+        sr (int): Sample Rate of the audio files Default: 32_000
+        target_col (int): label for no_buow
 
-    ads = buowset_extractor(metadata_csv,
+    Returns:
+        (AudioDataset): See dataset.py, AudioDatasets are consider
+        the universal dataset for the training pipeline.
+    """
+
+    # Use the original extractor to create a mutlilabeled dataset
+    ads = buowset_extractor(
+        metadata_csv,
         parent_path,
         output_path,
-        validation_fold=validation_fold,
-        test_fold=test_fold,
-        sr=sr,
-        filepath=filepath
     )
 
+    # Now we just need to convert labels from mutlilabel to
+    # 0 or 1
     binary_class_label = Sequence(ClassLabel(names=["no_buow", "buow"]))
     print(binary_class_label.feature.num_classes)
     for split in ads:
-        ads[split] = ads[split].map(lambda row: binarize_data(row, target_col=target_col)).cast_column(
-            "labels", binary_class_label
-        )
-    
+        ads[split] = ads[split].map(
+            lambda row: binarize_data(row, target_col=target_col)
+        ).cast_column("labels", binary_class_label)
+
     print(ads.get_num_classes())
 
     return ads
