@@ -44,7 +44,7 @@ class WhootTrainingArguments(PyhaTrainingArguments):
         super().__init__(os.path.join(f"{default_checkpoint_path}",
                                       f"{run_name}_{checkpoint_created_at}"))
 
-        #Required for whoot: override defaults in PyhaTrainingArguments
+        # Required for whoot: override defaults in PyhaTrainingArguments
         self.label_names = ["labels"]
         self.remove_unused_columns = False
         self.report_to = "comet_ml"
