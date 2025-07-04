@@ -9,8 +9,7 @@
 """
 
 import timm
-from torch import nn, Tensor
-import numpy as np
+from torch import nn
 
 from .model import Model, ModelInput, ModelOutput, has_required_inputs
 
@@ -29,8 +28,8 @@ class TimmInputs(ModelInput):
         # # Can use inputs to verify correct shape for upstream model
         # assert spectrogram.shape[1:] == (1, 100, 100)
         super().__init__(labels, waveform, spectrogram)
-        self.labels = Tensor(np.array(labels))
-        self.spectrogram = Tensor(np.array(spectrogram))
+        self.labels = labels
+        self.spectrogram = spectrogram
 
 
 class TimmModel(nn.Module, Model):
@@ -85,25 +84,23 @@ class TimmModel(nn.Module, Model):
 
     # TODO Fix this so it actually can take in a input object
     @has_required_inputs()
-    def forward(self, labels=None, spectrogram=None) -> ModelOutput:
+    def forward(self, x: TimmInputs) -> ModelOutput:
         """Model forward function
 
         Args:
-            labels=None (Torch.Tensor): the ground truth labels for computing
-                    loss
-            spectrogram=None (Torch.Tensor): spectrograms inputs into model
+            x: (TimmInputs): The specific input format for Timm Models
 
         Returns
             (ModelOutput): The model output (logits),
             latent space representations (embeddings), loss and labels.
         """
-        embedd = self.backbone(spectrogram)
-        logits = self.linear(embedd)
-        loss = self.loss(logits, labels)
+        embed = self.backbone(x.spectrogram)
+        logits = self.linear(embed)
+        loss = self.loss(logits, x.labels)
 
         return ModelOutput(
             logits=logits,
-            embeddings=embedd,
+            embeddings=embed,
             loss=loss,
-            labels=labels
+            labels=x.labels
         )

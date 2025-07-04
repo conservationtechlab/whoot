@@ -19,16 +19,31 @@ import numpy as np
 
 
 def has_required_inputs():
-    """
-        Wrapper to check to make sure everything is setup properly
-        Required before using PyhaTrainer
+    """Wrapper for formatting input for a given Model!
+
+    Checks to make sure a model is passed in the correct input
+    format, and returns the correct output format.
+
+    Usually this is defined by `model.input_format` and
+    `model.output_format`
+
+    MUST ALWAYS WRAP FORWARD FUNCTION OF MODEL
     """
     def decorator(forward):
         @wraps(forward)
-        def wrapper(self, *args, **kwarg):
-            # assert isinstance(x, self.input_format) #TODO FIX
-            model_output = forward(self, *args, **kwarg)
-            # assert isinstance(model_output, self.output_format)
+        def wrapper(self, x=None, **kwarg):
+            # During training, data is passed in as kwargs, (**ModelInput)
+            # due to how hugging face is designed
+            # this can be confusing if you are making custom models
+            # During inference, data is passed in as x, (ModelInput)
+            if x is None:
+                # ... but during training we just have the model
+                # pretend like it was passed in a ModelInput
+                x = self.input_format.from_dict(kwarg)
+
+            assert isinstance(x, self.input_format)
+            model_output = forward(self, x)
+            assert isinstance(model_output, self.output_format)
 
             return model_output
 
@@ -106,6 +121,19 @@ class ModelInput(UserDict, dict):
                 key, value
             ) in super(
             ).items() if value is not None]
+
+    @classmethod
+    def from_dict(cls, some_input):
+        spectrogram, waveform = None, None
+        labels = some_input["labels"]
+        if "spectrogram" in some_input:
+            spectrogram = some_input["spectrogram"]
+        if "waveform" in some_input:
+            waveform = some_input["waveform"]
+
+        assert spectrogram is not None or waveform is not None
+
+        return cls(labels, spectrogram=spectrogram, waveform=waveform)
 
 
 class Model(BaseModel):
