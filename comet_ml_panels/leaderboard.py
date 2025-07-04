@@ -28,12 +28,18 @@ api = API()
 available_metrics = ["train/valid_cMAP", "train/valid_ROCAUC"]
 selected_metric = ui.dropdown("Select a metric:", available_metrics)
 
-available_tasks = [None, "mutlilabelClass_buowset0"]
-selected_task = ui.dropdown("Select a Task:", available_tasks)
-
 experiment_keys = api.get_panel_experiment_keys()
 data = api.get_metrics_for_chart(
     experiment_keys, metrics=[selected_metric], parameters=["task"])
+
+# Given all experiments, find all possible tasks to measure!
+available_tasks = list(
+    set(data[key]["params"]["task"]
+        for key in data if "task" in data[key]["params"])
+)
+available_tasks.append(None)
+selected_task = ui.dropdown("Select a Task:", available_tasks)
+
 processed_data = []
 
 for key in data:
