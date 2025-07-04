@@ -46,6 +46,7 @@ class BuowsetParams():
     sr = 32_000
     filepath = "segment"
 
+
 def buowset_extractor(
     metadata_csv,
     parent_path,
@@ -89,7 +90,9 @@ def buowset_extractor(
 
     # Get audio into uniform format
     ds = ds.add_column(
-        "audio", [os.path.join(parent_path, file) for file in ds[params.filepath]]
+        "audio", [
+            os.path.join(parent_path, file) for file in ds[params.filepath]
+        ]
     )
 
     ds = ds.add_column("filepath", ds["audio"])
@@ -100,7 +103,9 @@ def buowset_extractor(
     test_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
     valid_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
     train_ds = ds.filter(
-        lambda x: x["fold"] != params.test_fold & x["fold"] != params.validation_fold
+        lambda x: x[
+            "fold"
+        ] != params.test_fold & x["fold"] != params.validation_fold
     )
     ds = AudioDataset(
         DatasetDict({"train": train_ds, "valid": valid_ds, "test": test_ds})

@@ -28,11 +28,8 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
         self,
         model_input: ModelInput,
         duration=5,
-        augment=None,
-        spectrogram_augments=None,
-        class_list=...,
+        augments: dict = {"audio":None, "spectrogram":None},
         spectrogram_params: SpectrogramParams = SpectrogramParams(),
-        dataset_ref=None,
     ):
         """ Creates a Online preprocessor for MelSpectrograms Based Models
 
@@ -41,8 +38,8 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
         Args:
             ModelInput (ModelInput): How the model like input data formatted
             Duration (int): Length in seconds of input
-            augment (none): See TODO WORK ON AUGMENTATIONS
-            spectrogram_augments (none): TODO WORK ON AUGMENTATIONS
+            augment (dict): contains two keys: audio, spectrogram each defining
+                a dict of augmentation names and augmentations to run
             class_list (list): the classes we are working with one-hot-encoding
             n_fft (int): number of ffts
             hop_length (int): hop length
@@ -52,10 +49,7 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
         """
         super().__init__(
             duration,
-            augment,
-            spectrogram_augments,
-            class_list,
-            dataset_ref,
+            augments,
             spectrogram_params
         )
         self.model_input = model_input

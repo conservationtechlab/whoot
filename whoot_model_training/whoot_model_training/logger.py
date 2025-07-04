@@ -9,6 +9,7 @@ integration
 import comet_ml
 
 
+# pylint disable-next=R0903
 class CometMLLoggerSupplement():
     """Note, that is working with the Trainer!
 
@@ -23,7 +24,19 @@ class CometMLLoggerSupplement():
 
     def __init__(self, augmentations, name):
         comet_ml.login()
+        self.start(augmentations, name)
+
+    def start(self, augmentations, name):
+        """Begins a new set of experiments
+
+        Helpful for cases where a new run has begun
+        """
         self.experiment = comet_ml.start()
 
         self.experiment.log_parameter("augmentations", augmentations)
         self.experiment.set_name(name)
+
+    def end(self):
+        """Fully ends experiment if still running
+        """
+        return self.experiment.end()

@@ -100,11 +100,11 @@ def train(config):
 
     # We define here what the model reads
     train_preprocessor = SpectrogramModelInputPreprocessors(
-        TimmInputs, duration=3, class_list=ds.get_class_labels()
+        TimmInputs, duration=3
     )
 
     preprocessor = SpectrogramModelInputPreprocessors(
-        TimmInputs, duration=3, class_list=ds.get_class_labels()
+        TimmInputs, duration=3
     )
 
     ds["train"].set_transform(train_preprocessor)

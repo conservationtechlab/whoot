@@ -130,7 +130,7 @@ class Model(BaseModel):
             embedding: np.array,
                 some embedding vector representing the input data
         """
-        return self.forward(x).embeddings
+        return self.forward(**x).embeddings
 
     @abstractmethod
     @has_required_inputs()

@@ -1,7 +1,7 @@
 """ Everything needed to train
 given a model and a dataset
 
-WhootTrainingArguments: A container for the 
+WhootTrainingArguments: A container for the
     many many args for WhootTrainer
 
 WhootTrainer: The class that is going to run training
@@ -32,6 +32,10 @@ class WhootTrainer(PyhaTrainer):
     """The training class
     #TODO Improve these docstrings
     """
+    # WhootTrainer is ment to mimic the huggingface trainer
+    # Including number of arguments
+    # Aside, we really should consider how useful R0913,R0917 is...
+    # pylint: disable-next=R0913,R0917
     def __init__(
         self,
         model,

@@ -33,12 +33,14 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
         initial_metrics = super().__call__(eval_pred=eval_pred)
 
         # Confusion Matrix
-        self.log_comet_ml_only(self, eval_pred)
+        self.log_comet_ml_only(eval_pred)
 
         # Return the metrics that can be logged to console AND comet-ml
         return initial_metrics
-    
+
     def log_comet_ml_only(self, eval_pred):
+        """Logs confusion matrix each eval step
+        """
         # For metrics that are not loggable to console
         # We can only have comet_ml for these metrics
         experiment = comet_ml.get_running_experiment()

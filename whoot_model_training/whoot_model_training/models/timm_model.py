@@ -44,7 +44,6 @@ class TimmModel(nn.Module, Model):
         pretrained=True,
         in_chans=1,
         num_classes=6,
-        loss=None,
     ):
         """Init for TimmModel
 
@@ -76,10 +75,13 @@ class TimmModel(nn.Module, Model):
         # the probability of class A occurring doesn't
         # change the probability of Class B
         # Many individuals can make calls at the same time!
-        if loss is not None:
-            self.loss = loss
-        else:
-            self.loss = nn.BCEWithLogitsLoss()
+        self.loss = nn.BCEWithLogitsLoss()
+
+    def set_custom_loss(self, loss_fn):
+        """Set a different loss function
+        For cases where we don't want BCEWithLogitsLoss
+        """
+        self.loss = loss_fn
 
     # TODO Fix this so it actually can take in a input object
     @has_required_inputs()
