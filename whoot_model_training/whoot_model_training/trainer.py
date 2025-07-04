@@ -49,7 +49,7 @@ class WhootTrainer(PyhaTrainer):
     # WhootTrainer is ment to mimic the huggingface trainer
     # Including number of arguments
     # Aside, we really should consider how useful R0913,R0917 is...
-    
+
     # pylint: disable-next=R0913,R0917
     def __init__(
         self,
