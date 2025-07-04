@@ -123,7 +123,11 @@ class ModelInput(UserDict, dict):
             ).items() if value is not None]
 
     @classmethod
-    def from_dict(cls, some_input):
+    def from_dict(cls, some_input: dict):
+        """Sometimes inputs are given as kwargs
+        So lets recreate correct inputs for model
+        via building from a dictionary!
+        """
         spectrogram, waveform = None, None
         labels = some_input["labels"]
         if "spectrogram" in some_input:
@@ -139,7 +143,6 @@ class ModelInput(UserDict, dict):
 class Model(BaseModel):
     """BaseModel Class for Whoot
     """
-    # TODO Define required class instance variables
     def __init__(self, *args, **kwargs):
         self.input_format = ModelInput
         self.output_format = ModelOutput

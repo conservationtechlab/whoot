@@ -25,6 +25,19 @@ class SpectrogramParams:
     n_mels: int = 256
 
 
+@dataclass
+class Augmentations():
+    """Dataclass for the augmentations of the model
+
+    audio (list[dict]): per item key name of augmentation,
+        value is the augmentation
+    spectrogram (list[dict]): same idea but augmentations
+        applied onto spectrograms
+    """
+    audio = None
+    spectrogram = None
+
+
 class BuowMelSpectrogramPreprocessors(PreProcessorBase):
     """Preprocessor for processing audio into spectrograms
     Particularly for the buow dataset
@@ -33,11 +46,9 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
     def __init__(
         self,
         duration=5,
-        augments={"audio":None, "spectrogram":None},
+        augments: Augmentations = Augmentations(),
         spectrogram_params: SpectrogramParams = SpectrogramParams()
     ):
-        
-        assert "audio" in augments.keys() and "spectrogram" in augments.keys()
         self.duration = duration
         self.augments = augments
 
@@ -64,7 +75,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
                 y = np.pad(y, end_sr - y.shape[-1])
 
             # Audio Based Augmentations
-            if self.augments["audio"] is not None:
+            if self.augments.audio is not None:
                 y, label = self.augments.audio(y, sr, label)
 
             pillow_transforms = transforms.ToPILImage()
@@ -86,7 +97,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
                 / 255
             )
 
-            if self.augments["spectrogram"] is not None:
+            if self.augments.spectrogram is not None:
                 mels = self.augments.spectrogram(mels)
 
             new_audio.append(mels)

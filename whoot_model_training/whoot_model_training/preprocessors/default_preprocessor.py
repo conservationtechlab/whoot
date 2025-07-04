@@ -13,9 +13,10 @@ but it forces the output to fit the ModelInput class structure.
 see `whoot_model_training/models/model.py` for more info.
 """
 
-
 from .spectrogram_preprocessors import (
-    BuowMelSpectrogramPreprocessors, SpectrogramParams
+    BuowMelSpectrogramPreprocessors,
+    SpectrogramParams,
+    Augmentations
 )
 from ..models.model import ModelInput
 
@@ -28,7 +29,7 @@ class SpectrogramModelInputPreprocessors(BuowMelSpectrogramPreprocessors):
         self,
         model_input: ModelInput,
         duration=5,
-        augments: dict = {"audio":None, "spectrogram":None},
+        augments: Augmentations = Augmentations(),
         spectrogram_params: SpectrogramParams = SpectrogramParams(),
     ):
         """ Creates a Online preprocessor for MelSpectrograms Based Models

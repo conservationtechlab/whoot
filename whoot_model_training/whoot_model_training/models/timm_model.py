@@ -82,7 +82,6 @@ class TimmModel(nn.Module, Model):
         """
         self.loss = loss_fn
 
-    # TODO Fix this so it actually can take in a input object
     @has_required_inputs()
     def forward(self, x: TimmInputs) -> ModelOutput:
         """Model forward function
