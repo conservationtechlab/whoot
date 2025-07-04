@@ -53,7 +53,6 @@ class BuowsetParams():
     sr = 32_000
     filepath = "segment"
 
-## Multilabel Extractor
 
 def buowset_extractor(
     metadata_csv,
@@ -118,7 +117,6 @@ def buowset_extractor(
 
     return ds
 
-## Binary Extractor
 
 def binarize_data(row, target_col=0):
     """ Convert a mutlilabel label into a binary one
