@@ -42,9 +42,11 @@ class AudioDataset(DatasetDict):
         for split in ds.keys():
             dataset = ds[split]
             for column in DEFAULT_COLUMNS:
+                phrase_one = "The column `"
+                phrase_two = "` is missing from dataset split `"
+                phrase_three = "`. Required by system"
                 state = (
-                    f"The column `{column}` is missing from dataset split `{
-                        split}`. Required by system"
+                    f"{phrase_one}{column}{phrase_two}{split}{phrase_three}"
                 )
                 assert column in dataset.features, state
 
