@@ -21,7 +21,7 @@ Current support optional dependency collections include
 
 - `cpu`: Installs torch and torchvision for CPU use only
 - `cu128`: Installs torch and torchvision with Cuda 12.8 Binaries
-- `model_training`: Required for running scripts in `whoot/model_training`, make sure to add either `cpu` or `cu128`
+- `model-training`: Required for running scripts in `whoot/model_training`, make sure to add either `cpu` or `cu128`
 
 ## Usage
 
