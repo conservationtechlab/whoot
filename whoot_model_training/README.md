@@ -15,9 +15,31 @@ Note that you should check what is supported by CUDA on your machine. See develo
 # Running
 
 0) Add your Comet-ML API to your local environment. See 
-1) Create a copy of the config found in `configs/config.yml` and fill it out with your dataset
+1) Create a copy of the config found in `configs/config.yml` and fill it out for your dataset. See the [config](#config) section
 2) Edit train.py to set up training for your dataset. If you are using a new dataset which an extractor does not exist for, contact code authors. 
 3) run `python train.py path/to/your/config/file.yml`
+
+# Config
+
+## Default Config Properties
+The properties of `config.yml` are as follows:
+### Data paths
+`metadata_csv`: the path to the metadata file for your dataset.
+`data_path`: Path to the highest level parent folder containing audio. Audio can be in a different path than the metadata!
+`hf_cache_path`: cache for hugging face. This path will be automatically made as you run the script, this would be the location of where the new file should go
+
+### Required Variables
+`COMET_PROJECT_NAME`: "whoot", this is the project on comet-ml training will run on. 
+`CUDA_VISIBLE_DEVICES`: "0" or "0,1", this controls how many GPUs the training uses.
+`SUBPROJECT_NAME`: Some description to help filter which training this is used for, can be the task being done (multi_label_classification) or something else (fun_training_test)
+`DATASET_NAME`: Name of the dataset being trained on, will be embedded on comet_ml to make searching easier
+
+## Project Specific config information
+### Buowset
+The filenames in metadata_csv are the audio files found in `data_path`. 
+
+`SUBPROJECT_NAME` is either "binary" or "mutlilabelClass"
+`DATASET_NAME` is buowset0
 
 # Repo Philosophy  
 
