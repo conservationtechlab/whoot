@@ -8,7 +8,9 @@ Key inspiration is https://github.com/UCSD-E4E/pyha-analyzer-2.0/tree/main. This
 To set up environment for model training:
 
 1) run steps 1 - 3 of the installation instructions in `whoot/README.md`
-2) For step 4, specifically run `pip install -e .[model_training, cu128/cpu]`
+2) For step 4, specifically run `pip install -e .[model_training, cpu]` for cpu training,  `pip install -e .[model_training, cu128]` for training on Nvidia GPUs
+
+Note that you should check what is supported by CUDA on your machine. See developers if you need a different CUDA version 
 
 # Running
 
