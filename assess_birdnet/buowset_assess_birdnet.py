@@ -17,13 +17,25 @@ import random
 
 
 def organize_birdnet_output(birdnet_results):
-    """
+    """Open the birdnet results file.
+
+    Args:
+        birdnet_results (string): Path to the .pkl aggregated results.
+
+    Returns:
+        pd.DataFrame
     """
     birdnet_df = pd.read_pickle(birdnet_results)
     return birdnet_df
 
 def merge_metadata(metadata, birdnet_df):
-    """
+    """Combine metadata and birdnet results by segment.
+
+    Args:
+        metadata (string): Path to metadata file.
+        birdnet_df (pd.DataFrame): The birdnet results file.
+    Returns:
+        pd.DataFrame
     """
     meta = pd.read_csv(metadata, index_col=0)
     df_merged = meta.merge(birdnet_df, on='segment')
@@ -43,7 +55,12 @@ def map_binary_labels(merged_data):
 
 
 def map_class_labels(merged_data, assess_class):
-    """
+    """Create binary class vs no buow assessment for 1 class.
+
+    Args:
+        merged_data (pd.DataFrame): The 
+        assess_class (int): The number associated with the specific
+            vocalization type to be assessed.
     """
     class_only = merged_data[merged_data['label'] == assess_class]
     num_rows = len(class_only) - 1
@@ -71,6 +88,9 @@ def assess_birdnet(y_true, y_pred, experiment=None):
     """Assess Birdnet against ground truth labels.
 
     Args:
+        y_true (pd.DataFrame):
+        y_pred (pd.DataFrame):
+        experiment:
     """
     confusion_m = confusion_matrix(y_true, y_pred)
     accuracy = accuracy_score(y_true, y_pred)
@@ -95,7 +115,10 @@ def assess_birdnet(y_true, y_pred, experiment=None):
 
 
 def create_comet_exp():
-    """
+    """Create the comet experiment settings.
+
+    Returns:
+        ()
     """
     project = input("Enter the comet project name you'd like this experiment to have/be associated with: ")
     work_space = input("Enter the comet workspace (username or organization) this experiment will go in: ")
@@ -109,8 +132,17 @@ def create_comet_exp():
 
     return experiment
 
-def main(birdnet_results, metadata, not_binary, assess_class):
+def main(birdnet_results, metadata, single_class, assess_class):
     """Assess birdnet.
+
+    Args:
+        birdnet_results (string): Path to the .pkl of the aggregated
+            birdnet results.
+        metadata (string): Path to the metadata.csv
+        single_class (bool): Default false for buow/no buow, true for
+            assessing an individual class.
+        assess_class (int): The class number to be assessed if single_class
+            called true.
     """
     print("Starting")
     experiment = create_comet_exp()
@@ -120,7 +152,7 @@ def main(birdnet_results, metadata, not_binary, assess_class):
     print(f"Matching ground truth labels to BirdNET results.")
     merged_data = merge_metadata(metadata, birdnet_df)
     print("Comparing BirdNET labels to ground truth.")
-    if not_binary == True:
+    if single_class == False:
         print("Doing binary buow/no_buow assessment")
         y_true, y_pred = map_binary_labels(merged_data)
     else:
@@ -139,9 +171,9 @@ if __name__ == '__main__':
     parser.add_argument('metadata',
                         type=str,
                         help='Path to buowset metadata file.')
-    parser.add_argument('-not_binary', action='store_false',
+    parser.add_argument('-single_class', action='store_true',
                         help='Default true binary assessment, call for individual class assessment.')
     parser.add_argument('-assess_class', default=None, type=int,
                         help='Which class would you like to assess individually?')
     args = parser.parse_args()
-    main(args.birdnet_results, args.metadata, args.not_binary, args.assess_class)
+    main(args.birdnet_results, args.metadata, args.single_class, args.assess_class)
