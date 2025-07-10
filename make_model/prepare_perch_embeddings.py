@@ -7,19 +7,23 @@ scripts and converts to a .pkl dataframe that stores
 filename, embedding, and related metadata
 
 Usage: python prepare_perch_embeddings \
-           /path/to/db/dir \
-           /path/to/metadata/file \
-           /path/to/output/dir \
+           /path/to/sqlite_dir \
+           /path/to/metadata_file \
+           /path/to/output_dir \
            embeddings_description
 
 Arguments:
-    database_directory (str): path to directory that contains
+    sqlite_dir (str): path to directory that contains
         hoplite.sqlite & usearch.index
-    outout_directory (str): path to directory to store output
-        csv
+    metadata_path (str): path to metadata file with labels
+        and fold information
+    outout_dir (str): path to directory to store output
+        pkl
+    embeddings_description (str) :description of set of embeddings
+        for file naming purposes
 
 Outputs:
-    <description>_perch_embeddings.pkl
+    <embeddings_description>_perch_embeddings.pkl
 
 '''
 
@@ -35,7 +39,20 @@ def prepare_perch_embeddings(sqlite_dir,
                              output_dir,
                              embeddings_description):
     '''
-    runs main script
+    converts raw perch embeddings (from sqlite database ) into standard
+    dataframe format for SVM.
+
+    Args:
+        sqlite_dir (str): path to directory that contains
+            hoplite.sqlite $ usearch.index
+        metadata_path (str): path to metadata file
+        output_dir (str): path to directory to store
+            output .pkl file
+        embeddings_description (str): description of set of embeddings
+            for file naming purposes
+
+    Returns:
+        None
     '''
 
     # load embeddings database
@@ -56,10 +73,6 @@ def prepare_perch_embeddings(sqlite_dir,
         base_dict = {'segment': file_name,
                      'embedding': embedding}
 
-        #embedding_dict = {f'{j}': val for j, val in enumerate(embedding)}
-
-        #full_row = {**base_dict, **embedding_dict}
-
         embeddings_data.append(base_dict)
 
     embeddings_df = pd.DataFrame(embeddings_data)
@@ -69,8 +82,6 @@ def prepare_perch_embeddings(sqlite_dir,
 
     output_filename = os.path.join(output_dir, f'{embeddings_description}_perch_embeddings.pkl')
     merged_df.to_pickle(output_filename)
-
-#    merged_df.to_csv(csv_filename, index=False)
 
     print(f'Embeddings saved at:\n\t{output_filename}')
 
