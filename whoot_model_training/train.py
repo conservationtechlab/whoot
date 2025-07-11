@@ -100,7 +100,7 @@ def train(config):
     #     )
     # ])
 
-    # Offline preprocessors prepare data for training
+    # Online preprocessors prepare data for training
     train_preprocessor = SpectrogramModelInputPreprocessors(
         TimmInputs, duration=3
     )
