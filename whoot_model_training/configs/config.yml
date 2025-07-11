@@ -6,6 +6,6 @@ hf_cache_path: data/burrowing_owl_dataset/cache/metadata.hf
 # Required Variables
 COMET_PROJECT_NAME: "whoot"
 CUDA_VISIBLE_DEVICES: "0" #"0,1"
-COMET_WORKSPACE: 
-SUBPROJECT_NAME: 
-DATASET_NAME: 
+COMET_WORKSPACE:
+SUBPROJECT_NAME:
+DATASET_NAME:
