@@ -150,6 +150,9 @@ def init_env(config: dict):
     print(config)
     os.environ["COMET_PROJECT_NAME"] = config["COMET_PROJECT_NAME"]
     os.environ["CUDA_VISIBLE_DEVICES"] = config["CUDA_VISIBLE_DEVICES"]
+    check_for_comet = config["COMET_WORKSPACE"] is not None
+    assert check_for_comet, "Make sure to add a COMET_WORKSPACE to config"
+    os.environ["COMET_WORKSPACE"] = config["COMET_WORKSPACE"]
 
 
 if __name__ == "__main__":
