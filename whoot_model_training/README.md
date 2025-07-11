@@ -14,7 +14,7 @@ Note that you should check what is supported by CUDA on your machine. See develo
 
 # Running
 
-0) Add your Comet-ML API to your local environment. See 
+0) Add your Comet-ML API to your local environment. See https://www.comet.com/docs/v2/guides/experiment-management/configure-sdk/
 1) Create a copy of the config found in `configs/config.yml` and fill it out for your dataset. See the [config](#config) section
 2) Edit train.py to set up training for your dataset. If you are using a new dataset which an extractor does not exist for, contact code authors. 
 3) run `python train.py path/to/your/config/file.yml`
