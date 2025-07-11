@@ -22,7 +22,7 @@ from whoot_model_training.models import TimmModel, TimmInputs
 from whoot_model_training import CometMLLoggerSupplement
 
 from whoot_model_training.preprocessors import (
-    SpectrogramModelInputPreprocessors
+    MelModelInputPreprocessor
 )
 
 # Uncomment for use with data augmentation
@@ -101,11 +101,11 @@ def train(config):
     # ])
 
     # Offline preprocessors prepare data for training
-    train_preprocessor = SpectrogramModelInputPreprocessors(
+    train_preprocessor = MelModelInputPreprocessor(
         TimmInputs, duration=3
     )
 
-    preprocessor = SpectrogramModelInputPreprocessors(
+    preprocessor = MelModelInputPreprocessor(
         TimmInputs, duration=3
     )
 

@@ -7,14 +7,14 @@ In traditional pytorch world, this would be like
 the __get_item__ function of a dataset
 """
 
-from .default_preprocessor import (
-    SpectrogramModelInputPreprocessors
+from .base_preprocessor import (
+    MelModelInputPreprocessor
 )
 from .spectrogram_preprocessors import (
     BuowMelSpectrogramPreprocessors
 )
 
 __all__ = [
-    "SpectrogramModelInputPreprocessors",
+    "MelModelInputPreprocessor",
     "BuowMelSpectrogramPreprocessors"
 ]
