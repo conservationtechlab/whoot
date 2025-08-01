@@ -18,7 +18,7 @@ import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.data_extractor import buowset_extractor
-from whoot_model_training.models import TimmModel, TimmInputs
+from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
 from whoot_model_training.preprocessors import (
@@ -71,8 +71,10 @@ def train(config):
 
     # Create the model
     run_name = "efficientnet_b1_testing_confusion_matrix_no_data_aug"
-    model = TimmModel(timm_model="efficientnet_b1",
-                      num_classes=ds.get_num_classes())
+    model_config = TimmModelConfig(
+        timm_model="efficientnet_b1",
+        num_classes=ds.get_num_classes())
+    model = TimmModel(model_config)
 
     # Preprocessors
 
@@ -122,7 +124,7 @@ def train(config):
 
     # COMMON OPTIONAL ARGS
     training_args.num_train_epochs = 2
-    training_args.eval_steps = 20
+    training_args.eval_steps = 100
     training_args.per_device_train_batch_size = 32
     training_args.per_device_eval_batch_size = 32
     training_args.dataloader_num_workers = 36
@@ -139,6 +141,7 @@ def train(config):
     )
 
     trainer.train()
+    model.save_pretrained("model_checkpoints/test")
 
 
 def init_env(config: dict):

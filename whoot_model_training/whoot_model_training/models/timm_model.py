@@ -12,7 +12,7 @@ import timm
 from torch import nn
 
 from .model import Model, ModelInput, ModelOutput, has_required_inputs
-
+from transformers import PretrainedConfig
 
 class TimmInputs(ModelInput):
     """Input for TimmModel's
@@ -31,18 +31,30 @@ class TimmInputs(ModelInput):
         self.labels = labels
         self.spectrogram = spectrogram
 
-
-class TimmModel(nn.Module, Model):
-    """Model that uses a timm's model as its backbone with a
-    linear layer for classification
-    """
-
+class TimmModelConfig(PretrainedConfig):
     def __init__(
         self,
         timm_model="resnet34",
         pretrained=True,
         in_chans=1,
         num_classes=6,
+        **kwargs
+    ):
+        self.timm_model= timm_model
+        self.pretrained = pretrained
+        self.in_chans = in_chans
+        self.num_classes = num_classes
+        super().__init__(**kwargs)
+
+class TimmModel(Model, nn.Module):
+    """Model that uses a timm's model as its backbone with a
+    linear layer for classification
+    """
+    config_class = TimmModelConfig
+
+    def __init__(
+        self,
+        config: TimmModelConfig
     ):
         """Init for TimmModel
 
@@ -57,16 +69,17 @@ class TimmModel(nn.Module, Model):
         super().__init__()
         self.input_format = TimmInputs
         self.output_format = ModelOutput
-
-        assert num_classes > 0
+        self.config = config
+        
+        assert config.num_classes > 0
 
         # Deep learning CNN backbone
         self.backbone = timm.create_model(
-            timm_model, pretrained=pretrained, in_chans=in_chans
+            config.timm_model, pretrained=config.pretrained, in_chans=config.in_chans
         )
 
         # Unsure if 1000 is default for all timm models. Need to check this
-        self.linear = nn.Linear(1000, num_classes)
+        self.linear = nn.Linear(1000, config.num_classes)
 
         # different losses if you want to train for different problems
         # BCEWithLogitsLoss is default as for Bioacoustics, the problem tends

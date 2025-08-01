@@ -15,6 +15,7 @@ from functools import wraps
 from collections import UserDict
 
 from pyha_analyzer.models.base_model import BaseModel
+from transformers import PreTrainedModel, PretrainedConfig
 import numpy as np
 
 
@@ -144,13 +145,15 @@ class ModelInput(UserDict, dict):
         return cls(labels, spectrogram=spectrogram, waveform=waveform)
 
 
-class Model(BaseModel):
+class Model(PreTrainedModel, BaseModel):
     """BaseModel Class for Whoot
     """
     def __init__(self, *args, **kwargs):
         self.input_format = ModelInput
         self.output_format = ModelOutput
-        super().__init__(*args, **kwargs)
+        super().__init__(PretrainedConfig())
+        super(BaseModel).__init__(*args, **kwargs)
+        
 
     def get_embeddings(self, x: ModelInput) -> np.array:
         """Gets an embedding for the model
