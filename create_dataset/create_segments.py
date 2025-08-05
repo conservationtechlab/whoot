@@ -8,6 +8,7 @@ import csv
 import pandas as pd
 from pydub import AudioSegment, exceptions
 import numpy as np
+from whoot import expand_window
 
 
 def get_paths(home_dir):
@@ -29,7 +30,7 @@ def get_paths(home_dir):
     return wavs_file_paths
 
 
-def create_segments(wav, filtered_labels, out_path, class_list):
+def create_segments(wav, filtered_labels, out_path, class_list, we, random):
     """Create the labeled segments.
 
     Args:
@@ -43,6 +44,8 @@ def create_segments(wav, filtered_labels, out_path, class_list):
             to be created for. What the manual ID's are in the human
             label file- will ignore everything that is misspelled or
             unknown labels.
+        we (bool): Window expansion option.
+        random (bool): Random window expansion option.
 
     Returns:
         pd.Dataframe: The metadata now associated with the
@@ -82,8 +85,10 @@ def create_segments(wav, filtered_labels, out_path, class_list):
                 end_time = start_time + float(row['DURATION'])
                 start_time = start_time * 1000
                 end_time = end_time * 1000
-                segment = window_expansion(wav, start_time, end_time)
-                #segment = audio[start_time:end_time]
+                if we:
+                    segment = expand_window(audio, start_time, end_time, random=random)
+                else:
+                    segment = audio[start_time:end_time]
                 segment_id = uuid.uuid4()
                 segment_id = str(segment_id) + '.wav'
                 segment_path = os.path.join(out_path, segment_id)
@@ -98,24 +103,6 @@ def create_segments(wav, filtered_labels, out_path, class_list):
             else:
                 continue
     return output_rows
-
-def window_expansion(wav, start_time, end_time):
-    """
-    """
-    length = 3000
-    if (end_time - start_time) > length:
-        segment = audio[start_time:end_time]
-        print(f"sample in {wav} is over 3s so no window expansion")
-        return segment
-    else:
-        duration = end_time-start_time
-        half_diff = (length - duration)/2
-        expanded_start = start_time - half_diff
-        expanded_end = end_time + half_diff
-        segment = audio[expanded_start:expanded_end]
-        print(f"window expansion applied to sample in {wav}")
-
-    return segment
 
 
 def create_noise_segments(wav, new_buow_rows, out_path):
