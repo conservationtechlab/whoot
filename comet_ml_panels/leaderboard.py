@@ -1,22 +1,22 @@
-"""Creates the Leaderboard for Comet ML Panels
+# """Creates the Leaderboard for Comet ML Panels
 
-This script queries from a given Comet ML project a DataFrame of
-model metrics at each step for each model in the project
-Then displays the top models.
+# This script queries from a given Comet ML project a DataFrame of
+# model metrics at each step for each model in the project
+# Then displays the top models.
 
-Example:
-    This is not intended to be run locally. Please test on Comet-ML.
+# Example:
+#     This is not intended to be run locally. Please test on Comet-ML.
 
-For Developers:
-    For more on adding to this see docs at
-    https://www.comet.com/docs/v2/guides/comet-ui/experiment-management/visualizations/python-panel/
+# For Developers:
+#     For more on adding to this see docs at
+#     https://www.comet.com/docs/v2/guides/comet-ui/experiment-management/visualizations/python-panel/
 
-    Note that updating this file does not update comet-ml. Please
-    go into the project to update after pushing to GitHub.
+#     Note that updating this file does not update comet-ml. Please
+#     go into the project to update after pushing to GitHub.
 
-    Do not include Doc string in comet-ml... for some reason this
-    is displayed in the comet-ml panel if copied directly
-"""
+#     Do not include Doc string in comet-ml... for some reason this
+#     is displayed in the comet-ml panel if copied directly
+# """
 from comet_ml import API, APIExperiment, ui
 import pandas as pd
 import numpy as np
