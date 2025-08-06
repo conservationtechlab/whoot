@@ -224,5 +224,5 @@ buowset.ipynb
 settings.json
 
 # Block all configs besides the example config
-whoot_model_training/configs
-!whoot_model_training/configs/config.yml
+script/model_training/configs
+!script/model_training/configs/config.yml
