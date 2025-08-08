@@ -226,3 +226,5 @@ settings.json
 # Block all configs besides the example config
 script/model_training/configs
 !script/model_training/configs/config.yml
+
+whoot_model_training
