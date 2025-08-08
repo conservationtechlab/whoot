@@ -185,6 +185,8 @@ pyrightconfig.json
 pyvenv.cfg
 pip-selfcheck.json
 
+
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
@@ -228,3 +230,7 @@ script/model_training/configs
 !script/model_training/configs/config.yml
 
 whoot_model_training
+
+!/scripts #Explictly allow root scripts
+
+data
