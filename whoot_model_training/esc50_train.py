@@ -123,11 +123,11 @@ def train(config):
     )
 
     # COMMON OPTIONAL ARGS
-    training_args.num_train_epochs = 2
-    training_args.eval_steps = 100
+    training_args.num_train_epochs = 10
+    training_args.eval_steps = 10
     training_args.per_device_train_batch_size = 32
     training_args.per_device_eval_batch_size = 32
-    training_args.dataloader_num_workers = 6
+    training_args.dataloader_num_workers = 36
     training_args.run_name = run_name
 
     trainer = WhootTrainer(

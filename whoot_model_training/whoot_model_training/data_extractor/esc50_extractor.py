@@ -28,12 +28,8 @@ from ..dataset import AudioDataset
 
 
 def one_hot_encode(row: dict, classes: list):
-    """One hot Encodes a list of labels
-    Args:
-        row (dict): row of data in a dataset containing a labels column
-        classes: a list of classes
-    """
-    one_hot = np.zeros(len(classes))
+    # row["labels"] is an int after class_encode_column
+    one_hot = np.zeroes(len(classes))
     one_hot[row["labels"]] = 1
     row["labels"] = np.array(one_hot, dtype=float)
     return row
@@ -52,7 +48,6 @@ class ESC50Params():
     test_fold = 5
     sr = 44_100
     filepath = "filename"
-    label_col = "target"
 
 
 def esc50_extractor(
@@ -82,16 +77,15 @@ def esc50_extractor(
     """
     # Hugging face by default defines a train split
     ds = load_dataset("csv", data_files=metadata_csv)["train"]
-    ds = ds.rename_column(params.label_col, "labels")  # Convention here is labels
+    ds = ds.rename_column("category", "labels")  # Convention here is labels
 
     ds = ds.class_encode_column("labels")
+    
     class_list = ds.features["labels"].names
     
-    # One-hot encode to match BUOW format
     multilabel_class_label = Sequence(ClassLabel(names=class_list))
-    ds = ds.map(lambda row: one_hot_encode(row, class_list)).cast_column(
-        "labels", multilabel_class_label
-    )
+
+    ds = ds.map(lambda row: one_hot_encode(row, class_list)).cast_column("labels", multilabel_class_label)
 
     ds = ds.add_column(
         "audio", [
@@ -111,7 +105,10 @@ def esc50_extractor(
     ds = AudioDataset(
         DatasetDict({"train": train_ds, "valid": valid_ds, "test": test_ds})
     )
-
+    print(len(ds["train"]), len(ds["valid"]), len(ds["test"]))
+    ex = ds["test"][0]["labels"]
+    print(type(ex), len(ex), sum(ex))
+    print(ds["test"].features["labels"])
     ds.save_to_disk(output_path)
 
     return ds
