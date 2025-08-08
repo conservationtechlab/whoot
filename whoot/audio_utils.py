@@ -5,7 +5,7 @@ from pydub import AudioSegment
 import random
 
 
-def expand_window(audio, start_time, end_time, length=3000, random=False):
+def expand_window(audio, start_time, end_time, length=3000, randomize=False):
     """Expand the window size of a detection.
 
     If you have audio segments with a designated start and stop time
@@ -18,7 +18,7 @@ def expand_window(audio, start_time, end_time, length=3000, random=False):
         start_time (float): Millisecond in wav file where the detection began.
         end_time (float): Millisecond in wav file where detection ended.
         length (int): Duration in millisecond of the desired window length.
-        random (bool): If the window expansion will have the detection centered 
+        randomize (bool): If the window expansion will have the detection centered 
             or have randomized beginning and end window expansion.
 
     Returns:
@@ -27,13 +27,17 @@ def expand_window(audio, start_time, end_time, length=3000, random=False):
     duration = end_time - start_time
     if duration > length:
         segment = audio[start_time:end_time]
-    if random:
+    if randomize:
         diff = length-duration
         offset = random.uniform(0, diff)
         new_start = start_time-offset 
         end_offset = length-(offset+duration)
-        new_end = end_time + end_offset 
-        segment = audio[new_start:new_end] 
+        new_end = end_time + end_offset
+        try: 
+            segment = audio[new_start:new_end]
+        except Exception as e:
+            segment = audio[start_time:end_time]
+            print(f"audio segment is not long enough to window expand")
     else:
         half_diff = (length - duration)/2
         expanded_start = start_time - half_diff

@@ -30,7 +30,7 @@ def get_paths(home_dir):
     return wavs_file_paths
 
 
-def create_segments(wav, filtered_labels, out_path, class_list, we, random):
+def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
     """Create the labeled segments.
 
     Args:
@@ -86,7 +86,7 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, random):
                 start_time = start_time * 1000
                 end_time = end_time * 1000
                 if we:
-                    segment = expand_window(audio, start_time, end_time, random=random)
+                    segment = expand_window(audio, start_time, end_time, randomize=randomize)
                 else:
                     segment = audio[start_time:end_time]
                 segment_id = uuid.uuid4()
