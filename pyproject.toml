@@ -14,6 +14,10 @@ dependencies = [
     "tqdm>=4.67.1",
 ]
 
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project.optional-dependencies]
 cpu = [
   "torch>=2.7.0",
@@ -40,7 +44,13 @@ notebooks = [
 cu128 = "https://download.pytorch.org/whl/cu128"
 
 [tool.setuptools]
-packages = ["make_model", "assess_birdnet", "whoot_model_training"]
+packages = ["whoot"]
 
 [tool.uv.sources]
 pyha-analyzer = { git = "https://github.com/UCSD-E4E/pyha-analyzer-2.0.git", branch = "support_whoot" }
+whoot = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "whoot",
+]
