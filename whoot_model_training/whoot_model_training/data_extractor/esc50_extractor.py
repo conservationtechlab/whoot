@@ -1,4 +1,4 @@
-"""Standardizes the format of the buowset dataset
+"""Standardizes the format of the ESC-50 dataset
 
 Inspired by https://github.com/UCSD-E4E/pyha-analyzer-2.0/
     tree/main/pyha_analyzer/extractors
@@ -10,7 +10,9 @@ This way, it should be easier to define what a
 common audio dataset format is between
 parts of the codebase for training
 
-Supports both mutlilabel and binary labels
+Supports multilabel.
+
+Dataset: https://github.com/karolpiczak/ESC-50#
 """
 
 import os
@@ -28,7 +30,11 @@ from ..dataset import AudioDataset
 
 
 def one_hot_encode(row: dict, classes: list):
-    # row["labels"] is an int after class_encode_column
+    """One hot Encodes a list of labels
+    Args:
+        row (dict): row of data in a dataset containing a labels column
+        classes: a list of classes
+    """
     one_hot = np.zeroes(len(classes))
     one_hot[row["labels"]] = 1
     row["labels"] = np.array(one_hot, dtype=float)
@@ -42,7 +48,7 @@ class ESC50Params():
     validation_fold (int): label for valid split
     test_fold (int): label for valid split
     sample_rate (int): sample rate of the data
-    filepath (int): name of column in csv for filepaths
+    filepath (string): name of column in csv for filepaths
     """
     validation_fold = 4
     test_fold = 5
@@ -51,15 +57,15 @@ class ESC50Params():
 
 
 def esc50_extractor(
-    metadata_csv,
-    parent_path,
-    output_path,
-    params: ESC50Params = ESC50Params()
+        metadata_csv,
+        parent_path,
+        output_path,
+        params: ESC50Params = ESC50Params()
 ):
     """Extracts raw data in the ESC-50 format into an AudioDataset
 
     Args:
-        Metdata_csv (str): Path to csv containing buowset metadata
+        Metdata_csv (str): Path to csv containing ESC-50 metadata
         parent_path (str): Path to the parent folder for all audio data.
             Note its assumed the audio filepath
             in the csv is relative to parent_path
@@ -67,9 +73,9 @@ def esc50_extractor(
         validation_fold (int): which fold is considered the validation set
             Default 4
         test_fold (int): Which fold is considered the test set Default 3
-        sr (int): Sample Rate of the audio files Default: 32_000
+        sr (int): Sample Rate of the audio files Default: 44_100
         filepath (str): Name of the column in the dataset containing
-        the filepaths Default: segment
+        the filepaths Default: filename
 
     Returns:
         (AudioDataset): See dataset.py, AudioDatasets are consider
@@ -80,12 +86,14 @@ def esc50_extractor(
     ds = ds.rename_column("category", "labels")  # Convention here is labels
 
     ds = ds.class_encode_column("labels")
-    
+
     class_list = ds.features["labels"].names
-    
+
     multilabel_class_label = Sequence(ClassLabel(names=class_list))
 
-    ds = ds.map(lambda row: one_hot_encode(row, class_list)).cast_column("labels", multilabel_class_label)
+    ds = ds.map(lambda row: one_hot_encode(row, class_list)).cast_column(
+        "labels", multilabel_class_label
+    )
 
     ds = ds.add_column(
         "audio", [
@@ -99,16 +107,16 @@ def esc50_extractor(
     test_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
     valid_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
     train_ds = ds.filter(
-        lambda x: (x["fold"] != params.test_fold) and (x["fold"] != params.validation_fold)
+        lambda x: (
+            x["fold"] != params.test_fold
+            and x["fold"] != params.validation_fold
+        )
     )
 
     ds = AudioDataset(
         DatasetDict({"train": train_ds, "valid": valid_ds, "test": test_ds})
     )
-    print(len(ds["train"]), len(ds["valid"]), len(ds["test"]))
-    ex = ds["test"][0]["labels"]
-    print(type(ex), len(ex), sum(ex))
-    print(ds["test"].features["labels"])
+
     ds.save_to_disk(output_path)
 
     return ds
