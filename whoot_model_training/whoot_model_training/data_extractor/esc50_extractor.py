@@ -52,7 +52,7 @@ class ESC50Params():
     """
     validation_fold = 4
     test_fold = 5
-    sr = 44_100
+    sample_rate = 44_100
     filepath = "filename"
 
 
@@ -82,41 +82,46 @@ def esc50_extractor(
         the universal dataset for the training pipeline.
     """
     # Hugging face by default defines a train split
-    ds = load_dataset("csv", data_files=metadata_csv)["train"]
-    ds = ds.rename_column("category", "labels")  # Convention here is labels
+    dataset = load_dataset("csv", data_files=metadata_csv)["train"]
+    dataset = dataset.rename_column("category", "labels")
 
-    ds = ds.class_encode_column("labels")
+    dataset = dataset.class_encode_column("labels")
 
-    class_list = ds.features["labels"].names
+    class_list = dataset.features["labels"].names
 
     multilabel_class_label = Sequence(ClassLabel(names=class_list))
 
-    ds = ds.map(lambda row: one_hot_encode(row, class_list)).cast_column(
-        "labels", multilabel_class_label
+    dataset = dataset.map(
+        lambda row: one_hot_encode(row, class_list)
+    ).cast_column(
+        "labels",
+        multilabel_class_label
     )
 
-    ds = ds.add_column(
+    dataset = dataset.add_column(
         "audio", [
-            os.path.join(parent_path, file) for file in ds[params.filepath]
+            os.path.join(parent_path,
+                         file) for file in dataset[params.filepath]
         ]
     )
-    ds = ds.add_column("filepath", ds["audio"])
-    ds = ds.cast_column("audio", Audio(sampling_rate=params.sr))
+    dataset = dataset.add_column("filepath", dataset["audio"])
+    dataset = dataset.cast_column("audio",
+                                  Audio(sampling_rate=params.sample_rate))
 
     # Create splits of the data
-    test_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
-    valid_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
-    train_ds = ds.filter(
+    test_ds = dataset.filter(lambda x: x["fold"] == params.test_fold)
+    valid_ds = dataset.filter(lambda x: x["fold"] == params.validation_fold)
+    train_ds = dataset.filter(
         lambda x: (
             x["fold"] != params.test_fold
             and x["fold"] != params.validation_fold
         )
     )
 
-    ds = AudioDataset(
+    dataset = AudioDataset(
         DatasetDict({"train": train_ds, "valid": valid_ds, "test": test_ds})
     )
 
-    ds.save_to_disk(output_path)
+    dataset.save_to_disk(output_path)
 
-    return ds
+    return dataset
