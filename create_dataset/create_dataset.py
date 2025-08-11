@@ -9,11 +9,15 @@ the label, the original filepath of the original wav the segment came
 from, the path to the segment, and the start and end time of the
 labeled detection relative to the original wav file. The labeled
 segments will be the duration of the label, and the duration of the
-noise will be fixed and consistent. The user of the dataset may choose
-to pad the labeled detections if they need consistent length segments.
+noise will be fixed and consistent. Adding -we (window expansion)
+parameter will expand the window to a default 3s for detections,
+evenly expanding on both sides around the sample. -randomize
+parameter will randomly add window expansion to the default 3s
+but the detection can be anywhere within those 3s.
 
-Usage:
-    python3 create_dataset.py -labels /path/to/human/labeled.csv
+Usage (from /whoot):
+    python3 -m create_dataset.create_dataset
+    -labels /path/to/human/labeled.csv
     -wav_dir /path/to/parent/dir/of/wavs/
     -output_dir /path/to/desired/output/dir/
     -class_list /path/to/classes.txt
