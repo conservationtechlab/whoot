@@ -9,11 +9,11 @@ Usage:
     /path/to/buowset/metadata.csv
 """
 import argparse
-import pandas as pd
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score
-from sklearn.metrics import recall_score, f1_score
-from comet_ml import Experiment
 import random
+import pandas as pd
+from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import recall_score, f1_score, precision_score
+from comet_ml import Experiment
 
 
 def organize_birdnet_output(birdnet_results):
@@ -27,6 +27,7 @@ def organize_birdnet_output(birdnet_results):
     """
     birdnet_df = pd.read_pickle(birdnet_results)
     return birdnet_df
+
 
 def merge_metadata(metadata, birdnet_df):
     """Combine metadata and birdnet results by segment.
@@ -43,12 +44,15 @@ def merge_metadata(metadata, birdnet_df):
 
     return df_merged
 
+
 def map_binary_labels(merged_data):
     """Obtain the two dataframes for the predicted and true labels.
 
     Args:
     """
-    y_true = merged_data['label'].map({0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 0}).values
+    y_true = merged_data['label'].map(
+        {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 0}
+    ).values
     y_pred = merged_data['bn_label'].values
 
     return y_true, y_pred
@@ -58,7 +62,8 @@ def map_class_labels(merged_data, assess_class):
     """Create binary class vs no buow assessment for 1 class.
 
     Args:
-        merged_data (pd.DataFrame): The 
+        merged_data (pd.DataFrame): The birdnet label and ground truth
+            merged on segment name.
         assess_class (int): The number associated with the specific
             vocalization type to be assessed.
     """
@@ -120,8 +125,8 @@ def create_comet_exp():
     Returns:
         ()
     """
-    project = input("Enter the comet project name you'd like this experiment to have/be associated with: ")
-    work_space = input("Enter the comet workspace (username or organization) this experiment will go in: ")
+    project = input("Enter the comet project name: ")
+    work_space = input("Enter the comet workspace: ")
     experiment_name = input("Enter the name of this experiment: ")
     experiment = Experiment(
         project_name=project,
@@ -131,6 +136,7 @@ def create_comet_exp():
     experiment.add_tags(["burrowl", "birdnet", "binary-classification"])
 
     return experiment
+
 
 def main(birdnet_results, metadata, single_class, assess_class):
     """Assess birdnet.
@@ -152,28 +158,31 @@ def main(birdnet_results, metadata, single_class, assess_class):
     print(f"Matching ground truth labels to BirdNET results.")
     merged_data = merge_metadata(metadata, birdnet_df)
     print("Comparing BirdNET labels to ground truth.")
-    if single_class == False:
+    if single_class is False:
         print("Doing binary buow/no_buow assessment")
         y_true, y_pred = map_binary_labels(merged_data)
     else:
-        print(f"Assessing performance of Birdnet on vocalization: {assess_class}")
+        print(f"Assessing performance of Birdnet on: {assess_class}")
         y_true, y_pred = map_class_labels(merged_data, assess_class)
     assess_birdnet(y_true, y_pred, experiment=experiment)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
+    PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
         )
-    parser.add_argument('birdnet_results',
+    PARSER.add_argument('birdnet_results',
                         type=str,
                         help='Path to Birdnet results for padded buowset.')
-    parser.add_argument('metadata',
+    PARSER.add_argument('metadata',
                         type=str,
                         help='Path to buowset metadata file.')
-    parser.add_argument('-single_class', action='store_true',
-                        help='Default true binary assessment, call for individual class assessment.')
-    parser.add_argument('-assess_class', default=None, type=int,
-                        help='Which class would you like to assess individually?')
-    args = parser.parse_args()
-    main(args.birdnet_results, args.metadata, args.single_class, args.assess_class)
+    PARSER.add_argument('-single_class', action='store_true',
+                        help='Call for individual class assessment.')
+    PARSER.add_argument('-assess_class', default=None, type=int,
+                        help='Which class would you like to assess?')
+    ARGS = PARSER.parse_args()
+    main(ARGS.birdnet_results,
+         ARGS.metadata,
+         ARGS.single_class,
+         ARGS.assess_class)
