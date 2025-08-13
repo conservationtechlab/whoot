@@ -1,4 +1,4 @@
-""" Metrics for Bioacoustic Mutlilabel Models
+""" Metrics for Bioacoustic multilabel Models
 
 Helps us evaluate which models do well
 
@@ -25,7 +25,7 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
     def __init__(self, classes: list):
         self.classes = classes
         self.training = True
-        super().__init__([], len(classes), mutlilabel=True)
+        super().__init__([], len(classes), multilabel=True)
 
     def __call__(self, eval_pred) -> dict[str, float]:
         """Log all metrics

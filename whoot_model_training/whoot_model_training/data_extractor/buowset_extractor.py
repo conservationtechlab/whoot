@@ -10,7 +10,7 @@ This way, it should be easier to define what a
 common audio dataset format is between
 parts of the codebase for training
 
-Supports both mutlilabel and binary labels
+Supports both multilabel and binary labels
 """
 
 import os
@@ -86,9 +86,9 @@ def buowset_extractor(
     # Convert to a uniform one_hot encoding for classes
     ds = ds.class_encode_column("labels")
     class_list = ds.features["labels"].names
-    mutlilabel_class_label = Sequence(ClassLabel(names=class_list))
+    multilabel_class_label = Sequence(ClassLabel(names=class_list))
     ds = ds.map(lambda row: one_hot_encode(row, class_list)).cast_column(
-        "labels", mutlilabel_class_label
+        "labels", multilabel_class_label
     )
 
     # Get audio into uniform format
@@ -119,7 +119,7 @@ def buowset_extractor(
 
 
 def binarize_data(row, target_col=0):
-    """ Convert a mutlilabel label into a binary one
+    """ Convert a multilabel label into a binary one
 
     Args:
         row (dict): an example of data
@@ -157,14 +157,14 @@ def buowset_binary_extractor(
         the universal dataset for the training pipeline.
     """
 
-    # Use the original extractor to create a mutlilabeled dataset
+    # Use the original extractor to create a multilabeled dataset
     ads = buowset_extractor(
         metadata_csv,
         parent_path,
         output_path,
     )
 
-    # Now we just need to convert labels from mutlilabel to
+    # Now we just need to convert labels from multilabel to
     # 0 or 1
     binary_class_label = Sequence(ClassLabel(names=["no_buow", "buow"]))
     print(binary_class_label.feature.num_classes)

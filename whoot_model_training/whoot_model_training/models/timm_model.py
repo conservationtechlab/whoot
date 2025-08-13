@@ -83,7 +83,7 @@ class TimmModel(Model, nn.Module):
 
         # different losses if you want to train for different problems
         # BCEWithLogitsLoss is default as for Bioacoustics, the problem tends
-        # mutlilabel!
+        # multilabel!
         # the probability of class A occurring doesn't
         # change the probability of Class B
         # Many individuals can make calls at the same time!

@@ -38,7 +38,7 @@ The properties of `config.yml` are as follows:
 ### Buowset
 The filenames in metadata_csv are the audio files found in `data_path`. 
 
-`SUBPROJECT_NAME` is either "binary" or "mutlilabelClass"
+`SUBPROJECT_NAME` is either "binary" or "multilabelClass"
 `DATASET_NAME` is buowset0
 
 # Repo Philosophy  
@@ -46,7 +46,7 @@ The filenames in metadata_csv are the audio files found in `data_path`.
 The most challenging issue with machine learning is the dataset. This training repo intends to make it easy to modularize parts of the training pipeline, and integrate them together, ideally regardless of the dataset. 
 
 The pipeline works in 5 parts:
-- Extractors: Extractors take in raw data and reformats it into `AudioDatasets`, apache-arrow data structures implemented via HuggingFace with common columns between any dataset. Every label is one_hot_encoded and treated as mutlilabel regardless of the problem. Audio filepaths as casted into [Audio columns](https://huggingface.co/docs/datasets/v3.6.0/en/package_reference/main_classes#datasets.Audio). Extractors are *unique for each dataset* but *uniform in the AudioDataset*. 
+- Extractors: Extractors take in raw data and reformats it into `AudioDatasets`, apache-arrow data structures implemented via HuggingFace with common columns between any dataset. Every label is one_hot_encoded and treated as multilabel regardless of the problem. Audio filepaths as casted into [Audio columns](https://huggingface.co/docs/datasets/v3.6.0/en/package_reference/main_classes#datasets.Audio). Extractors are *unique for each dataset* but *uniform in the AudioDataset*. 
 
 - Preprocessors: Online preprocessors take rows in `AudioDatasets` and output `ModelInputs`, formatted data specific to a given model. Preprocessors read AudioDatasets and translate it so the Model can read it
 
