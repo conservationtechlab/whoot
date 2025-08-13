@@ -1,0 +1,2 @@
+#length added to beginning and end of detection segment (ms)
+padding: 100

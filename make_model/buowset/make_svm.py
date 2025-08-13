@@ -61,11 +61,9 @@ def make_x_and_y(embed_df):
     train_df = embed_df[embed_df['fold'].isin(TRAINING_FOLDS)]
     test_df = embed_df[embed_df['fold'].isin(TESTING_FOLDS)]
 
-    embedding_cols = embed_df.select_dtypes(include='float64').columns.tolist()
-
-    x_train = train_df[embedding_cols].values
+    x_train = list(train_df['embedding'].values)
     y_train = train_df['binary_label'].values
-    x_test = test_df[embedding_cols].values
+    x_test = list(test_df['embedding'].values)
     y_test = test_df['binary_label'].values
 
     return x_train, y_train, x_test, y_test

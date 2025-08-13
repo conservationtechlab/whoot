@@ -1,6 +1,6 @@
 [project]
 name = "whoot"
-version = "0.0.2.dev0"
+dynamic = ["version"]
 description = "Tools for capturing, analyzing, and parsing audio data"
 readme = "README.md"
 requires-python = ">= 3.10.0, < 3.13.0"
@@ -13,6 +13,16 @@ dependencies = [
     "scikit-learn>=1.7.0",
     "tqdm>=4.67.1",
 ]
+
+[dependency-groups]
+dev = [
+    "flake8>=7.3.0",
+    "pylint>=3.3.7",
+    "flake8-docstrings>=1.7.0",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "whoot.__version__"}
 
 [project.optional-dependencies]
 cpu = [
@@ -44,3 +54,4 @@ packages = ["make_model", "assess_birdnet", "whoot_model_training"]
 
 [tool.uv.sources]
 pyha-analyzer = { git = "https://github.com/UCSD-E4E/pyha-analyzer-2.0.git", branch = "support_whoot" }
+
