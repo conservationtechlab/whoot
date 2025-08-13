@@ -13,6 +13,13 @@ dependencies = [
     "tqdm>=4.67.1",
 ]
 
+[dependency-groups]
+dev = [
+    "flake8>=7.3.0",
+    "pylint>=3.3.7",
+    "flake8-docstrings>=1.7.0",
+]
+
 [tool.setuptools.dynamic]
 version = {attr = "whoot.__version__"}
 
