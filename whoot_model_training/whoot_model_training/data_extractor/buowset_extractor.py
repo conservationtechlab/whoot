@@ -102,8 +102,8 @@ def buowset_extractor(
     ds = ds.cast_column("audio", Audio(sampling_rate=params.sr))
 
     # Create splits of the data
-    test_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
-    valid_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
+    test_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
+    valid_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
     train_ds = ds.filter(
         lambda x: x[
             "fold"
