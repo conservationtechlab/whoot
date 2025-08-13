@@ -1,4 +1,4 @@
-"""Standardizes the format of the ESC-50 dataset
+"""Standardizes the format of the ESC-50 dataset.
 
 Inspired by https://github.com/UCSD-E4E/pyha-analyzer-2.0/
     tree/main/pyha_analyzer/extractors
@@ -30,7 +30,8 @@ from ..dataset import AudioDataset
 
 
 def one_hot_encode(row: dict, classes: list):
-    """One hot Encodes a list of labels
+    """One hot Encodes a list of labels.
+
     Args:
         row (dict): row of data in a dataset containing a labels column
         classes: a list of classes
@@ -43,7 +44,7 @@ def one_hot_encode(row: dict, classes: list):
 
 @dataclass
 class ESC50Params():
-    """Parameters that describe ESC-50
+    """Parameters that describe ESC-50.
 
     validation_fold (int): label for valid split
     test_fold (int): label for valid split
@@ -62,7 +63,7 @@ def esc50_extractor(
         output_path,
         params: ESC50Params = ESC50Params()
 ):
-    """Extracts raw data in the ESC-50 format into an AudioDataset
+    """Extracts raw data in the ESC-50 format into an AudioDataset.
 
     Args:
         Metdata_csv (str): Path to csv containing ESC-50 metadata

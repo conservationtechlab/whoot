@@ -1,4 +1,4 @@
-"""Abstract Model Class for training
+"""Abstract Model Class for training.
 
 Any model trained with this repo SHOULD inherit from these classes found here
 
@@ -54,7 +54,7 @@ def has_required_inputs():
 
 
 class ModelOutput(dict, UserDict):
-    """ModelOutput
+    """ModelOutput.
 
     Object that stores the output of a model
     This allows for standardizing model outputs
@@ -78,6 +78,15 @@ class ModelOutput(dict, UserDict):
         labels: np.ndarray | None = None,
         loss: np.ndarray | None = None,
     ):
+        """Create a new output to a model!
+
+        Args:
+            logits: raw output from model
+            embeddings: some latent space encoding of data
+                Useful for transfer learning!
+            labels: labels for computing metrics
+            loss: loss as computed by the model
+        """
         super().__init__({
                 "predictions": logits,
                 "logits": logits,
@@ -88,6 +97,10 @@ class ModelOutput(dict, UserDict):
             })
 
     def items(self):
+        """Get all items in dict.
+
+        But only if they are defined (not null)!
+        """
         return [
             (key, value) for (
                 key, value
@@ -95,8 +108,7 @@ class ModelOutput(dict, UserDict):
 
 
 class ModelInput(UserDict, dict):
-
-    """ModelInput
+    """ModelInput.
 
     Specifies Input Types
     Hopefully should help standardize formatting for models
@@ -114,6 +126,13 @@ class ModelInput(UserDict, dict):
         waveform: np.ndarray | None = None,
         spectrogram: np.ndarray | None = None,
     ):
+        """Create a new input to a model!
+
+        Args:
+            labels: one_hot encoded labels
+            waveform: raw audio signal
+            spectrogram: 2d matrix to represent the waveform
+        """
         super().__init__({
             "labels": labels,
             "waveform": waveform,
@@ -121,6 +140,10 @@ class ModelInput(UserDict, dict):
         })
 
     def items(self):
+        """Get all items in dict.
+
+        But only if they are defined (not null)!
+        """
         return [
             (key, value) for (
                 key, value
@@ -129,7 +152,9 @@ class ModelInput(UserDict, dict):
 
     @classmethod
     def from_dict(cls, some_input: dict):
-        """Sometimes inputs are given as kwargs
+        """Recreates input for models!
+
+        Sometimes inputs are given as kwargs
         So lets recreate correct inputs for model
         via building from a dictionary!
         """
@@ -146,17 +171,24 @@ class ModelInput(UserDict, dict):
 
 
 class Model(PreTrainedModel, BaseModel):
-    """BaseModel Class for Whoot
-    """
-    def __init__(self, *args, **kwargs):
+    """BaseModel Class for Whoot."""
+    def __init__(self):
+        """Creates a basic model format.
+
+        Anytime you create a new model, check if you need
+        to specify an input and output format for this model!
+        """
         self.input_format = ModelInput
         self.output_format = ModelOutput
-        super().__init__(PretrainedConfig())
-        super(BaseModel).__init__(*args, **kwargs)
-        
+        PreTrainedModel.__init__(self, PretrainedConfig())
+
+        assert hasattr(self.forward, "__wrapped__"), (
+            "Please put `@has_required_inputs()",
+            "on the forward function of the model"
+        )
 
     def get_embeddings(self, x: ModelInput) -> np.array:
-        """Gets an embedding for the model
+        """Gets an embedding for the model.
 
         This can be the final layer of a model backbone
         or a set of useful features
@@ -173,8 +205,7 @@ class Model(PreTrainedModel, BaseModel):
     @abstractmethod
     @has_required_inputs()
     def forward(self, x: ModelInput) -> ModelOutput:
-        """
-        Runs some input x through the model
+        """Runs some input x through the model.
 
         In PyTorch models, this is the same forward function logits
         We just apply the convention for non Pytorch models,
@@ -184,3 +215,11 @@ class Model(PreTrainedModel, BaseModel):
         Returns:
             ModelOutput: dict, a dictionary like object that describes
         """
+
+    def get_position_embeddings(self):
+        """Required by PretrainedModel, not needed for our work yet!"""
+        print("this model doesn't support position_embeddings")
+
+    def resize_position_embeddings(self, new_num_position_embeddings: int):
+        """Required by PretrainedModel, not needed for our work yet!"""
+        print("this model doesn't support position_embeddings")

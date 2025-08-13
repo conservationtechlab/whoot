@@ -1,4 +1,5 @@
-"""
+"""Defines preprocessors for creating spectrograms.
+
 Pulled from pyha_analyzer/preprocessors/spectogram_preprocessors.py
 """
 from dataclasses import dataclass
@@ -12,7 +13,7 @@ from pyha_analyzer.preprocessors import PreProcessorBase
 
 @dataclass
 class SpectrogramParams:
-    """ Dataclass for spectrogram Parameters
+    """Dataclass for spectrogram Parameters.
 
     n_fft: (int) number of fft bins
     hop_length (int) skip count
@@ -27,7 +28,7 @@ class SpectrogramParams:
 
 @dataclass
 class Augmentations():
-    """Dataclass for the augmentations of the model
+    """Dataclass for the augmentations of the model.
 
     audio (list[dict]): per item key name of augmentation,
         value is the augmentation
@@ -39,7 +40,8 @@ class Augmentations():
 
 
 class BuowMelSpectrogramPreprocessors(PreProcessorBase):
-    """Preprocessor for processing audio into spectrograms
+    """Preprocessor for processing audio into spectrograms.
+
     Particularly for the buow dataset
     """
 
@@ -49,6 +51,14 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         augments: Augmentations = Augmentations(),
         spectrogram_params: SpectrogramParams = SpectrogramParams()
     ):
+        """Defines a BuowMelSpectrogramPreprocessors.
+
+        Args:
+            duration (float): length of chunk of data to train on
+            augments (Augmentations): An augmentation to apply to waveforms
+            spectrogram_params (SpectrogramParams):
+                config for spectrogram generation
+        """
         self.duration = duration
         self.augments = augments
 
@@ -62,6 +72,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         super().__init__(name="MelSpectrogramPreprocessor")
 
     def __call__(self, batch):
+        """Process a batch of data from an AudioDataset."""
         new_audio = []
         new_labels = []
         for item_idx in range(len(batch["audio"])):
@@ -109,12 +120,21 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         return batch
 
     def get_augmentations(self):
-        """Returns a list of augmentations
+        """Returns a list of augmentations.
+
         Perhaps for logging purposes
+
+        Returns:
+            (list) all the augmentations
         """
         return self.augments
 
     def __repr__(self):
+        """Use representation to describe the augmentations.
+
+        Returns:
+            (str) all information about this preprocessor
+        """
         return (
             f"""{self.name}
                 Augmentations: {self.augments}

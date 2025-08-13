@@ -1,4 +1,5 @@
-""" Everything needed to train
+"""Everything needed to train!
+
 given a model and a dataset
 
 WhootTrainingArguments: A container for the
@@ -19,13 +20,20 @@ from .models import Model
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):
-    """Holds arguments use for training
-    """
+    """Holds arguments use for training."""
     def __init__(self,
-                 run_name,
+                 run_name: str,
                  subproject_name: str = "TESTING",
                  dataset_name: str = "DS_404"):
+        """Create Arguments.
 
+        Args:
+            run_name (str): name of the current run
+            subproject_name (str): name of subproject
+                These experiments are a part of
+            dataset_name (str): name of dataset
+                used for model experiments
+        """
         assert subproject_name is not None
         assert dataset_name is not None
 
@@ -51,21 +59,7 @@ class WhootTrainingArguments(PyhaTrainingArguments):
 
 
 class WhootTrainer(PyhaTrainer):
-    """Trainers run the training of a model
-
-    Model (Model): a pytorch model for training
-        should inherit from BaseModel
-        see `models/model.py`
-    Dataset (AudioDataset): A canonical audio dataset
-        Ideally attached some a preprocessor and returns ModelInputs
-    training_args (WhootTrainingArugments):
-        All the parameters that define training
-    Logger (CometMLLoggerSupplement):
-        Class that adds additional logging
-        On top of logging done by PyhaTrainer
-    preprocessor (PreProcessorBase):
-        Preprocessor used for formatting the data
-    """
+    """Trainers run the training of a model."""
     # WhootTrainer is ment to mimic the huggingface trainer
     # Including number of arguments
     # Aside, we really should consider how useful R0913,R0917 is...
@@ -79,9 +73,23 @@ class WhootTrainer(PyhaTrainer):
         logger=None,
         preprocessor=None,
     ):
+        """Creates a trainer to hold training setup.
 
+        Args:
+            model (Model): a pytorch model for training
+                should inherit from BaseModel see `models/model.py`
+            dataset (AudioDataset): A canonical audio dataset
+                Ideally attached some a preprocessor and returns ModelInputs
+            training_args (WhootTrainingArugments):
+                All the parameters that define training
+            logger (CometMLLoggerSupplement):
+                Class that adds additional logging
+                On top of logging done by PyhaTrainer
+            preprocessor (PreProcessorBase):
+                Preprocessor used for formatting the data
+        """
         metrics = WhootMutliClassMetrics(dataset.get_class_labels().names)
-        print(logger, type(logger))
+
         if logger is not None:
             logger.log_task(training_args.task_name)
 

@@ -1,4 +1,5 @@
-"""
+"""The Canonical Dataset used for any and all bioacoustic training.
+
 Pulled from:
 https://github.com/UCSD-E4E/pyha-analyzer-2.0/blob/main/pyha_analyzer/dataset.py
 Key idea is we define a generic AudioDataset with uniform features
@@ -14,8 +15,7 @@ DEFAULT_COLUMNS = ["labels", "audio"]
 
 
 class AudioDataset(DatasetDict):
-    """
-    AudioDataset Class
+    """AudioDataset Class.
 
     If your dataset is an AudioDataset, it can be read by
     the rest of the system
@@ -29,12 +29,16 @@ class AudioDataset(DatasetDict):
     - audio (Audio Column type from hugging face)
     """
     def __init__(self, ds: DatasetDict):
+        """Creates the Audio Datasets.
+
+        ds should be in the AudioDataset format after
+        being extracted by extractors
+        """
         self.validate_format(ds)
         super().__init__(ds)
 
     def validate_format(self, ds: DatasetDict):
-        """Validates dataset is correctly formatted and ready to be used for
-        training
+        """Validates dataset is correctly formatted.
 
         Raises:
             AssertionError if dataset is not correctly formatted.
@@ -51,28 +55,30 @@ class AudioDataset(DatasetDict):
                 assert column in dataset.features, state
 
     def get_num_classes(self):
-        """
-            Returns:
-                (int): the number of classes in this dataset
+        """Gets the number of classes in the dataset.
+
+        Returns:
+            (int): the number of classes in this dataset
         """
         return self["train"].features["labels"].feature.num_classes
 
     def get_number_species(self) -> int:
-        """
-            PyhaAnalyzer uses `get_number_species` for getting class count
-            This... isn't always the case that the dataset is species only
-            (could have calls!)
-            To support legacy PyhaAnalyzer, we therefore have this function.
+        """Get the number of classes in the dataset!
 
-            This should be deprecated in future versions of PyhaAnalyzer
+        PyhaAnalyzer uses `get_number_species` for getting class count
+        This... isn't always the case that the dataset is species only
+        (could have calls!)
+        To support legacy PyhaAnalyzer, we therefore have this function.
 
-            return
-                (int): number of classes
+        This should be deprecated in future versions of PyhaAnalyzer
+
+        Returns:
+            (int): number of classes
         """
         return self.get_num_classes()
 
     def get_class_labels(self) -> ClassLabel:
-        """Class mapping for this dataset
+        """Class mapping for this dataset.
 
         A common problem is when moving between datasets
         creating mappings between classes

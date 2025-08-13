@@ -1,4 +1,4 @@
-"""Standardizes the format of the buowset dataset
+"""Standardizes the format of the buowset dataset.
 
 Inspired by https://github.com/UCSD-E4E/pyha-analyzer-2.0/
     tree/main/pyha_analyzer/extractors
@@ -28,7 +28,8 @@ from ..dataset import AudioDataset
 
 
 def one_hot_encode(row: dict, classes: list):
-    """One hot Encodes a list of labels
+    """One hot Encodes a list of labels.
+
     Args:
         row (dict): row of data in a dataset containing a labels column
         classes: a list of classes
@@ -41,12 +42,13 @@ def one_hot_encode(row: dict, classes: list):
 
 @dataclass
 class BuowsetParams():
-    """Parameters that describe the Buowset
+    """Parameters that describe the Buowset.
 
-    validation_fold (int): label for valid split
-    test_fold (int): label for valid split
-    sample_rate (int): sample rate of the data
-    filepath (int): name of column in csv for filepaths
+    Args:
+        validation_fold (int): label for valid split
+        test_fold (int): label for valid split
+        sample_rate (int): sample rate of the data
+        filepath (int): name of column in csv for filepaths
     """
     validation_fold = 4
     test_fold = 3
@@ -60,7 +62,7 @@ def buowset_extractor(
     output_path,
     params: BuowsetParams = BuowsetParams()
 ):
-    """Extracts raw data in the buowset format into an AudioDataset
+    """Extracts raw data in the buowset format into an AudioDataset.
 
     Args:
         Metdata_csv (str): Path to csv containing buowset metadata
@@ -119,13 +121,13 @@ def buowset_extractor(
 
 
 def binarize_data(row, target_col=0):
-    """ Convert a multilabel label into a binary one
+    """Convert a multilabel label into a binary one.
 
     Args:
         row (dict): an example of data
         target_col (int): which index is the label for no_buow
 
-    returns
+    Returns:
         row (dict): now with a binary label instead
     """
     row["labels"] = [row["labels"][target_col], 1-row["labels"][target_col]]
@@ -137,10 +139,11 @@ def buowset_binary_extractor(
         parent_path,
         output_path,
         target_col=0):
-    """Extracts raw data in the buowset format into an AudioDataset
-        BUT only allows for two classes: no_buow, yes_buow
+    """Extracts raw data in the buowset format into an AudioDataset.
 
-     Args:
+    BUT only allows for two classes: no_buow, yes_buow
+
+    Args:
         Metdata_csv (str): Path to csv containing buowset metadata
         parent_path (str): Path to the parent folder for all audio data.
             Note its assumed the audio filepath
@@ -156,7 +159,6 @@ def buowset_binary_extractor(
         (AudioDataset): See dataset.py, AudioDatasets are consider
         the universal dataset for the training pipeline.
     """
-
     # Use the original extractor to create a multilabeled dataset
     ads = buowset_extractor(
         metadata_csv,
@@ -167,12 +169,9 @@ def buowset_binary_extractor(
     # Now we just need to convert labels from multilabel to
     # 0 or 1
     binary_class_label = Sequence(ClassLabel(names=["no_buow", "buow"]))
-    print(binary_class_label.feature.num_classes)
     for split in ads:
         ads[split] = ads[split].map(
             lambda row: binarize_data(row, target_col=target_col)
         ).cast_column("labels", binary_class_label)
-
-    print(ads.get_num_classes())
 
     return ads

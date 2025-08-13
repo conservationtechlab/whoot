@@ -1,4 +1,4 @@
-"""A zoo for extractors
+"""A zoo for extractors.
 
 Extractors convert raw data into AudioDatasets
 Ideally you make a new Extractor for each new raw dataset

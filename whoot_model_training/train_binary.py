@@ -1,4 +1,4 @@
-"""Trains a Mutliclass Model with Pytorch and Huggingface
+"""Trains a Mutliclass Model with Pytorch and Huggingface.
 
 This script can be used to run experiments with different
 models and datasets to create any model for bioacoustic classification
@@ -18,7 +18,7 @@ import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.data_extractor import buowset_binary_extractor
-from whoot_model_training.models import TimmModel, TimmInputs
+from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
 from whoot_model_training.preprocessors import (
@@ -34,12 +34,12 @@ from whoot_model_training.preprocessors import (
 
 
 def parse_config(config_path: str) -> dict:
-    """wrapper to parse config
+    """Wrapper to parse config.
 
     Args:
         config_path (str): path to config file for training!
 
-    returns:
+    Returns:
         (dict): hyperparameters parameters
     """
     config = {}
@@ -49,7 +49,7 @@ def parse_config(config_path: str) -> dict:
 
 
 def train(config):
-    """Highest level logic for training
+    """Highest level logic for training!
 
     Does the following:
     - Formats the dataset into an AudioDataset
@@ -61,7 +61,6 @@ def train(config):
     Args:
         config (dict): the config used for training. Defined in yaml file
     """
-
     # Extract the dataset
     ds = buowset_binary_extractor(
         metadata_csv=config["metadata_csv"],
@@ -71,8 +70,10 @@ def train(config):
 
     # Create the model
     run_name = "efficientnet_b1_testing_confusion_matrix_no_data_aug"
-    model = TimmModel(timm_model="efficientnet_b1",
-                      num_classes=ds.get_num_classes())
+    model_config = TimmModelConfig(
+        timm_model="efficientnet_b1",
+        num_classes=ds.get_num_classes())
+    model = TimmModel(model_config)
 
     # Preprocessors
 
@@ -142,7 +143,7 @@ def train(config):
 
 
 def init_env(config: dict):
-    """Sets up local environment for COMET-ML training logging
+    """Sets up local environment for COMET-ML training logging.
 
     Args: config (dict): at a minimum this has the project name
         and CUDA devices that are allowed to be used.

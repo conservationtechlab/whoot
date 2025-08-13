@@ -1,4 +1,4 @@
-"""a Bioacoustic Model Zoo
+"""a Bioacoustic Model Zoo!
 
 Example:
     `from whoot_model_training.models import TimmModel

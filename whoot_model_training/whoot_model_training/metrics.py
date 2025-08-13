@@ -1,4 +1,4 @@
-""" Metrics for Bioacoustic multilabel Models
+"""Metrics for Bioacoustic multilabel Models.
 
 Helps us evaluate which models do well
 
@@ -19,23 +19,30 @@ from pyha_analyzer.metrics.classification_metrics  \
 
 
 class WhootMutliClassMetrics(AudioClassificationMetrics):
-    """Gets CMAP, ROCAUC, and confusion matrices and reports them to
-    Comet-ML dashboards
+    """Report metrics to logging.
+
+    Supports CMAP, ROCAUC, and confusion matrices.
+    and reports them to Comet-ML dashboards
     """
     def __init__(self, classes: list):
+        """Initializes metric reporting.
+
+        classes (list): all classes used by model
+        """
         self.classes = classes
         self.training = True
         super().__init__([], len(classes), multilabel=True)
 
     def __call__(self, eval_pred) -> dict[str, float]:
-        """Log all metrics
+        """Log all metrics.
 
-        eval_pred: package of data provided by trainer
-            contains
-                - predictions: np.array of model outputs
-                - label_ids: np.array of ground truth targets
+        Args:
+            eval_pred: package of data provided by trainer
+                contains
+                    - predictions: np.array of model outputs
+                    - label_ids: np.array of ground truth targets
 
-        returns:
+        Returns:
             (dict) key name of metric, float metric score
         """
         # CMAP / ROCAUC, done by AudioClassificationMetrics
@@ -48,7 +55,7 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
         return initial_metrics
 
     def log_comet_ml_only(self, eval_pred):
-        """Logs confusion matrix
+        """Logs confusion matrix.
 
         eval_pred: package of data provided by trainer
             contains

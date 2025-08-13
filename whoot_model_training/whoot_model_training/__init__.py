@@ -1,5 +1,4 @@
-"""Logging Toolkit for different MLops platforms
-"""
+"""Logging Toolkit for different MLops platforms."""
 
 from .logger import CometMLLoggerSupplement
 

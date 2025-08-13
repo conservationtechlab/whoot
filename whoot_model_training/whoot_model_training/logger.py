@@ -1,4 +1,4 @@
-""" Contains useful tools for additional logging
+"""Contains useful tools for additional logging.
 
 For example, CometMLLoggerSupplement adds additional
 logging for data augmentations used compared
@@ -23,13 +23,25 @@ class CometMLLoggerSupplement():
     """
 
     def __init__(self, augmentations, name):
+        """Log in and start new experiment.
+
+        Args:
+            augmentations: list of augmentations
+                To record what was used during run
+            name (str): run name
+        """
         comet_ml.login()
         self.start(augmentations, name)
 
     def start(self, augmentations, name):
-        """Begins a new set of experiments
+        """Begins a new set of experiments.
 
         Helpful for cases where a new run has begun
+
+        Args:
+            augmentations: list of augmentations
+                To record what was used during run
+            name (str): run name
         """
         self.experiment = comet_ml.start()
 
@@ -37,12 +49,11 @@ class CometMLLoggerSupplement():
         self.experiment.set_name(name)
 
     def end(self):
-        """Fully ends experiment if still running
-        """
+        """Fully ends experiment if still running."""
         return self.experiment.end()
 
     def log_task(self, task_name):
-        """Log what task this model should be listed under
+        """Log what task this model should be listed under.
 
         Args:
             task_name: usually what task the model is doing
