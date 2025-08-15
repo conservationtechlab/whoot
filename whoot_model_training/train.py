@@ -69,9 +69,10 @@ def train(config):
     )
 
     # Create the model
-    run_name = "flac_pylint_test_efficientnet_b1_buowset"
+    model_name = "efficientnet_b1"
+    run_name = f"buowset1.1_{model_name}"
     model_config = TimmModelConfig(
-        timm_model="efficientnet_b1",
+        timm_model=model_name,
         num_classes=ds.get_num_classes())
     model = TimmModel(model_config)
 
@@ -122,11 +123,11 @@ def train(config):
     )
 
     # COMMON OPTIONAL ARGS
-    training_args.num_train_epochs = 2
+    training_args.num_train_epochs = 5
     training_args.eval_steps = 100
-    training_args.per_device_train_batch_size = 32
-    training_args.per_device_eval_batch_size = 32
-    training_args.dataloader_num_workers = 36
+    training_args.per_device_train_batch_size = 16
+    training_args.per_device_eval_batch_size = 16
+    training_args.dataloader_num_workers = 1
     training_args.run_name = run_name
 
     trainer = WhootTrainer(
