@@ -207,3 +207,22 @@ pip-selfcheck.json
 # End of https://www.toptal.com/developers/gitignore/api/python,venv,visualstudiocode
 
 uv.lock
+.ruff_cache
+
+# Data Folders
+data
+
+# Model Storage
+model_checkpoints/*
+
+
+# testing/debugging notebooks
+test.ipynb
+buowset.ipynb
+
+# Question: do we want to commit vscode setting.json files?
+settings.json
+
+# Block all configs besides the example config
+whoot_model_training/configs
+!whoot_model_training/configs/config.yml

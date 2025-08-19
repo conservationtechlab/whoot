@@ -1,2 +1,3 @@
+[disable]
 max-args=10
 max-positional-arguments=10
