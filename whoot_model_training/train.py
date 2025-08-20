@@ -24,6 +24,7 @@ from whoot_model_training import CometMLLoggerSupplement
 from whoot_model_training.preprocessors import (
     MelModelInputPreprocessor
 )
+from whoot_model_training.preprocessors.spectrogram_preprocessors import SpectrogramParams
 
 # Uncomment for use with data augmentation
 # from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
@@ -69,7 +70,9 @@ def train(config):
     )
 
     # Create the model
+    #model_name = "vit_base_patch16_224.augreg2_in21k_ft_in1k"
     model_name = "efficientnet_b1"
+
     run_name = f"buowset1.1_{model_name}"
     model_config = TimmModelConfig(
         timm_model=model_name,
@@ -102,13 +105,30 @@ def train(config):
     #     )
     # ])
 
+    spectrogram_params = SpectrogramParams()
+    # spectrogram_params = SpectrogramParams(
+    #     n_mels = 224,
+    #     hop_length = 286,
+    # )
+    # """Dataclass for spectrogram Parameters.
+
+    # n_fft: (int) number of fft bins
+    # hop_length (int) skip count
+    # power: (float) usually 2
+    # n_mels: (int) number of mel bins
+    # """
+    # n_fft: int = 2048
+    # hop_length: int = 256
+    # power: float = 2.0
+    # n_mels: int = 256
+
     # Online preprocessors prepare data for training
     train_preprocessor = MelModelInputPreprocessor(
-        TimmInputs, duration=3
+        TimmInputs, duration=3, spectrogram_params=spectrogram_params
     )
 
     preprocessor = MelModelInputPreprocessor(
-        TimmInputs, duration=3
+        TimmInputs, duration=3, spectrogram_params=spectrogram_params
     )
 
     ds["train"].set_transform(train_preprocessor)

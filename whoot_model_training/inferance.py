@@ -69,15 +69,54 @@ def test(config, model_name=""):
     )
 
     ds["train"].set_transform(preprocessor)
+    ds["valid"].set_transform(preprocessor)
+    ds["test"].set_transform(preprocessor)
 
+
+    model_name = "efficientnet_b1"
+    run_name = f"buowset1.1_{model_name}"
+
+    # trainer = WhootTrainer._load_from_checkpoint(model_name)
+    
+    # Run training
+    training_args = WhootTrainingArguments(
+        run_name=run_name,
+        subproject_name=config["SUBPROJECT_NAME"]+"_INFERANCE",
+        dataset_name=config["DATASET_NAME"],
+    )
+
+    # COMMON OPTIONAL ARGS
+    training_args.num_train_epochs = 5
+    training_args.eval_steps = 100
+    training_args.per_device_train_batch_size = 16
+    training_args.per_device_eval_batch_size = 16
+    training_args.dataloader_num_workers = 1
+    training_args.run_name = run_name
+
+    trainer = WhootTrainer(
+        model=model,
+        dataset=ds,
+        training_args=training_args,
+        logger=CometMLLoggerSupplement(
+            augmentations=None,
+            name=training_args.run_name
+        ),
+    )
+
+    print(ds["train"].shape, ds["test"].shape, ds["valid"].shape)
+    input()
+    trainer.evaluate(ds["train"], metric_key_prefix="train")
+    trainer.evaluate(ds["test"], metric_key_prefix="test")
+    trainer.evaluate(ds["valid"], metric_key_prefix="valid")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")
     parser.add_argument("config", type=str, help="Path to config.yml")
     parser.add_argument(
-        "model_name", 
+        "--model_name", 
+        required=False,
         help="path to weights or hugging face repo id",
-        default="/home/sean/whoot/model_checkpoints/buowset1.1_efficientnet_b1_08_15_2025_13:16:04/checkpoint-1580")
+        default="/home/sean/whoot/model_checkpoints/buowset1.1_efficientnet_b1_08_20_2025_14:00:56/checkpoint-4985")
     args = parser.parse_args()
     _config = parse_config(args.config)
 
