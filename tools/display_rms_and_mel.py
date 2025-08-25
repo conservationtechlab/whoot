@@ -1,10 +1,20 @@
+"""Display RMS and Mel-Spectrogram
+
+For a given audio file, you can visualize the RMS and
+the associated Mel-Spectrogram with the same time-step to
+see how they relate. Replace the filename variable with the
+path to your specific audio file.
+
+Usage:
+    python3 display_rms_and_mel.py
+"""
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
-import soundfile as sf
 
-FILENAME = '/mnt/projects/PandaBear/acoustics/zoo_recordings/2025-05-23/SMM1/GPBZ_SMM01_20250523_103000.wav'  # change to path of your sound file
+
+FILENAME = '<path/to/audio/file.wav>'
 FRAME_LENGTH = 2048
 HOP_LENGTH = 512
 NUM_SECONDS_OF_SLICE = 3
