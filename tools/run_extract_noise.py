@@ -18,7 +18,7 @@ Usage:
 import argparse
 import os
 import yaml
-from extract_noise import clip_loud_segments
+from whoot.extract_noise import clip_loud_segments
 
 
 if __name__ == "__main__":
