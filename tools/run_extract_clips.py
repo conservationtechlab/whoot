@@ -35,6 +35,6 @@ if __name__ == "__main__":
     for file in all_files:
         try:
             print(f"running {file}")
-            main(os.path.join(config['audio'], file), out)
+            clip_loud_segments(os.path.join(config['audio'], file), out)
         except Exception as e:
             print(f"couldnt load {file} because {e}")
