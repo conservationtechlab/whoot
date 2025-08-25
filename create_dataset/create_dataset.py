@@ -151,4 +151,9 @@ if __name__ == "__main__":
     PARSER.add_argument('-randomize', action='store_true',
                         help='Call for randomly distributed expanded window')
     ARGS = PARSER.parse_args()
-    main(ARGS.labels, ARGS.wav_dir, ARGS.output_dir, ARGS.class_list, ARGS.we, ARGS.randomize)
+    main(ARGS.labels,
+         ARGS.wav_dir,
+         ARGS.output_dir,
+         ARGS.class_list,
+         ARGS.we,
+         ARGS.randomize)
