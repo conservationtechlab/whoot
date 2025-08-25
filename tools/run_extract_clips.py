@@ -1,7 +1,24 @@
-from extract_noise import main
+"""Create segments of noisy audio from wavs.
+
+This script uses the extract noise function to
+calculate the average RMS of a given wav file,
+and then creates 3 second segments where the
+RMS peaked above the average. This main script
+parses through a directory and sends each wav
+file through the function. The extract_noise.yaml
+is an example of the config file needed, copy
+it and fill it out prior to running script.
+
+Usage:
+
+    python3 run_extract_noise.py
+    -config /path/to/extract_noise_copy.yaml
+
+"""
 import argparse
 import os
 import yaml
+from extract_noise import main
 
 
 if __name__ == "__main__":
