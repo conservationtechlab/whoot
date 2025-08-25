@@ -3,8 +3,10 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 import soundfile as sf
+import os
 
-def main(file):
+
+def main(file, out):
     FILENAME = file  # change to path of your sound file
     FRAME_LENGTH = 4096
     HOP_LENGTH = 2048
@@ -59,13 +61,14 @@ def main(file):
                     right_index = real_index + half_slice_width
 # current left index needs to be greater than the last right index to prevent overlap
                     last_right_index = right_index
-
+                    filename = os.path.basename(file)
+                    filename = filename.strip('.wav')
                     print(f"right index to start clip: {right_index}")
                     sound_slice = sound[left_index:right_index]
-
-                    sf.write(f"/home/katiegarwood/test_panda/clip{index}.wav", sound_slice, sr)
+                    name = out + filename + "_" + str(index) + ".wav"
+                    sf.write(name, sound_slice, sr)
                     yes_counter = 0
-                    print("created clip, setting yes_counter back to 0")
+                    print(f"created {name}, setting yes_counter back to 0")
                 else:
                     print("skipping this clip because it would overlap with the last one")
 
@@ -80,10 +83,12 @@ def main(file):
 
             print(f"right index to start clip: {right_index}")
             sound_slice = sound[left_index:right_index]
+            filename = os.path.basename(file)
+            filename = filename.strip('.wav')
+            name = out + filename + "_" + str(index) + ".wav"
 
-            sf.write(f"/home/katiegarwood/test_panda/clip{index}.wav", sound_slice, sr)
-            print("created clip, setting yes_counter back to 0")
-            sf.write("/home/katiegarwood/test_panda/clip.wav", sound_slice, sr)
+            sf.write(NAME, sound_slice, sr)
+            print("end of clip")
         else:
             print("skipping this clip because it qould overlap with the last one")
 
