@@ -11,7 +11,7 @@ import numpy as np
 import soundfile as sf
 
 
-def main(file, out):
+def clip_loud_segments(file, out):
     """Extract loud segments from a wav file.
 
     Args:
