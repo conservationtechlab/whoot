@@ -1,3 +1,3 @@
-audio: /mnt/projects/PandaBear/acoustics/zoo_recordings/2025-05-23/SMM1/
-out: /home/katiegarwood/2025-05-23_SMM1_rms_clips/
+audio: /path/to/audio/file/dir/
+out: /path/to/output/folder/
 
