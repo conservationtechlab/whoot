@@ -31,7 +31,6 @@ if __name__ == "__main__":
     with open(ARGS.config, 'r', encoding='UTF-8') as f:
         config = yaml.safe_load(f)
     all_files = os.listdir(config['audio'])
-    out = config['out']
     for file in all_files:
         try:
             print(f"running {file}")
