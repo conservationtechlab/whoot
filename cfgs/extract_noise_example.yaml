@@ -1,3 +1,5 @@
 audio: /path/to/audio/file/dir/
 out: /path/to/output/folder/
-
+frame_length: 4096
+hop_length: 2048
+num_sec_slice: 3

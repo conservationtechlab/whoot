@@ -11,19 +11,19 @@ import numpy as np
 import soundfile as sf
 
 
-def clip_loud_segments(file, out):
+def clip_loud_segments(file, config):
     """Extract loud segments from a wav file.
 
     Args:
         file (str): The path of the current wav file.
-        out (str): The path to the directory to store the
+        config (str): The path to the directory to store the
             loud segments.
     """
     index = None
     filename = file
-    frame_length = 4096
-    hop_length = 2048
-    num_sec_slice = 3
+    frame_length = config['frame_length']
+    hop_length = config['hop_length']
+    num_sec_slice = config['num_sec_slice']
     sound, sr = librosa.load(filename, sr=None)
     print(f"sample rate: {sr}")
 
@@ -52,7 +52,7 @@ def clip_loud_segments(file, out):
                     filename = os.path.basename(file)
                     filename = filename.strip('.wav')
                     sound_slice = sound[left_index:right_index]
-                    name = out + filename + "_" + str(index) + ".wav"
+                    name = config['out'] + filename + "_" + str(index) + ".wav"
                     sf.write(name, sound_slice, sr)
                     yes_counter = 0
                     print(f"created {name}, setting yes_counter back to 0")
@@ -69,7 +69,7 @@ def clip_loud_segments(file, out):
             sound_slice = sound[left_index:stop_index]
             filename = os.path.basename(file)
             filename = filename.strip('.wav')
-            name = out + filename + "_" + str(index) + ".wav"
+            name = config['out'] + filename + "_" + str(index) + ".wav"
             sf.write(name, sound_slice, sr)
         else:
             print("skipping clip bc it would overlap with last clip")
