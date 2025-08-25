@@ -1,94 +1,108 @@
+"""Extract noisy segments from a wav file.
+
+Takes in a wav file and an outpath to store
+the 3 second segments that contain an RMS value above
+the average RMS for that wav file.
+"""
+import os
 import librosa
 import librosa.display
-import matplotlib.pyplot as plt
 import numpy as np
 import soundfile as sf
-import os
 
 
 def main(file, out):
-    FILENAME = file  # change to path of your sound file
-    FRAME_LENGTH = 4096
-    HOP_LENGTH = 2048
-    NUM_SECONDS_OF_SLICE = 3
+    """Extract loud segments from a wav file.
 
-    sound, sr = librosa.load(FILENAME, sr=None)
+    Args:
+        file (str): The path of the current wav file.
+        out (str): The path to the directory to store the
+            loud segments.
+    """
+    index = None
+    filename = file
+    frame_length = 4096
+    hop_length = 2048
+    num_sec_slice = 3
+    sound, sr = librosa.load(filename, sr=None)
     print(f"sample rate: {sr}")
 
-    clip_rms = librosa.feature.rms(y=sound,
-                                   frame_length=FRAME_LENGTH,
-                                   hop_length=HOP_LENGTH)
-
-    clip_rms = clip_rms.squeeze()
-    print(f"clip RMS: {clip_rms}, length of clip rms: {clip_rms.size}")
-    peak_rms_index = clip_rms.argmax()
-    print(f"Peak RMS index: {peak_rms_index}, value: {clip_rms[peak_rms_index]}")
-    average_rms = np.mean(clip_rms) * (3/2)
-
-    above_avg_rms = clip_rms
-    for index, value in enumerate(clip_rms):
-        if average_rms > clip_rms[index]:
-            above_avg_rms[index] = 0
-        else:
-            above_avg_rms[index] = 1
-
-    sum = np.sum(above_avg_rms)
-    print(f"num frames with above the 1.5x average rms value: {sum}")
+    above_avg_rms = find_peaks(frame_length, hop_length, sound)
 
     yes_counter = 0
     start_index = None
     last_right_index = 0
 
     for index, value in enumerate(above_avg_rms):
-        print(f"current index in above avg rms = {index}")
         if value == 1:
-            print(f"value is 1!")
             if yes_counter == 0:
                 start_index = index
-                print(f"newest start_index: {start_index}")
-            yes_counter +=1
-            print(f"yes counter : {yes_counter}")
+            yes_counter += 1
         else:
             if yes_counter > 0:
-                print(f"yes counter reached a 0 at index : {index}")
                 mid_index = int((index - start_index) / 2)
                 mid_index = mid_index + start_index
-                real_index = mid_index * HOP_LENGTH + int(FRAME_LENGTH/2)
-                half_slice_width = int(NUM_SECONDS_OF_SLICE * sr / 2)
+                real_index = mid_index * hop_length + int(frame_length/2)
+                half_slice_width = int(num_sec_slice * sr / 2)
                 left_index = max(0, real_index - half_slice_width)
-                print(f"left index to start clip: {left_index}")
                 if left_index > last_right_index:
                     right_index = real_index + half_slice_width
-# current left index needs to be greater than the last right index to prevent overlap
-                    last_right_index = right_index
+                    # left index needs to be greater than the last right
+                    last_right_index = right_index + 1
                     filename = os.path.basename(file)
                     filename = filename.strip('.wav')
-                    print(f"right index to start clip: {right_index}")
                     sound_slice = sound[left_index:right_index]
                     name = out + filename + "_" + str(index) + ".wav"
                     sf.write(name, sound_slice, sr)
                     yes_counter = 0
                     print(f"created {name}, setting yes_counter back to 0")
                 else:
-                    print("skipping this clip because it would overlap with the last one")
+                    print("skipping clip bc it would overlap with last clip")
 
     if yes_counter > 0:
         stop_index = index
         mid_index = int((stop_index - start_index) / 2)
-        real_index = mid_index * HOP_LENGTH + int(FRAME_LENGTH/2)
-        half_slice_width = int(NUM_SECONDS_OF_SLICE * sr / 2)
+        real_index = mid_index * hop_length + int(frame_length/2)
+        half_slice_width = int(num_sec_slice * sr / 2)
         left_index = max(0, real_index - half_slice_width)
         if left_index > last_right_index:
-            right_index = real_index + half_slice_width
-
-            print(f"right index to start clip: {right_index}")
-            sound_slice = sound[left_index:right_index]
+            sound_slice = sound[left_index:stop_index]
             filename = os.path.basename(file)
             filename = filename.strip('.wav')
             name = out + filename + "_" + str(index) + ".wav"
-
-            sf.write(NAME, sound_slice, sr)
-            print("end of clip")
+            sf.write(name, sound_slice, sr)
         else:
-            print("skipping this clip because it qould overlap with the last one")
+            print("skipping clip bc it would overlap with last clip")
 
+
+def find_peaks(frame_length, hop_length, sound):
+    """Find peak RMS moments in a sound file.
+
+    Args:
+        frame_length (int): Window size.
+        hop_length (int): Overlap between frames.
+        sound (numpy.ndarray): The audio as a time series array.
+
+    Returns:
+        numpy.ndarray: The array containing each frame as an index
+                       with values corresponding to whether that
+                       frame exceeded the avg RMS or not.
+    """
+    clip_rms = librosa.feature.rms(y=sound,
+                                   frame_length=frame_length,
+                                   hop_length=hop_length)
+
+    clip_rms = clip_rms.squeeze()
+    average_rms = np.mean(clip_rms) * (3/2)
+    above_avg_rms = clip_rms
+
+    for index, _ in enumerate(clip_rms):
+        if average_rms > clip_rms[index]:
+            above_avg_rms[index] = 0
+        else:
+            above_avg_rms[index] = 1
+
+    num_frames = np.sum(above_avg_rms)
+    print(f"num frames with above the 1.5x average rms value: {num_frames}")
+
+    return above_avg_rms
