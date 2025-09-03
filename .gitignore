@@ -229,3 +229,5 @@ whoot_model_training/configs
 buowset_preds_96545a6b81b24794962d464e8fcbdc1d.csv
 auto_filtered.csv
 20240524-0607_RGCB_MVC.csv
+whoot_model_training/whoot_model_training/preprocessors/spectrogram_preprocessors.py
+test_subchunk.py
