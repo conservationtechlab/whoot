@@ -31,7 +31,7 @@ import argparse
 import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
-from whoot_model_training.data_extractor import buowset_extractor
+from whoot_model_training.data_extractor import buowset_extractor, raw_audio_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 from train import parse_config, init_env
@@ -39,6 +39,8 @@ from train import parse_config, init_env
 from whoot_model_training.preprocessors import (
     MelModelInputPreprocessor
 )
+
+import pickle
 
 def test(config, model_name=""):
     """Highest level logic for inferance.
@@ -55,11 +57,17 @@ def test(config, model_name=""):
         TODO
     """
     # Extract a new dataset
-    ds = buowset_extractor(
-        metadata_csv=config["metadata_csv"],
-        parent_path=config["data_path"],
-        output_path=config["hf_cache_path"],
+    ds = raw_audio_extractor(
+        audio_parent_folder="/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/",
+        output_folder="data/manual_buowset",
+        chunk_duration=3
     )
+
+    # ds = buowset_extractor(
+    #     metadata_csv=config["metadata_csv"],
+    #     parent_path=config["data_path"],
+    #     output_path=config["hf_cache_path"],
+    # )
 
     # Create the model
     model = TimmModel.from_pretrained(model_name)
@@ -69,12 +77,12 @@ def test(config, model_name=""):
     )
 
     ds["train"].set_transform(preprocessor)
-    ds["valid"].set_transform(preprocessor)
-    ds["test"].set_transform(preprocessor)
+    # ds["valid"].set_transform(preprocessor)
+    # ds["test"].set_transform(preprocessor)
 
 
     model_name = "efficientnet_b1"
-    run_name = f"buowset1.1_{model_name}"
+    run_name = f"buowset1.1_{model_name}_ATTEMPT_TO_STUDY_NEW_DATA"
 
     # trainer = WhootTrainer._load_from_checkpoint(model_name)
     
@@ -103,11 +111,15 @@ def test(config, model_name=""):
         ),
     )
 
-    print(ds["train"].shape, ds["test"].shape, ds["valid"].shape)
-    input()
-    trainer.evaluate(ds["train"], metric_key_prefix="train")
-    trainer.evaluate(ds["test"], metric_key_prefix="test")
-    trainer.evaluate(ds["valid"], metric_key_prefix="valid")
+    # print(ds["train"].shape, ds["test"].shape, ds["valid"].shape)
+    # input()
+
+    out = trainer.predict(ds["train"], metric_key_prefix="train")
+    print(out)
+    with open(run_name + ".pkl", mode="wb") as f:
+        pickle.dump(out, f)
+    # trainer.evaluate(ds["test"], metric_key_prefix="test")
+    # trainer.evaluate(ds["valid"], metric_key_prefix="valid")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")
@@ -116,7 +128,7 @@ if __name__ == "__main__":
         "--model_name", 
         required=False,
         help="path to weights or hugging face repo id",
-        default="/home/sean/whoot/model_checkpoints/buowset1.1_efficientnet_b1_08_20_2025_14:00:56/checkpoint-4985")
+        default="/home/sean/whoot/checkpoint-4985")
     args = parser.parse_args()
     _config = parse_config(args.config)
 
