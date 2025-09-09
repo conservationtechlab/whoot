@@ -25,9 +25,13 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
     Returns:
         AudioSegment: The audio sample with expanded window of the detection.
     """
+    clip_length = len(audio)
     duration = end_time - start_time
+    if clip_length < length:
+        return audio
     if duration > length:
         segment = audio[start_time:end_time]
+        return segment
     if randomize:
         diff = length-duration
         offset = random.uniform(0, diff)
