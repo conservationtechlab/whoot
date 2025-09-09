@@ -38,15 +38,21 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
         new_start = start_time-offset
         end_offset = length-(offset+duration)
         new_end = end_time + end_offset
-        try:
+        if new_end > clip_length:
+            end_diff = clip_length - start_time
+            new_start = start_time - (length - end_diff)
+            segment = audio[new_start:clip_length]
+        else:
             segment = audio[new_start:new_end]
-        except TooManyMissingFrames:
-            segment = audio[start_time:end_time]
-            print("audio segment is not long enough to window expand")
     else:
         half_diff = (length - duration)/2
         expanded_start = start_time - half_diff
         expanded_end = end_time + half_diff
-        segment = audio[expanded_start:expanded_end]
+        if expanded_end > clip_length:
+            end_diff = clip_length - start_time
+            new_start = start_time - (length - end_diff)
+            segment = audio[new_start:clip_length]
+        else:
+            segment = audio[expanded_start:expanded_end]
 
     return segment
