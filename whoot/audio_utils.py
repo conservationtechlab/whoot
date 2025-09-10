@@ -23,8 +23,9 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
 
     Returns:
         AudioSegment: The audio sample with expanded window of the detection.
-        int: The relative start time in ms from the beginning of the new desired length
-             segment and the actual start time of the strongly labeled audio.
+        int: The relative start time in ms from the beginning of the new
+             desired length segment and the actual start time of the strongly
+             labeled audio.
     """
     clip_length = len(audio)
     duration = end_time - start_time
