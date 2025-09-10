@@ -66,6 +66,7 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
                                         'segment_path',
                                         'original_path',
                                         'segment_duration_s',
+                                        'original_rel_start_ms',
                                         'segment_rel_start_ms'])
     with open(class_list, 'r', newline='', encoding='utf-8') as file:
         reader = csv.reader(file)
@@ -85,8 +86,12 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
                 end_time = start_time + float(row['DURATION'])
                 start_time = start_time * 1000
                 end_time = end_time * 1000
+                rel_start = 0
                 if we:
-                    segment = expand_window(audio, start_time, end_time, randomize=randomize)
+                    segment, rel_start = expand_window(audio,
+                                                       start_time,
+                                                       end_time,
+                                                       randomize=randomize)
                 else:
                     segment = audio[start_time:end_time]
                 segment_id = uuid.uuid4()
@@ -98,7 +103,8 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
                                            segment_path,
                                            wav,
                                            float(row['DURATION']),
-                                           start_time]
+                                           start_time,
+                                           rel_start]
                 df_row += 1
             else:
                 continue
