@@ -86,7 +86,7 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
                 end_time = start_time + float(row['DURATION'])
                 start_time = start_time * 1000
                 end_time = end_time * 1000
-                rel_start = 0
+                rel_start = None
                 if we:
                     segment, rel_start = expand_window(audio,
                                                        start_time,
@@ -142,6 +142,7 @@ def create_noise_segments(wav, new_buow_rows, out_path):
     call_type = "no_buow"
     num = len(new_buow_rows) * 2
     seconds_array = np.zeros(duration)
+    rel_start = None
     for _, row in new_buow_rows.iterrows():
         start = int((row['segment_rel_start_ms'] / 1000) - 1)
         end = int((row['segment_rel_start_ms'] / 1000)
@@ -172,7 +173,8 @@ def create_noise_segments(wav, new_buow_rows, out_path):
                                              segment_path,
                                              wav,
                                              duration_of_segment,
-                                             start_time]
+                                             start_time,
+                                             rel_start]
             new_sample += 1
 
     all_buow_rows = new_buow_rows
