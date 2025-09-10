@@ -23,15 +23,17 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
 
     Returns:
         AudioSegment: The audio sample with expanded window of the detection.
+        int: The relative start time in ms from the beginning of the new desired length
+             segment and the actual start time of the strongly labeled audio.
     """
     clip_length = len(audio)
     duration = end_time - start_time
     # if the clip is shorter than the desired length
     if clip_length < length:
-        return audio
+        return audio, 0
     # if the detected segment is longer than the desired length
     if duration > length:
-        return audio[start_time:end_time]
+        return audio[start_time:end_time], 0
     # if we're randomly window expanding
     if randomize:
         diff = length-duration
@@ -39,23 +41,25 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
         new_start = start_time-offset
         # if the randomly exapanded start time is negative
         if 0 > new_start:
-            return audio[0:length]
+            return audio[0:length], start_time
         end_offset = length-(offset+duration)
         new_end = end_time + end_offset
         # if the new end is too long
         if new_end > clip_length:
             new_start = clip_length - length
-            return audio[int(new_start):clip_length]
-        return audio[int(new_start):int(new_end)]
+            start_offset = start_time - new_start
+            return audio[int(new_start):clip_length], start_offset
+        return audio[int(new_start):int(new_end)], offset
     # if not random expansion, its equidistant expansion
     half_diff = (length - duration)/2
     expanded_start = start_time - half_diff
     # if expanded start is negative
     if 0 > expanded_start:
-        return audio[0:length]
+        return audio[0:length], start_time
     expanded_end = end_time + half_diff
     # if expanded end is too long
     if expanded_end > clip_length:
         new_start = clip_length - length
-        return audio[new_start:clip_length]
-    return audio[int(expanded_start):int(expanded_end)]
+        start_offset = start_time - new_start
+        return audio[new_start:clip_length], start_offset
+    return audio[int(expanded_start):int(expanded_end)], half_diff
