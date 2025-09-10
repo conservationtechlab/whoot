@@ -3,7 +3,6 @@
 """
 import random
 from pydub import AudioSegment
-from pydub.exceptions import TooManyMissingFrames
 
 
 def expand_window(audio, start_time, end_time, length=3000, randomize=False):
@@ -27,32 +26,36 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
     """
     clip_length = len(audio)
     duration = end_time - start_time
+    # if the clip is shorter than the desired length
     if clip_length < length:
         return audio
+    # if the detected segment is longer than the desired length
     if duration > length:
-        segment = audio[start_time:end_time]
-        return segment
+        return audio[start_time:end_time]
+    # if we're randomly window expanding
     if randomize:
         diff = length-duration
         offset = random.uniform(0, diff)
         new_start = start_time-offset
+        # if the randomly exapanded start time is negative
+        if 0 > new_start:
+            return audio[0:length]
         end_offset = length-(offset+duration)
         new_end = end_time + end_offset
+        # if the new end is too long
         if new_end > clip_length:
-            end_diff = clip_length - start_time
-            new_start = start_time - (length - end_diff)
-            segment = audio[new_start:clip_length]
-        else:
-            segment = audio[new_start:new_end]
-    else:
-        half_diff = (length - duration)/2
-        expanded_start = start_time - half_diff
-        expanded_end = end_time + half_diff
-        if expanded_end > clip_length:
-            end_diff = clip_length - start_time
-            new_start = start_time - (length - end_diff)
-            segment = audio[new_start:clip_length]
-        else:
-            segment = audio[expanded_start:expanded_end]
-
-    return segment
+            new_start = clip_length - length
+            return audio[int(new_start):clip_length]
+        return audio[int(new_start):int(new_end)]
+    # if not random expansion, its equidistant expansion
+    half_diff = (length - duration)/2
+    expanded_start = start_time - half_diff
+    # if expanded start is negative
+    if 0 > expanded_start:
+        return audio[0:length]
+    expanded_end = end_time + half_diff
+    # if expanded end is too long
+    if expanded_end > clip_length:
+        new_start = clip_length - length
+        return audio[new_start:clip_length]
+    return audio[int(expanded_start):int(expanded_end)]
