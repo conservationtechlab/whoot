@@ -231,3 +231,5 @@ auto_filtered.csv
 20240524-0607_RGCB_MVC.csv
 whoot_model_training/whoot_model_training/preprocessors/spectrogram_preprocessors.py
 test_subchunk.py
+checkpoint-4985/*
+results/*
