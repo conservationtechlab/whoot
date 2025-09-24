@@ -126,7 +126,7 @@ class TimmModel(Model, nn.Module):
         embed = self.backbone(x.spectrogram)
         logits = self.linear(embed)
         loss = self.loss(logits, x.labels)
-        # print(logits, loss)
+
         return ModelOutput(
             logits=logits,
             embeddings=embed,

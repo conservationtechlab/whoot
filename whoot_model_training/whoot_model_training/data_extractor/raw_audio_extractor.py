@@ -32,6 +32,9 @@ from ..dataset import AudioDataset
 class SubAudio(Audio):
     """Extends Audio to take a chunks of data.
 
+    Uses code from the Hugging Face Audio Class
+    https://github.com/huggingface/datasets/blob/5dc1a179783dff868b0547c8486268cfaea1ea1f/src/datasets/features/audio.py#L24
+
     The Audio Column of a HuggingFace dataset
     handles loading in data from a given file 
 
