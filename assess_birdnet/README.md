@@ -5,6 +5,17 @@ needs padding but buowsetv1.1 are 3s without artificial padding. And then run
 BirdNET analyze over the entire dataset with the desired confidence
 thresholding and with burrowing owl as the only class in the species list.
 
+To run Birdnet over your dataset, follow the instructions in this repo:
+https://birdnet-team.github.io/BirdNET-Analyzer/usage/cli.html#birdnet-analyzer-analyze
+
+We created our own class list with only our species of interest and ran
+birdnet_analyzer.analyze over the entire dataset, beginning with default
+confidence and sensitivity values. You can adjust these values and rerun 
+to obtain a comparison of performance across different confidence thresholds
+and sensitivity. Birdnet will give you a text file result for each audio file
+in your dataset, we had these text files saved to the same directory as the
+audio.
+
 Running aggregate_birdnet_buowset.py with the path to the BirdNET results and
 a .pkl file to send the result to will create a dataframe with the name of the
 wav file and a 0 for no buow and a 1 for yes buow detected by BirdNET. 
