@@ -226,6 +226,4 @@ settings.json
 # Block all configs besides the example config
 whoot_model_training/configs
 !whoot_model_training/configs/config.yml
-buowset_preds_96545a6b81b24794962d464e8fcbdc1d.csv
-auto_filtered.csv
-20240524-0607_RGCB_MVC.csv
+*.csv
