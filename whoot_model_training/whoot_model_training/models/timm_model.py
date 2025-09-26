@@ -20,7 +20,7 @@ class TimmInputs(ModelInput):
 
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
-    def __init__(self, labels, waveform=None, spectrogram=None):
+    def __init__(self, labels, spectrogram=None):
         """Creates TimmInputs.
 
         Args:
@@ -30,7 +30,7 @@ class TimmInputs(ModelInput):
         """
         # # Can use inputs to verify correct shape for upstream model
         # assert spectrogram.shape[1:] == (1, 100, 100)
-        super().__init__(labels, waveform, spectrogram)
+        super().__init__(labels, waveform=None, spectrogram=spectrogram)
         self.labels = labels
         self.spectrogram = spectrogram
 
