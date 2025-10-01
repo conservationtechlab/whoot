@@ -28,6 +28,7 @@ class AudioDataset(DatasetDict):
     - labels (Sequence of class labels, such as [0,10])
     - audio (Audio Column type from hugging face)
     """
+
     def __init__(self, ds: DatasetDict):
         """Creates the Audio Datasets.
 
@@ -49,9 +50,7 @@ class AudioDataset(DatasetDict):
                 phrase_one = "The column `"
                 phrase_two = "` is missing from dataset split `"
                 phrase_three = "`. Required by system"
-                state = (
-                    f"{phrase_one}{column}{phrase_two}{split}{phrase_three}"
-                )
+                state = f"{phrase_one}{column}{phrase_two}{split}{phrase_three}"
                 assert column in dataset.features, state
 
     def get_num_classes(self):

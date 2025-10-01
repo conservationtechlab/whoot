@@ -41,7 +41,7 @@ def one_hot_encode(row: dict, classes: list):
 
 
 @dataclass
-class BuowsetParams():
+class BuowsetParams:
     """Parameters that describe the Buowset.
 
     Args:
@@ -50,6 +50,7 @@ class BuowsetParams():
         sample_rate (int): sample rate of the data
         filepath (int): name of column in csv for filepaths
     """
+
     validation_fold = 4
     test_fold = 3
     sr = 32_000
@@ -57,10 +58,7 @@ class BuowsetParams():
 
 
 def buowset_extractor(
-    metadata_csv,
-    parent_path,
-    output_path,
-    params: BuowsetParams = BuowsetParams()
+    metadata_csv, parent_path, output_path, params: BuowsetParams = BuowsetParams()
 ):
     """Extracts raw data in the buowset format into an AudioDataset.
 
@@ -95,9 +93,7 @@ def buowset_extractor(
 
     # Get audio into uniform format
     ds = ds.add_column(
-        "audio", [
-            os.path.join(parent_path, file) for file in ds[params.filepath]
-        ]
+        "audio", [os.path.join(parent_path, file) for file in ds[params.filepath]]
     )
 
     ds = ds.add_column("filepath", ds["audio"])
@@ -107,9 +103,8 @@ def buowset_extractor(
     test_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
     valid_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
     train_ds = ds.filter(
-        lambda x: (x[
-            "fold"
-        ] != params.test_fold) & (x["fold"] != params.validation_fold)
+        lambda x: (x["fold"] != params.test_fold)
+        & (x["fold"] != params.validation_fold)
     )
     ds = AudioDataset(
         DatasetDict({"train": train_ds, "valid": valid_ds, "test": test_ds})
@@ -130,15 +125,11 @@ def binarize_data(row, target_col=0):
     Returns:
         row (dict): now with a binary label instead
     """
-    row["labels"] = [row["labels"][target_col], 1-row["labels"][target_col]]
+    row["labels"] = [row["labels"][target_col], 1 - row["labels"][target_col]]
     return row
 
 
-def buowset_binary_extractor(
-        metadata_csv,
-        parent_path,
-        output_path,
-        target_col=0):
+def buowset_binary_extractor(metadata_csv, parent_path, output_path, target_col=0):
     """Extracts raw data in the buowset format into an AudioDataset.
 
     BUT only allows for two classes: no_buow, yes_buow
@@ -170,8 +161,10 @@ def buowset_binary_extractor(
     # 0 or 1
     binary_class_label = Sequence(ClassLabel(names=["no_buow", "buow"]))
     for split in ads:
-        ads[split] = ads[split].map(
-            lambda row: binarize_data(row, target_col=target_col)
-        ).cast_column("labels", binary_class_label)
+        ads[split] = (
+            ads[split]
+            .map(lambda row: binarize_data(row, target_col=target_col))
+            .cast_column("labels", binary_class_label)
+        )
 
     return ads

@@ -18,15 +18,18 @@ from .metrics import WhootMutliClassMetrics
 from .dataset import AudioDataset
 from .models import Model
 import torch
-import numpy as np
 from tqdm import tqdm
+
 
 class WhootTrainingArguments(PyhaTrainingArguments):
     """Holds arguments use for training."""
-    def __init__(self,
-                 run_name: str,
-                 subproject_name: str = "TESTING",
-                 dataset_name: str = "DS_404"):
+
+    def __init__(
+        self,
+        run_name: str,
+        subproject_name: str = "TESTING",
+        dataset_name: str = "DS_404",
+    ):
         """Create Arguments.
 
         Args:
@@ -47,12 +50,13 @@ class WhootTrainingArguments(PyhaTrainingArguments):
         self.run_name = f"{subproject_name}_{dataset_name}_{run_name}"
         self.task_name = f"{subproject_name}_{dataset_name}"
 
-        print(
-            f"Starting training on {dataset_name} for {subproject_name}"
-        )
+        print(f"Starting training on {dataset_name} for {subproject_name}")
 
-        super().__init__(os.path.join(f"{default_checkpoint_path}",
-                                      f"{run_name}_{checkpoint_created_at}"))
+        super().__init__(
+            os.path.join(
+                f"{default_checkpoint_path}", f"{run_name}_{checkpoint_created_at}"
+            )
+        )
 
         # Required for whoot: override defaults in PyhaTrainingArguments
         self.label_names = ["labels"]
@@ -62,6 +66,7 @@ class WhootTrainingArguments(PyhaTrainingArguments):
 
 class WhootTrainer(PyhaTrainer):
     """Trainers run the training of a model."""
+
     # WhootTrainer is ment to mimic the huggingface trainer
     # Including number of arguments
     # Aside, we really should consider how useful R0913,R0917 is...
@@ -103,17 +108,22 @@ class WhootTrainer(PyhaTrainer):
             logger,
             None,  # Data Collator, about to be deprecated
             preprocessor,
-            model.output_format.ignore_keys
+            model.output_format.ignore_keys,
         )
-    def predict(
-            self, test_dataset: AudioDataset, ignore_keys = None, metric_key_prefix: str = "test"
-        ):
 
+    def predict(
+        self,
+        test_dataset: AudioDataset,
+        ignore_keys=None,
+        metric_key_prefix: str = "test",
+    ):
         test_dataloader = self.get_test_dataloader(test_dataset)
-        
+
         preds = []
         for batch in tqdm(test_dataloader):
-            preds.append(self.model(self.model.input_format(**batch))["logits"].detach().cpu())
+            preds.append(
+                self.model(self.model.input_format(**batch))["logits"].detach().cpu()
+            )
 
         dataset = test_dataset.to_dict()
         dataset["pred"] = torch.concat(preds).detach().numpy()

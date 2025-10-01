@@ -12,6 +12,7 @@ Usage:
 
 config.yml should contain frequently changed hyperparameters
 """
+
 import os
 import argparse
 import yaml
@@ -21,9 +22,7 @@ from whoot_model_training.data_extractor import buowset_binary_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
-from whoot_model_training.preprocessors import (
-    MelModelInputPreprocessor
-)
+from whoot_model_training.preprocessors import MelModelInputPreprocessor
 
 # Uncomment for use with data augmentation
 # from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
@@ -71,8 +70,8 @@ def train(config):
     # Create the model
     run_name = "efficientnet_b1_testing_confusion_matrix_no_data_aug"
     model_config = TimmModelConfig(
-        timm_model="efficientnet_b1",
-        num_classes=ds.get_num_classes())
+        timm_model="efficientnet_b1", num_classes=ds.get_num_classes()
+    )
     model = TimmModel(model_config)
 
     # Preprocessors
@@ -102,13 +101,9 @@ def train(config):
     # ])
 
     # Offline preprocessors prepare data for training
-    train_preprocessor = MelModelInputPreprocessor(
-        TimmInputs, duration=3
-    )
+    train_preprocessor = MelModelInputPreprocessor(TimmInputs, duration=3)
 
-    preprocessor = MelModelInputPreprocessor(
-        TimmInputs, duration=3
-    )
+    preprocessor = MelModelInputPreprocessor(TimmInputs, duration=3)
 
     ds["train"].set_transform(train_preprocessor)
     ds["valid"].set_transform(preprocessor)
@@ -133,10 +128,7 @@ def train(config):
         model=model,
         dataset=ds,
         training_args=training_args,
-        logger=CometMLLoggerSupplement(
-            augmentations=None,
-            name=training_args.run_name
-        ),
+        logger=CometMLLoggerSupplement(augmentations=None, name=training_args.run_name),
     )
 
     trainer.train()

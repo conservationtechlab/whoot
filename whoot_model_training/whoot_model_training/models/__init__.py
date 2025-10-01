@@ -13,5 +13,5 @@ __all__ = [
     "TimmModelConfig",
     "Model",
     "ModelInput",
-    "ModelOutput"
+    "ModelOutput",
 ]

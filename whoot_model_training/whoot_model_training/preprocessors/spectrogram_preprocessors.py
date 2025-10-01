@@ -2,6 +2,7 @@
 
 Pulled from pyha_analyzer/preprocessors/spectogram_preprocessors.py
 """
+
 from dataclasses import dataclass
 
 import librosa
@@ -20,6 +21,7 @@ class SpectrogramParams:
     power: (float) usually 2
     n_mels: (int) number of mel bins
     """
+
     n_fft: int = 2048
     hop_length: int = 256
     power: float = 2.0
@@ -27,7 +29,7 @@ class SpectrogramParams:
 
 
 @dataclass
-class Augmentations():
+class Augmentations:
     """Dataclass for the augmentations of the model.
 
     audio (list[dict]): per item key name of augmentation,
@@ -35,6 +37,7 @@ class Augmentations():
     spectrogram (list[dict]): same idea but augmentations
         applied onto spectrograms
     """
+
     audio = None
     spectrogram = None
 
@@ -49,7 +52,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         self,
         duration=5,
         augments: Augmentations = Augmentations(),
-        spectrogram_params: SpectrogramParams = SpectrogramParams()
+        spectrogram_params: SpectrogramParams = SpectrogramParams(),
     ):
         """Defines a BuowMelSpectrogramPreprocessors.
 
@@ -77,7 +80,10 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         new_labels = []
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
-            y, sr = batch["audio"][item_idx]["array"],batch["audio"][item_idx]["sampling_rate"]
+            y, sr = (
+                batch["audio"][item_idx]["array"],
+                batch["audio"][item_idx]["sampling_rate"],
+            )
             start = 0
 
             # Handle out of bound issues
@@ -95,7 +101,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
                 np.array(
                     pillow_transforms(
                         librosa.feature.melspectrogram(
-                            y=y[int(start * sr):end_sr],
+                            y=y[int(start * sr) : end_sr],
                             sr=sr,
                             n_fft=self.n_fft,
                             hop_length=self.hop_length,
@@ -135,9 +141,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         Returns:
             (str) all information about this preprocessor
         """
-        return (
-            f"""{self.name}
+        return f"""{self.name}
                 Augmentations: {self.augments}
                 MelSpectrogram: {self.spectrogram_params}
             """
-        )

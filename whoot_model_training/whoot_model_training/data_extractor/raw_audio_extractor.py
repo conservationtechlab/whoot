@@ -2,31 +2,31 @@
 
 Extractor for general, typically unlabeled soundscape recordings
 
-Fits as much as possible to the AudioDataset standard but 
+Fits as much as possible to the AudioDataset standard but
 NOT INTENDED FOR TRAINING
 
 Rather just a placeholder to help inferance work
 """
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
+
+from typing import Any, ClassVar, Union
 import os
 import numpy as np
 from datasets import (
-    load_dataset,
     Audio,
     concatenate_datasets,
     DatasetDict,
     ClassLabel,
     Sequence,
     Dataset,
-    table
+    table,
 )
 import librosa
 from math import floor
 from tqdm import tqdm
 import pyarrow as pa
+from datasets.features.features import _FEATURE_TYPES, FeatureType
 
 from ..dataset import AudioDataset
-
 
 
 class SubAudio(Audio):
@@ -36,7 +36,7 @@ class SubAudio(Audio):
     https://github.com/huggingface/datasets/blob/5dc1a179783dff868b0547c8486268cfaea1ea1f/src/datasets/features/audio.py#L24
 
     The Audio Column of a HuggingFace dataset
-    handles loading in data from a given file 
+    handles loading in data from a given file
 
     What is nice is it streams data: it doesn't get loaded into
     memory until it is needed via the path
@@ -60,12 +60,14 @@ class SubAudio(Audio):
     You need both offset and duration to load in the chunk, otherwise it will load the full file.
     """
 
-    pa_type: ClassVar[Any] = pa.struct({
-        "bytes": pa.binary(), 
-        "path": pa.string(),
-        "offset": pa.int64(),
-        "duration": pa.int64()
-    })
+    pa_type: ClassVar[Any] = pa.struct(
+        {
+            "bytes": pa.binary(),
+            "path": pa.string(),
+            "offset": pa.int64(),
+            "duration": pa.int64(),
+        }
+    )
 
     def __call__(self):
         return self.pa_type
@@ -75,10 +77,12 @@ class SubAudio(Audio):
             isinstance(value, dict)
             and value.get("offset")
             and value.get("duration")
-            and value.get("path") is not None 
+            and value.get("path") is not None
             and os.path.isfile(value["path"])
         ):
-            y, sr = librosa.load(path = value["path"], offset=value["offset"], duration=value["duration"])
+            y, sr = librosa.load(
+                path=value["path"], offset=value["offset"], duration=value["duration"]
+            )
             value["array"] = y
             value["sampling_rate"] = sr
             encoded = super().encode_example(value)
@@ -88,36 +92,41 @@ class SubAudio(Audio):
             return encoded
         return super().encode_example(value)
 
-    def decode_example(self, value, token_per_repo_id=None) -> dict: 
+    def decode_example(self, value, token_per_repo_id=None) -> dict:
         # print("d4ecode", value)
         if (
             isinstance(value, dict)
             and "offset" in value
             and "duration" in value
-            and value.get("bytes") is  None 
-            and value.get("path") is not  None 
+            and value.get("bytes") is None
+            and value.get("path") is not None
             and os.path.isfile(value["path"])
         ):
-            y, sr = librosa.load(path = value["path"], offset=value["offset"], duration=value["duration"])
+            y, sr = librosa.load(
+                path=value["path"], offset=value["offset"], duration=value["duration"]
+            )
             return {
-                "path": value["path"], 
-                "array": y, 
+                "path": value["path"],
+                "array": y,
                 "sampling_rate": sr,
                 "offset": value["offset"],
-                "duration": value["duration"]}
+                "duration": value["duration"],
+            }
         elif (
             isinstance(value, dict)
             and value.get("offset")
             and value.get("duration")
-            and value.get("bytes") is not  None 
+            and value.get("bytes") is not None
         ):
             decoded = super().decode_example(value, token_per_repo_id=token_per_repo_id)
-            decoded["offset"] = value["offset"]  
-            decoded["duration"] = value["duration"]  
+            decoded["offset"] = value["offset"]
+            decoded["duration"] = value["duration"]
             return decoded
         return super().decode_example(value, token_per_repo_id=token_per_repo_id)
-            
-    def cast_storage(self, storage: Union[pa.StringArray, pa.StructArray]) -> pa.StructArray:
+
+    def cast_storage(
+        self, storage: Union[pa.StringArray, pa.StructArray]
+    ) -> pa.StructArray:
         # print("cast_storage real")
         if pa.types.is_struct(storage.type):
             if storage.type.get_field_index("bytes") >= 0:
@@ -136,48 +145,61 @@ class SubAudio(Audio):
                 duration_array = storage.field("duration")
             else:
                 duration_array = pa.array([None] * len(storage), type=pa.int64())
-            storage = pa.StructArray.from_arrays([bytes_array, path_array, offset_array, duration_array], ["bytes", "path", "offset", "duration"], mask=storage.is_null())
+            storage = pa.StructArray.from_arrays(
+                [bytes_array, path_array, offset_array, duration_array],
+                ["bytes", "path", "offset", "duration"],
+                mask=storage.is_null(),
+            )
         return table.array_cast(storage, self.pa_type)
 
-from datasets.features.features import _FEATURE_TYPES, FeatureType
+
 _FEATURE_TYPES[SubAudio.__name__] = SubAudio
 FeatureType = Union[FeatureType, SubAudio]
 
+
 def get_empty_dict():
-    return  {
+    return {
         "audio": [],
         "file_path": [],
         "labels": [],
     }
 
+
 def get_array_chunks_from_memory(
     parent_folder,
-    chunk_length_sec = 5,
-    no_class_idx = 5,
-    output_path = "/data/manual_buowset"
+    chunk_length_sec=5,
+    no_class_idx=5,
+    output_path="/data/manual_buowset",
 ):
-    
     new_rows = get_empty_dict()
     _datasets = []
     for root, dirs, files in tqdm(os.walk(parent_folder), desc="All Folders"):
-        for filename in tqdm(files, leave=False, desc=f"file in dir"):
+        for filename in tqdm(files, leave=False, desc="file in dir"):
             try:
-                if not filename.lower().endswith((".wav", ".mp3", ".flac", ".ogg", ".m4a")):
+                if not filename.lower().endswith(
+                    (".wav", ".mp3", ".flac", ".ogg", ".m4a")
+                ):
                     continue
                 file_path = os.path.join(root, filename)
                 try:
                     clip_length = librosa.get_duration(path=file_path)
-                    sr = librosa.get_samplerate(path=file_path)
-                except BaseException as e:
+                    # sr = librosa.get_samplerate(path=file_path)
+                except BaseException:
                     print(file_path, "failed stat read", "continuing")
                     continue
-                for i in tqdm(range(0, int(floor(clip_length)), chunk_length_sec), leave=False, desc=f"{filename}"):
-                    new_rows["audio"].append({
+                for i in tqdm(
+                    range(0, int(floor(clip_length)), chunk_length_sec),
+                    leave=False,
+                    desc=f"{filename}",
+                ):
+                    new_rows["audio"].append(
+                        {
                             "path": file_path,
                             # "sampling_rate": sr,
                             "offset": i,
-                            "duration": chunk_length_sec
-                    })
+                            "duration": chunk_length_sec,
+                        }
+                    )
                     new_rows["file_path"].append(filename)
                     new_rows["labels"].append(no_class_idx)
                     # break #TODO REMOVE
@@ -195,6 +217,7 @@ def get_array_chunks_from_memory(
 
     return concatenate_datasets(_datasets)
 
+
 def one_hot_encode(row: dict, classes: list):
     """One hot Encodes a list of labels.
 
@@ -207,13 +230,13 @@ def one_hot_encode(row: dict, classes: list):
     row["labels"] = np.array(one_hot, dtype=int)
     return row
 
-def raw_audio_extractor(
-    audio_parent_folder:str = "",
-    sr=32_000,
-    class_list = ["cluck", "coocoo", "twitter", "alarm", "chick begging", "no_buow"],
-    chunk_duration = -1,
-    output_folder = ""
 
+def raw_audio_extractor(
+    audio_parent_folder: str = "",
+    sr=32_000,
+    class_list=["cluck", "coocoo", "twitter", "alarm", "chick begging", "no_buow"],
+    chunk_duration=-1,
+    output_folder="",
 ):
     """Extracts raw, unlabeled data in the buowset format into an AudioDataset.
 
@@ -244,4 +267,3 @@ def raw_audio_extractor(
         DatasetDict({"train": dataset, "valid": dataset, "test": dataset})
     )
     return ds
-

@@ -20,6 +20,7 @@ class TimmInputs(ModelInput):
 
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
+
     def __init__(self, labels, spectrogram=None):
         """Creates TimmInputs.
 
@@ -37,13 +38,14 @@ class TimmInputs(ModelInput):
 
 class TimmModelConfig(PretrainedConfig):
     """Config for Timm Model Zoo Models!"""
+
     def __init__(
         self,
         timm_model="resnet34",
         pretrained=True,
         in_chans=1,
         num_classes=6,
-        **kwargs
+        **kwargs,
     ):
         """Creates Config.
 
@@ -62,12 +64,10 @@ class TimmModelConfig(PretrainedConfig):
 
 class TimmModel(Model, nn.Module):
     """Model that uses a timm's model."""
+
     config_class = TimmModelConfig
 
-    def __init__(
-        self,
-        config: TimmModelConfig
-    ):
+    def __init__(self, config: TimmModelConfig):
         """Init for TimmModel.
 
         kwargs:
@@ -86,9 +86,7 @@ class TimmModel(Model, nn.Module):
 
         # Deep learning CNN backbone
         self.backbone = timm.create_model(
-            config.timm_model,
-            pretrained=config.pretrained,
-            in_chans=config.in_chans
+            config.timm_model, pretrained=config.pretrained, in_chans=config.in_chans
         )
 
         # Unsure if 1000 is default for all timm models. Need to check this
@@ -127,9 +125,4 @@ class TimmModel(Model, nn.Module):
         logits = self.linear(embed)
         loss = self.loss(logits, x.labels)
 
-        return ModelOutput(
-            logits=logits,
-            embeddings=embed,
-            loss=loss,
-            labels=x.labels
-        )
+        return ModelOutput(logits=logits, embeddings=embed, loss=loss, labels=x.labels)

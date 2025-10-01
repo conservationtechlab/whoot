@@ -12,6 +12,7 @@ Usage:
 
 config.yml should contain frequently changed hyperparameters
 """
+
 import os
 import argparse
 import yaml
@@ -21,10 +22,10 @@ from whoot_model_training.data_extractor import buowset_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
-from whoot_model_training.preprocessors import (
-    MelModelInputPreprocessor
+from whoot_model_training.preprocessors import MelModelInputPreprocessor
+from whoot_model_training.preprocessors.spectrogram_preprocessors import (
+    SpectrogramParams,
 )
-from whoot_model_training.preprocessors.spectrogram_preprocessors import SpectrogramParams
 
 # Uncomment for use with data augmentation
 # from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
@@ -74,8 +75,8 @@ def train(config):
 
     run_name = f"buowset1.1_{model_name}"
     model_config = TimmModelConfig(
-        timm_model=model_name,
-        num_classes=ds.get_num_classes())
+        timm_model=model_name, num_classes=ds.get_num_classes()
+    )
     model = TimmModel(model_config)
 
     # Preprocessors
@@ -153,10 +154,7 @@ def train(config):
         model=model,
         dataset=ds,
         training_args=training_args,
-        logger=CometMLLoggerSupplement(
-            augmentations=None,
-            name=training_args.run_name
-        ),
+        logger=CometMLLoggerSupplement(augmentations=None, name=training_args.run_name),
     )
 
     trainer.train()

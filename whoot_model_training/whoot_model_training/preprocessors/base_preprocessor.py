@@ -19,7 +19,7 @@ from pyha_analyzer.preprocessors import PreProcessorBase
 from .spectrogram_preprocessors import (
     BuowMelSpectrogramPreprocessors,
     SpectrogramParams,
-    Augmentations
+    Augmentations,
 )
 from ..models.model import ModelInput
 
@@ -29,6 +29,7 @@ class SpectrogramModelInPreprocessors(PreProcessorBase):
 
     Passes a spectrogram into a ModelInput object.
     """
+
     def __init__(
         self,
         spec_preprocessor: PreProcessorBase,
@@ -54,10 +55,7 @@ class SpectrogramModelInPreprocessors(PreProcessorBase):
         Formats the data as a ModelInput
         """
         batch = self.spec_preprocessor(batch)
-        return self.model_input(
-            labels=batch["labels"],
-            spectrogram=batch["audio"]
-        )
+        return self.model_input(labels=batch["labels"], spectrogram=batch["audio"])
 
 
 class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
@@ -71,6 +69,7 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
     format of the old SpectrogramModelInputPreprocessors
     class with the new functionality
     """
+
     def __init__(
         self,
         model_input: ModelInput,
@@ -100,8 +99,6 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
                         external ref to an AudioDataset
         """
         spec_preprocessor = BuowMelSpectrogramPreprocessors(
-            duration=duration,
-            augments=augments,
-            spectrogram_params=spectrogram_params
+            duration=duration, augments=augments, spectrogram_params=spectrogram_params
         )
         super().__init__(spec_preprocessor, model_input)
