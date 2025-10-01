@@ -8,7 +8,7 @@ the __get_item__ function of a dataset
 """
 
 from .base_preprocessor import (
-    MelModelInputPreprocessor
+    MelModelInputPreprocessor, WaveformInputPreprocessor
 )
 from .spectrogram_preprocessors import (
     BuowMelSpectrogramPreprocessors

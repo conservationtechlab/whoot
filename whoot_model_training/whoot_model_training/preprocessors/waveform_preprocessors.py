@@ -11,19 +11,19 @@ from torchvision import transforms
 from pyha_analyzer.preprocessors import PreProcessorBase
 
 
-@dataclass
-class SpectrogramParams:
-    """Dataclass for spectrogram Parameters.
+# @dataclass
+# class WaveformParams:
+#     """Dataclass for spectrogram Parameters.
 
-    n_fft: (int) number of fft bins
-    hop_length (int) skip count
-    power: (float) usually 2
-    n_mels: (int) number of mel bins
-    """
-    n_fft: int = 2048
-    hop_length: int = 256
-    power: float = 2.0
-    n_mels: int = 256
+#     n_fft: (int) number of fft bins
+#     hop_length (int) skip count
+#     power: (float) usually 2
+#     n_mels: (int) number of mel bins
+#     """
+#     n_fft: int = 2048
+#     hop_length: int = 256
+#     power: float = 2.0
+#     n_mels: int = 256
 
 
 @dataclass
@@ -39,7 +39,7 @@ class Augmentations():
     spectrogram = None
 
 
-class BuowMelSpectrogramPreprocessors(PreProcessorBase):
+class WaveformPreprocessors(PreProcessorBase):
     """Preprocessor for processing audio into spectrograms.
 
     Particularly for the buow dataset
@@ -48,8 +48,8 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
     def __init__(
         self,
         duration=5,
+        sr=None,
         augments: Augmentations = Augmentations(),
-        spectrogram_params: SpectrogramParams = SpectrogramParams()
     ):
         """Defines a BuowMelSpectrogramPreprocessors.
 
@@ -61,24 +61,32 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         """
         self.duration = duration
         self.augments = augments
+        self.sr = sr
 
-        # Below parameter defaults from https://arxiv.org/pdf/2403.10380 pg 25
-        self.n_fft = spectrogram_params.n_fft
-        self.hop_length = spectrogram_params.hop_length
-        self.power = spectrogram_params.power
-        self.n_mels = spectrogram_params.n_mels
-        self.spectrogram_params = spectrogram_params
+        # # Below parameter defaults from https://arxiv.org/pdf/2403.10380 pg 25
+        # self.n_fft = spectrogram_params.n_fft
+        # self.hop_length = spectrogram_params.hop_length
+        # self.power = spectrogram_params.power
+        # self.n_mels = spectrogram_params.n_mels
+        # self.spectrogram_params = spectrogram_params
 
         super().__init__(name="MelSpectrogramPreprocessor")
 
     def __call__(self, batch):
         """Process a batch of data from an AudioDataset."""
+        # print("preprocessor", len(batch), len(batch["audio"]), len(batch["labels"]))
         new_audio = []
-        new_labels = []
+        new_labels = [] 
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
-            y, sr = batch["audio"][item_idx]["array"],batch["audio"][item_idx]["sampling_rate"]
-            start = 0
+            try:
+                y, sr = librosa.load(path=batch["audio"][item_idx]["path"], sr=self.sr)
+            except Exception as e:
+                print(e)
+                print("File Likely is corrupted, moving on")
+                continue
+
+            start = 0 #np.random.uniform(0, len(y)/sr - self.duration)
 
             # Handle out of bound issues
             end_sr = int(start * sr) + int(sr * self.duration)
@@ -88,34 +96,18 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
             # Audio Based Augmentations
             if self.augments.audio is not None:
                 y, label = self.augments.audio(y, sr, label)
-
-            pillow_transforms = transforms.ToPILImage()
-
-            mels = (
-                np.array(
-                    pillow_transforms(
-                        librosa.feature.melspectrogram(
-                            y=y[int(start * sr):end_sr],
-                            sr=sr,
-                            n_fft=self.n_fft,
-                            hop_length=self.hop_length,
-                            power=self.power,
-                            n_mels=self.n_mels,
-                        )
-                    ),
-                    np.float32,
-                )[np.newaxis, ::]
-                / 255
-            )
-
-            if self.augments.spectrogram is not None:
-                mels = self.augments.spectrogram(mels)
-
-            new_audio.append(mels)
+            
+            new_y = y[int(start * sr):end_sr]
+            if (new_y.shape[-1] < int(sr * self.duration)):
+                print(int(start * sr), end_sr, y.shape, new_y.shape, int(sr * self.duration))
+                continue
+            
+            new_audio.append(new_y)
             new_labels.append(label)
 
-        batch["audio"] = np.concatenate(new_audio)
+        batch["audio"] = new_audio
         batch["labels"] = np.array(new_labels, dtype=np.float32)
+        # print(len(batch["audio"]),  len(batch["labels"]))
 
         return batch
 
@@ -138,6 +130,5 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         return (
             f"""{self.name}
                 Augmentations: {self.augments}
-                MelSpectrogram: {self.spectrogram_params}
             """
         )

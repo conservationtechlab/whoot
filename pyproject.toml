@@ -27,10 +27,12 @@ version = {attr = "whoot.__version__"}
 [project.optional-dependencies]
 cpu = [
   "torch>=2.7.0",
+  "torchaudio>=2.8.0",
   "torchvision>=0.22.0",
 ]
 cu128 = [
   "torch>=2.7.0",
+  "torchaudio>=2.8.0",
   "torchvision>=0.22.0",
 ]
 model-training = [
