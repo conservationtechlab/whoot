@@ -1,17 +1,3 @@
-import os
-import argparse
-import yaml
-
-from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
-from whoot_model_training.data_extractor import buowset_extractor
-from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
-from whoot_model_training import CometMLLoggerSupplement
-
-from whoot_model_training.preprocessors import (
-    MelModelInputPreprocessor
-)
-
-# New Dataset
 """Trains a Mutliclass Model with Pytorch and Huggingface.
 
 This script can be used to run experiments with different

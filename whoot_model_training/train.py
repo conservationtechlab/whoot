@@ -70,7 +70,6 @@ def train(config):
     )
 
     # Create the model
-    #model_name = "vit_base_patch16_224.augreg2_in21k_ft_in1k"
     model_name = "efficientnet_b1"
 
     run_name = f"buowset1.1_{model_name}"
