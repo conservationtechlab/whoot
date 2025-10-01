@@ -108,8 +108,9 @@ def buowset_extractor(
     test_ds = ds.filter(lambda x: x["fold"] == params.test_fold)
     valid_ds = ds.filter(lambda x: x["fold"] == params.validation_fold)
     train_ds = ds.filter(
-        lambda x: (x["fold"] != params.test_fold)
-        & (x["fold"] != params.validation_fold)
+        lambda x: (x[
+            "fold"
+        ] != params.test_fold) & (x["fold"] != params.validation_fold)
     )
     ds = AudioDataset(
         DatasetDict({"train": train_ds, "valid": valid_ds, "test": test_ds})
