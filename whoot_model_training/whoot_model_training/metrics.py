@@ -14,7 +14,9 @@ import comet_ml
 import torch
 from sklearn.metrics import confusion_matrix
 
-from pyha_analyzer.metrics.classification_metrics import AudioClassificationMetrics
+from pyha_analyzer.metrics.classification_metrics import (
+    AudioClassificationMetrics
+)
 
 
 class WhootMutliClassMetrics(AudioClassificationMetrics):
@@ -72,5 +74,11 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
 
         # Confusion Matrix WARNING, ONLY MAKES SENSE
         # IF DATA IS MOSTLY MUTLICLASS
-        cm = confusion_matrix(torch.argmax(target, dim=1), torch.argmax(logits, dim=1))
-        experiment.log_confusion_matrix(matrix=cm.tolist(), labels=self.classes)
+        cm = confusion_matrix(
+            torch.argmax(target, dim=1),
+            torch.argmax(logits, dim=1)
+        )
+        experiment.log_confusion_matrix(
+            matrix=cm.tolist(),
+            labels=self.classes
+        )

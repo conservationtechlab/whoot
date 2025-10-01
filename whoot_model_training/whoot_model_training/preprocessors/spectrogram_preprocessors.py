@@ -101,7 +101,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
                 np.array(
                     pillow_transforms(
                         librosa.feature.melspectrogram(
-                            y=y[int(start * sr) : end_sr],
+                            y=y[int(start * sr):end_sr],
                             sr=sr,
                             n_fft=self.n_fft,
                             hop_length=self.hop_length,

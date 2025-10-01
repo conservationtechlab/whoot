@@ -154,7 +154,10 @@ def train(config):
         model=model,
         dataset=ds,
         training_args=training_args,
-        logger=CometMLLoggerSupplement(augmentations=None, name=training_args.run_name),
+        logger=CometMLLoggerSupplement(
+            augmentations=None,
+            name=training_args.run_name
+        ),
     )
 
     trainer.train()

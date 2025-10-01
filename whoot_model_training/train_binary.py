@@ -1,3 +1,4 @@
+# pylint: skip-file
 """Trains a Mutliclass Model with Pytorch and Huggingface.
 
 This script can be used to run experiments with different
@@ -128,7 +129,10 @@ def train(config):
         model=model,
         dataset=ds,
         training_args=training_args,
-        logger=CometMLLoggerSupplement(augmentations=None, name=training_args.run_name),
+        logger=CometMLLoggerSupplement(
+            augmentations=None,
+            name=training_args.run_name
+        ),
     )
 
     trainer.train()

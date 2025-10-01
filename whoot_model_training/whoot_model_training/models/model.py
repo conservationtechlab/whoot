@@ -104,7 +104,10 @@ class ModelOutput(dict, UserDict):
 
         But only if they are defined (not null)!
         """
-        return [(key, value) for (key, value) in super().items() if value is not None]
+        return [
+            (key, value) for
+            (key, value) in super().items() if value is not None
+        ]
 
 
 class ModelInput(UserDict, dict):
@@ -134,7 +137,11 @@ class ModelInput(UserDict, dict):
             spectrogram: 2d matrix to represent the waveform
         """
         super().__init__(
-            {"labels": labels, "waveform": waveform, "spectrogram": spectrogram}
+            {
+                "labels": labels,
+                "waveform": waveform,
+                "spectrogram": spectrogram
+            }
         )
 
     def items(self):
@@ -142,7 +149,9 @@ class ModelInput(UserDict, dict):
 
         But only if they are defined (not null)!
         """
-        return [(key, value) for (key, value) in super().items() if value is not None]
+        return [
+            (key, value) for
+            (key, value) in super().items() if value is not None]
 
     @classmethod
     def from_dict(cls, some_input: dict):

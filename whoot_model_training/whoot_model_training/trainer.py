@@ -11,14 +11,16 @@ WhootTrainer: The class that is going to run training
 from datetime import datetime
 import os
 
+import torch
+from tqdm import tqdm
+
 from pyha_analyzer import PyhaTrainingArguments
 from pyha_analyzer import PyhaTrainer
 
 from .metrics import WhootMutliClassMetrics
 from .dataset import AudioDataset
 from .models import Model
-import torch
-from tqdm import tqdm
+
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):
@@ -54,7 +56,8 @@ class WhootTrainingArguments(PyhaTrainingArguments):
 
         super().__init__(
             os.path.join(
-                f"{default_checkpoint_path}", f"{run_name}_{checkpoint_created_at}"
+                f"{default_checkpoint_path}",
+                f"{run_name}_{checkpoint_created_at}"
             )
         )
 
@@ -114,15 +117,25 @@ class WhootTrainer(PyhaTrainer):
     def predict(
         self,
         test_dataset: AudioDataset,
-        ignore_keys=None,
-        metric_key_prefix: str = "test",
+        ignore_keys=None, # overloaded, please ignore
+        metric_key_prefix: str = "test", # overloaded, please ignore
     ):
+        """Run Inferance with trained model!
+
+        Args:
+            test_dataset: AudioDataset,
+            an AudioDataset to collect predictions from
+
+        ignore_keys, and metric_key_prefix exist for subclass overriding
+        """
         test_dataloader = self.get_test_dataloader(test_dataset)
 
         preds = []
         for batch in tqdm(test_dataloader):
             preds.append(
-                self.model(self.model.input_format(**batch))["logits"].detach().cpu()
+                self.model(
+                    self.model.input_format(**batch)
+                )["logits"].detach().cpu()
             )
 
         dataset = test_dataset.to_dict()

@@ -86,7 +86,9 @@ class TimmModel(Model, nn.Module):
 
         # Deep learning CNN backbone
         self.backbone = timm.create_model(
-            config.timm_model, pretrained=config.pretrained, in_chans=config.in_chans
+            config.timm_model,
+            pretrained=config.pretrained,
+            in_chans=config.in_chans
         )
 
         # Unsure if 1000 is default for all timm models. Need to check this
@@ -125,4 +127,9 @@ class TimmModel(Model, nn.Module):
         logits = self.linear(embed)
         loss = self.loss(logits, x.labels)
 
-        return ModelOutput(logits=logits, embeddings=embed, loss=loss, labels=x.labels)
+        return ModelOutput(
+            logits=logits,
+            embeddings=embed,
+            loss=loss,
+            labels=x.labels
+        )

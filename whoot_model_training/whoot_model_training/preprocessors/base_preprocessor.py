@@ -55,7 +55,10 @@ class SpectrogramModelInPreprocessors(PreProcessorBase):
         Formats the data as a ModelInput
         """
         batch = self.spec_preprocessor(batch)
-        return self.model_input(labels=batch["labels"], spectrogram=batch["audio"])
+        return self.model_input(
+            labels=batch["labels"],
+            spectrogram=batch["audio"]
+        )
 
 
 class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
@@ -99,6 +102,8 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
                         external ref to an AudioDataset
         """
         spec_preprocessor = BuowMelSpectrogramPreprocessors(
-            duration=duration, augments=augments, spectrogram_params=spectrogram_params
+            duration=duration,
+            augments=augments,
+            spectrogram_params=spectrogram_params
         )
         super().__init__(spec_preprocessor, model_input)

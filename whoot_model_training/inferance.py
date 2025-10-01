@@ -1,3 +1,4 @@
+# pylint: skip-file
 """Trains a Mutliclass Model with Pytorch and Huggingface.
 
 This script can be used to run experiments with different
@@ -14,6 +15,7 @@ config.yml should contain frequently changed hyperparameters
 """
 
 import argparse
+import pickle
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.data_extractor import raw_audio_extractor
@@ -23,7 +25,6 @@ from train import parse_config, init_env
 
 from whoot_model_training.preprocessors import MelModelInputPreprocessor
 
-import pickle
 
 
 def test(config, model_name=""):
@@ -38,11 +39,12 @@ def test(config, model_name=""):
 
     Args:
         config (dict): the config used for training. Defined in yaml file
-        TODO
+        model_name (str): Model name for this run
     """
     # Extract a new dataset
+    unlabel_audio_path = "/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/"
     ds = raw_audio_extractor(
-        audio_parent_folder="/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/",
+        audio_parent_folder=unlabel_audio_path,
         output_folder="data/manual_buowset",
         chunk_duration=3,
     )
@@ -86,13 +88,16 @@ def test(config, model_name=""):
         model=model,
         dataset=ds,
         training_args=training_args,
-        logger=CometMLLoggerSupplement(augmentations=None, name=training_args.run_name),
+        logger=CometMLLoggerSupplement(
+            augmentations=None,
+            name=training_args.run_name
+        ),
     )
 
     # print(ds["train"].shape, ds["test"].shape, ds["valid"].shape)
     # input()
 
-    out = trainer.predict(ds["train"], metric_key_prefix="train")
+    out = trainer.predict(ds["train"])
     print(out)
     with open(run_name + ".pkl", mode="wb") as f:
         pickle.dump(out, f)

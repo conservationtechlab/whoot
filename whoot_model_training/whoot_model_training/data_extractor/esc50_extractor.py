@@ -90,22 +90,30 @@ def esc50_extractor(
 
     multilabel_class_label = Sequence(ClassLabel(names=class_list))
 
-    dataset = dataset.map(lambda row: one_hot_encode(row, class_list)).cast_column(
+    dataset = dataset.map(
+        lambda row: one_hot_encode(row, class_list)
+        ).cast_column(
         "labels", multilabel_class_label
     )
 
     dataset = dataset.add_column(
-        "audio", [os.path.join(parent_path, file) for file in dataset[params.filepath]]
+        "audio", [
+            os.path.join(
+                parent_path, file
+            ) for file in dataset[params.filepath]
+        ]
     )
     dataset = dataset.add_column("filepath", dataset["audio"])
-    dataset = dataset.cast_column("audio", Audio(sampling_rate=params.sample_rate))
+    dataset = dataset.cast_column("audio",
+                                  Audio(sampling_rate=params.sample_rate))
 
     # Create splits of the data
     test_ds = dataset.filter(lambda x: x["fold"] == params.test_fold)
     valid_ds = dataset.filter(lambda x: x["fold"] == params.validation_fold)
     train_ds = dataset.filter(
         lambda x: (
-            x["fold"] != params.test_fold and x["fold"] != params.validation_fold
+            x["fold"] != params.test_fold and
+            x["fold"] != params.validation_fold
         )
     )
 

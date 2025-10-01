@@ -58,7 +58,10 @@ class BuowsetParams:
 
 
 def buowset_extractor(
-    metadata_csv, parent_path, output_path, params: BuowsetParams = BuowsetParams()
+    metadata_csv,
+    parent_path,
+    output_path,
+    params: BuowsetParams = BuowsetParams()
 ):
     """Extracts raw data in the buowset format into an AudioDataset.
 
@@ -93,7 +96,9 @@ def buowset_extractor(
 
     # Get audio into uniform format
     ds = ds.add_column(
-        "audio", [os.path.join(parent_path, file) for file in ds[params.filepath]]
+        "audio", [
+            os.path.join(parent_path, file) for file in ds[params.filepath]
+        ]
     )
 
     ds = ds.add_column("filepath", ds["audio"])
@@ -129,7 +134,11 @@ def binarize_data(row, target_col=0):
     return row
 
 
-def buowset_binary_extractor(metadata_csv, parent_path, output_path, target_col=0):
+def buowset_binary_extractor(
+        metadata_csv,
+        parent_path,
+        output_path,
+        target_col=0):
     """Extracts raw data in the buowset format into an AudioDataset.
 
     BUT only allows for two classes: no_buow, yes_buow
