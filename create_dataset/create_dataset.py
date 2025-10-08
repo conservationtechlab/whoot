@@ -33,9 +33,9 @@ import argparse
 import ntpath
 import os
 import pandas as pd
-from .create_segments import get_paths, create_segments
-from .create_segments import create_noise_segments
-from .filter_labels import filter_labels_2017, filter_labels_2018
+from create_segments import get_paths, create_segments
+from create_segments import create_noise_segments
+from filter_labels import filter_labels_2017, filter_labels_2018
 
 
 def create_dataset(labels, wav_dir, output_dir, class_list, we, randomize):

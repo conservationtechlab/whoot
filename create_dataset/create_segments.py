@@ -65,7 +65,7 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
                                         'label',
                                         'segment_path',
                                         'original_path',
-                                        'segment_duration_s',
+                                        'labeled_duration_s',
                                         'original_rel_start_ms',
                                         'segment_rel_start_ms'])
     with open(class_list, 'r', newline='', encoding='utf-8') as file:
@@ -146,7 +146,7 @@ def create_noise_segments(wav, new_buow_rows, out_path):
     for _, row in new_buow_rows.iterrows():
         start = int((row['segment_rel_start_ms'] / 1000) - 1)
         end = int((row['segment_rel_start_ms'] / 1000)
-                  + row['segment_duration_s'])
+                  + row['labeled_duration_s'])
         mask_start = max(0, start - 30)
         mask_end = min(len(seconds_array), end + 30 + 1)
         seconds_array[mask_start:mask_end] = 1
