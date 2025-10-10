@@ -23,6 +23,10 @@ from .spectrogram_preprocessors import (
 )
 from ..models.model import ModelInput
 
+from .waveform_preprocessors import (
+    WaveformPreprocessors
+)
+
 
 class SpectrogramModelInPreprocessors(PreProcessorBase):
     """Defines a preprocessor that after formatting the audio.
@@ -105,3 +109,61 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
             spectrogram_params=spectrogram_params
         )
         super().__init__(spec_preprocessor, model_input)
+
+
+class WaveformInputPreprocessor(SpectrogramModelInPreprocessors):
+    """Demo of how SpectrogramModelInPreprocessors works.
+
+    Uses a kind of Spectrogram Preprocessor, BuowMelSpectrogramPreprocessors
+
+    This was created in part because legacy implementation of
+    SpectrogramModelInputPreprocessors had these parameters and subclassed
+    BuowMelSpectrogramPreprocessors. This class replicates the
+    format of the old SpectrogramModelInputPreprocessors
+    class with the new functionality
+    """
+    def __init__(
+        self,
+        model_input: ModelInput,
+        duration=5,
+        augments: Augmentations = Augmentations(),
+    ):
+        """Creates a Online preprocessor for MelSpectrograms Based Models.
+
+        Formats input into spefific ModelInput format.
+
+        Args:
+            model_input (ModelInput): How the model like input data formatted
+            duration (int): Length in seconds of input
+            augments (dict): contains two keys: audio,
+                spectrogram each defining
+                a dict of augmentation names and augmentations to run
+            spectrogram_params (SpectrogramParams):
+                has the following parameters:
+                    class_list (list): the classes we are
+                        working with one-hot-encoding
+                    dataset_ref (AudioDataset): a
+                        external ref to an AudioDataset
+        """
+        wav_preprocessor = WaveformPreprocessors(
+            duration=duration,
+            augments=augments,
+        )
+        super().__init__(wav_preprocessor, model_input)
+
+    def __call__(self, batch: dict) -> ModelInput:
+        """Processes a batch of AudioDataset rows.
+
+        For this specific preprocessor, it creates a spectrogram then
+        Formats the data as a ModelInput
+        """
+        batch = self.spec_preprocessor(batch)
+        return self.model_input(
+            labels=batch["labels"],
+            waveform=batch["audio"]
+        )
+
+
+
+
+

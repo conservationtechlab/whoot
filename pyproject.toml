@@ -9,6 +9,7 @@ dependencies = [
     "numba==0.61.0",
     "pandas>=2.3.0",
     "pydub>=0.25.1",
+    "python-dotenv>=1.1.1",
     "pyyaml>=6.0.2",
     "scikit-learn>=1.7.0",
     "tqdm>=4.67.1",
@@ -40,9 +41,17 @@ model-training = [
   "comet-ml>=3.43.2",
 ]
 
+perch = [
+  "perch-hoplite>=0.1.0",
+  "tensorflow-hub>=0.16.1",
+  "tensorflow[and-cuda]>=2.20.0",
+]
+
 notebooks = [
   "ipykernel>=6.29.5",
   "ipywidgets>=8.1.6",
+  "matplotlib>=3.10.6",
+  "seaborn>=0.13.2",
 ]
 
 
@@ -50,7 +59,7 @@ notebooks = [
 cu128 = "https://download.pytorch.org/whl/cu128"
 
 [tool.setuptools]
-packages = ["make_model", "assess_birdnet", "whoot_model_training"]
+packages = ["make_model", "assess_birdnet", "whoot_model_training", "data_downloader"]
 
 [tool.uv.sources]
 pyha-analyzer = { git = "https://github.com/UCSD-E4E/pyha-analyzer-2.0.git", branch = "support_whoot" }

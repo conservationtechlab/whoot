@@ -6,6 +6,7 @@ Example:
 
 from .timm_model import TimmModel, TimmInputs, TimmModelConfig
 from .model import Model, ModelInput, ModelOutput
+from .few_shot_model import PerchEmbeddingInput, PerchFewShotModel, FewShotModelConfig
 
 __all__ = [
     "TimmModel",
@@ -13,5 +14,8 @@ __all__ = [
     "TimmModelConfig",
     "Model",
     "ModelInput",
-    "ModelOutput"
+    "ModelOutput",
+    "PerchEmbeddingInput",
+    "PerchFewShotModel",
+    "FewShotModelConfig"
 ]
