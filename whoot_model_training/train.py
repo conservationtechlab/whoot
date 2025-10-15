@@ -25,6 +25,12 @@ from whoot_model_training.preprocessors import (
     MelModelInputPreprocessor
 )
 from whoot_model_training.preprocessors.spectrogram_preprocessors import SpectrogramParams
+from whoot_model_training.preprocessors.augmentations import (
+    Gain,
+    PolarityInversion,
+    MixItUp,
+    ComposeAudioLabel
+)
 
 # Uncomment for use with data augmentation
 # from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
@@ -63,10 +69,17 @@ def train(config):
         config (dict): the config used for training. Defined in yaml file
     """
     # Extract the dataset
-    ds = buowset_extractor(
-        metadata_csv=config["metadata_csv"],
-        parent_path=config["data_path"],
-        output_path=config["hf_cache_path"],
+    # ds = buowset_extractor(
+    #     metadata_csv=config["metadata_csv"],
+    #     parent_path=config["data_path"],
+    #     output_path=config["hf_cache_path"],
+    # )
+
+    from whoot_model_training.whoot_model_training.data_extractor import xc_extractor
+
+    ds = xc_extractor(
+        XC_dataset_json_path="/home/sean/whoot/data/san_diego_xc_aux/xc_meta_aux.json",
+        parent_path="/home/sean/whoot/data/san_diego_xc_aux/xeno-canto"
     )
 
     # Create the model
@@ -81,28 +94,45 @@ def train(config):
     # Preprocessors
 
     # Uncomment if doing work with data augmentation
-    # # Augmentations
-    # wav_augs = ComposeAudioLabel([
-    #     # AddBackgroundNoise( #We don't have background noise yet...
-    #     #     sounds_path="data_birdset/background_noise",
-    #     #     min_snr_db=10,
-    #     #     max_snr_db=30,
-    #     #     noise_transform=PolarityInversion(),
-    #     #     p=0.8
-    #     # ),
-    #     Gain(
-    #         min_gain_db = -12,
-    #         max_gain_db = 12,
-    #         p = 0.8
-    #     ),
-    #     MixItUp(
-    #         dataset_ref=ds["train"],
-    #         min_snr_db=10,
-    #         max_snr_db=30,
-    #         noise_transform=PolarityInversion(),
-    #         p=0.8
-    #     )
-    # ])
+    # Augmentations
+    wav_augs = ComposeAudioLabel([
+        # AddBackgroundNoise( #We don't have background noise yet...
+        #     sounds_path="data_birdset/background_noise",
+        #     min_snr_db=10,
+        #     max_snr_db=30,
+        #     noise_transform=PolarityInversion(),
+        #     p=0.8
+        # ),
+        Gain(
+            min_gain_db = -12,
+            max_gain_db = 12,
+            p = 0.8
+        ),
+        # MixItUp(
+        #     dataset_ref=ds["train"],
+        #     min_snr_db=10,
+        #     max_snr_db=30,
+        #     noise_transform=PolarityInversion(),
+        #     p=0.8
+        # )
+    ])
+
+    spectrogram_params = SpectrogramParams()
+    # spectrogram_params = SpectrogramParams(
+    #     n_mels = 224,
+    #     hop_length = 286,
+    # )
+    # """Dataclass for spectrogram Parameters.
+
+    # n_fft: (int) number of fft bins
+    # hop_length (int) skip count
+    # power: (float) usually 2
+    # n_mels: (int) number of mel bins
+    # """
+    # n_fft: int = 2048
+    # hop_length: int = 256
+    # power: float = 2.0
+    # n_mels: int = 256
 
     spectrogram_params = SpectrogramParams()
     # spectrogram_params = SpectrogramParams(
@@ -160,7 +190,7 @@ def train(config):
     )
 
     trainer.train()
-    model.save_pretrained("model_checkpoints/test")
+    model.save_pretrained("model_checkpoints/xc_aux")
 
 
 def init_env(config: dict):
