@@ -77,7 +77,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         new_labels = []
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
-            y, sr = librosa.load(path=batch["audio"][item_idx]["path"])
+            y, sr = batch["audio"][item_idx]["array"],batch["audio"][item_idx]["sampling_rate"]
             start = 0
 
             # Handle out of bound issues
@@ -114,7 +114,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
             new_audio.append(mels)
             new_labels.append(label)
 
-        batch["audio"] = new_audio
+        batch["audio"] = np.concatenate(new_audio)
         batch["labels"] = np.array(new_labels, dtype=np.float32)
 
         return batch

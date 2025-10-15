@@ -147,6 +147,7 @@ class WaveformInputPreprocessor(SpectrogramModelInPreprocessors):
         """
         wav_preprocessor = WaveformPreprocessors(
             duration=duration,
+            sr=32_000,
             augments=augments,
         )
         super().__init__(wav_preprocessor, model_input)

@@ -1,3 +1,6 @@
+from transformers import AutoFeatureExtractor, AutoModel
+import librosa
+
 """Wrapper around the timms model zoo!
 
 See https://timm.fast.ai/
@@ -15,58 +18,59 @@ from transformers import PretrainedConfig
 from .model import Model, ModelInput, ModelOutput, has_required_inputs
 
 
-class TimmInputs(ModelInput):
+class HFInput(ModelInput):
     """Input for TimmModels.
 
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
-    def __init__(self, labels, spectrogram=None):
+    def __init__(self, labels, spectrogram=None,  waveform=None, extractor_path="DBD-research-group/Bird-MAE-Base"):
         """Creates TimmInputs.
 
         Args:
             labels: the data's label for this batch
-            spectrogram: audio's spectrogram
-            waveform: Optional, audio waveform
+            audio_data: some audio_data, basically this has a feature extractor for it
         """
+
+        # print("fe works")
+        feature_extractor = AutoFeatureExtractor.from_pretrained(extractor_path, trust_remote_code=True)
+       
+        mel_spectrogram = feature_extractor(waveform)
+
         # # Can use inputs to verify correct shape for upstream model
         # assert spectrogram.shape[1:] == (1, 100, 100)
-        super().__init__(labels, waveform=None, spectrogram=spectrogram)
+        super().__init__(labels, waveform=waveform, spectrogram=mel_spectrogram)
         self.labels = labels
-        self.spectrogram = spectrogram
+        self.spectrogram = mel_spectrogram
 
-
-class TimmModelConfig(PretrainedConfig):
+class HFModelConfig(PretrainedConfig):
     """Config for Timm Model Zoo Models!"""
     def __init__(
         self,
-        timm_model="resnet34",
-        pretrained=True,
-        in_chans=1,
+        path="DBD-research-group/Bird-MAE-Huge",
         num_classes=6,
+        embeddings_size=1280,
         **kwargs
     ):
         """Creates Config.
 
         Args:
-            timm_model (str): name of a model in timm model zoo
-            pretrained (bool): use pretrain weights from timms
-            in_chans (int): channels in audio, mono is 1
+            path (str): url to pull from hf model zoo
             num_classes (int): number of classes in dataset, for cls
+            embeddings_size (int): size of output of model
         """
-        self.timm_model = timm_model
-        self.pretrained = pretrained
-        self.in_chans = in_chans
+        self.path = path
         self.num_classes = num_classes
+        self.embeddings_size = embeddings_size
         super().__init__(**kwargs)
 
 
-class TimmModel(Model, nn.Module):
+class HFModel(Model, nn.Module):
     """Model that uses a timm's model."""
-    config_class = TimmModelConfig
+    config_class = HFModelConfig
 
     def __init__(
         self,
-        config: TimmModelConfig
+        config: HFModelConfig
     ):
         """Init for TimmModel.
 
@@ -79,20 +83,16 @@ class TimmModel(Model, nn.Module):
             loss (any): custom loss function Default: BCEWithLogitsLoss
         """
         super().__init__()
-        self.input_format = TimmInputs
+        self.input_format = HFInput
         self.output_format = ModelOutput
         self.config = config
         assert config.num_classes > 0
 
         # Deep learning CNN backbone
-        self.backbone = timm.create_model(
-            config.timm_model,
-            pretrained=config.pretrained,
-            in_chans=config.in_chans
-        )
+        self.backbone = AutoModel.from_pretrained(config.path, trust_remote_code=True)
 
         # Unsure if 1000 is default for all timm models. Need to check this
-        self.linear = nn.Linear(1000, config.num_classes)
+        self.linear = nn.Linear(config.embeddings_size, config.num_classes)
 
         # different losses if you want to train for different problems
         # BCEWithLogitsLoss is default as for Bioacoustics, the problem tends
@@ -113,7 +113,7 @@ class TimmModel(Model, nn.Module):
         self.loss = loss_fn
 
     @has_required_inputs()
-    def forward(self, x: TimmInputs) -> ModelOutput:
+    def forward(self, x: HFInput) -> ModelOutput:
         """Model forward function.
 
         Args:
@@ -123,7 +123,7 @@ class TimmModel(Model, nn.Module):
             (ModelOutput): The model output (logits),
             latent space representations (embeddings), loss and labels.
         """
-        embed = self.backbone(x.spectrogram)
+        embed = self.backbone(x.spectrogram.to(self.device)).last_hidden_state
         logits = self.linear(embed)
         loss = self.loss(logits, x.labels)
 
@@ -133,3 +133,10 @@ class TimmModel(Model, nn.Module):
             loss=loss,
             labels=x.labels
         )
+
+
+
+
+
+
+

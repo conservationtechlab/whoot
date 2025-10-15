@@ -8,10 +8,11 @@ from .buowset_extractor import (
     buowset_binary_extractor,
 )
 from .esc50_extractor import esc50_extractor
+from .raw_audio_extractor import raw_audio_extractor
 from .Jacuzzi_Olden_extractor import Jacuzzi_Olden_Extractor
 from .xc_extractor import xc_extractor
 
-__all__ = ["buowset_extractor", "buowset_binary_extractor", "esc50_extractor", "Jacuzzi_Olden_Extractor", "xc_extractor"]
+__all__ = ["buowset_extractor", "buowset_binary_extractor", "esc50_extractor", "Jacuzzi_Olden_Extractor", "xc_extractor", "raw_audio_extractor"]
 
 def concat_dataset(datasetA, datasetB):
     for split in datasetA.keys():

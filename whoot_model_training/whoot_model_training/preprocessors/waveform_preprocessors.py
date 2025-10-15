@@ -48,6 +48,7 @@ class WaveformPreprocessors(PreProcessorBase):
     def __init__(
         self,
         duration=5,
+        sr=None,
         augments: Augmentations = Augmentations(),
     ):
         """Defines a BuowMelSpectrogramPreprocessors.
@@ -60,6 +61,7 @@ class WaveformPreprocessors(PreProcessorBase):
         """
         self.duration = duration
         self.augments = augments
+        self.sr = sr
 
         # # Below parameter defaults from https://arxiv.org/pdf/2403.10380 pg 25
         # self.n_fft = spectrogram_params.n_fft
@@ -72,12 +74,13 @@ class WaveformPreprocessors(PreProcessorBase):
 
     def __call__(self, batch):
         """Process a batch of data from an AudioDataset."""
+        # print("preprocessor", len(batch), len(batch["audio"]), len(batch["labels"]))
         new_audio = []
         new_labels = [] 
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
             try:
-                y, sr = librosa.load(path=batch["audio"][item_idx]["path"])
+                y, sr = librosa.load(path=batch["audio"][item_idx]["path"], sr=self.sr)
             except Exception as e:
                 print(e)
                 print("File Likely is corrupted, moving on")
@@ -103,6 +106,7 @@ class WaveformPreprocessors(PreProcessorBase):
 
         batch["audio"] = new_audio
         batch["labels"] = np.array(new_labels, dtype=np.float32)
+        # print(len(batch["audio"]),  len(batch["labels"]))
 
         return batch
 

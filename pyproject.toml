@@ -29,10 +29,12 @@ version = {attr = "whoot.__version__"}
 [project.optional-dependencies]
 cpu = [
   "torch>=2.7.0",
+  "torchaudio>=2.8.0",
   "torchvision>=0.22.0",
 ]
 cu128 = [
   "torch>=2.7.0",
+  "torchaudio>=2.8.0",
   "torchvision>=0.22.0",
 ]
 model-training = [
@@ -53,6 +55,9 @@ notebooks = [
   "ipywidgets>=8.1.6",
   "matplotlib>=3.10.6",
   "seaborn>=0.13.2",
+]
+birdnet = [
+    "birdnet>=0.1.7",
 ]
 
 
