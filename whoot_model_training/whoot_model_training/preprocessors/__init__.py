@@ -16,5 +16,6 @@ from .spectrogram_preprocessors import (
 
 __all__ = [
     "MelModelInputPreprocessor",
-    "BuowMelSpectrogramPreprocessors"
+    "BuowMelSpectrogramPreprocessors",
+    "WaveformInputPreprocessor"
 ]

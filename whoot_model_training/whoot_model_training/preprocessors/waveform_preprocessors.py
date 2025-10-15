@@ -86,7 +86,7 @@ class WaveformPreprocessors(PreProcessorBase):
                 print("File Likely is corrupted, moving on")
                 continue
 
-            start = 0 #np.random.uniform(0, len(y)/sr - self.duration)
+            start = np.random.uniform(0, len(y)/sr - self.duration)
 
             # Handle out of bound issues
             end_sr = int(start * sr) + int(sr * self.duration)
@@ -99,7 +99,6 @@ class WaveformPreprocessors(PreProcessorBase):
             
             new_y = y[int(start * sr):end_sr]
             if (new_y.shape[-1] < int(sr * self.duration)):
-                print(int(start * sr), end_sr, y.shape, new_y.shape, int(sr * self.duration))
                 continue
             
             new_audio.append(new_y)
@@ -130,5 +129,6 @@ class WaveformPreprocessors(PreProcessorBase):
         return (
             f"""{self.name}
                 Augmentations: {self.augments}
+                MelSpectrogram: {self.spectrogram_params}
             """
         )
