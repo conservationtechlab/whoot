@@ -19,6 +19,7 @@ from datasets import (
     DatasetDict,
     ClassLabel,
     Sequence,
+    load_from_disk,
 )
 from ..dataset import AudioDataset
 
@@ -99,10 +100,14 @@ class XCParams():
 def xc_extractor(
         XC_dataset_json_path,
         parent_path,
+        cache_path="data/san_diego_xc_aux/cache",
         params: XCParams = XCParams(),
         bad_file_path="data/xc_bad_file"
 ):
-    
+    if os.path.exists(cache_path):
+        return load_from_disk(cache_path)
+
+
     with open(XC_dataset_json_path, mode="r") as f:
         xc_recordings_paged = json.load(f)
     
@@ -164,6 +169,7 @@ def xc_extractor(
             "test": test_val["test"]})
     )
 
-    # dataset.save_to_disk(output_path)
+    # os.makedirs(cache_path, exist_ok=True)
+    # dataset.save_to_disk(cache_path)
 
     return dataset

@@ -138,6 +138,9 @@ class ModelInput(UserDict, dict):
             "waveform": waveform,
             "spectrogram": spectrogram
         })
+        self.labels = labels
+        self.waveform = waveform
+        self.spectrogram = spectrogram
 
     def items(self):
         """Get all items in dict.

@@ -13,17 +13,19 @@ Great repo for models, but currently using this for demoing pipeline
 
 import timm
 from torch import nn
+import torch
+from contextlib import nullcontext
 from transformers import PretrainedConfig
 
 from .model import Model, ModelInput, ModelOutput, has_required_inputs
 
 
-class HFInput(ModelInput):
+class HFInput():
     """Input for TimmModels.
 
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
-    def __init__(self, labels, spectrogram=None,  waveform=None, extractor_path="DBD-research-group/Bird-MAE-Base"):
+    def __init__(self, labels=None, spectrogram=None,  waveform=None, extractor_path="DBD-research-group/Bird-MAE-Base"):
         """Creates TimmInputs.
 
         Args:
@@ -32,16 +34,20 @@ class HFInput(ModelInput):
         """
 
         # print("fe works")
-        feature_extractor = AutoFeatureExtractor.from_pretrained(extractor_path, trust_remote_code=True)
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(extractor_path, trust_remote_code=True) 
+        # self.feature_extractor = AutoFeatureExtractor.from_pretrained(extractor_path, trust_remote_code=True)
        
-        mel_spectrogram = feature_extractor(waveform)
+        # mel_spectrogram = feature_extractor(waveform)
 
-        # # Can use inputs to verify correct shape for upstream model
-        # assert spectrogram.shape[1:] == (1, 100, 100)
-        super().__init__(labels, waveform=waveform, spectrogram=mel_spectrogram)
-        self.labels = labels
-        self.spectrogram = mel_spectrogram
+        # # # Can use inputs to verify correct shape for upstream model
+        # # assert spectrogram.shape[1:] == (1, 100, 100)
+        # self.labels = labels
+        # self.spectrogram = mel_spectrogram
 
+    def __call__(self, labels, spectrogram=None,  waveform=None):
+        mel_spectrogram = self.feature_extractor(waveform)
+        return ModelInput(labels, waveform=None, spectrogram=mel_spectrogram)
+        
 class HFModelConfig(PretrainedConfig):
     """Config for Timm Model Zoo Models!"""
     def __init__(
@@ -49,6 +55,7 @@ class HFModelConfig(PretrainedConfig):
         path="DBD-research-group/Bird-MAE-Huge",
         num_classes=6,
         embeddings_size=1280,
+        freeze_backbone = True,
         **kwargs
     ):
         """Creates Config.
@@ -61,6 +68,7 @@ class HFModelConfig(PretrainedConfig):
         self.path = path
         self.num_classes = num_classes
         self.embeddings_size = embeddings_size
+        self.freeze_backbone = freeze_backbone
         super().__init__(**kwargs)
 
 
@@ -83,7 +91,7 @@ class HFModel(Model, nn.Module):
             loss (any): custom loss function Default: BCEWithLogitsLoss
         """
         super().__init__()
-        self.input_format = HFInput
+        self.input_format = ModelInput
         self.output_format = ModelOutput
         self.config = config
         assert config.num_classes > 0
@@ -123,7 +131,8 @@ class HFModel(Model, nn.Module):
             (ModelOutput): The model output (logits),
             latent space representations (embeddings), loss and labels.
         """
-        embed = self.backbone(x.spectrogram.to(self.device)).last_hidden_state
+        with torch.no_grad() if self.config.freeze_backbone else nullcontext():
+            embed = self.backbone(x.spectrogram.to(self.device)).last_hidden_state
         logits = self.linear(embed)
         loss = self.loss(logits, x.labels)
 

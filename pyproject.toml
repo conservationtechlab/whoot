@@ -13,6 +13,7 @@ dependencies = [
     "pyyaml>=6.0.2",
     "scikit-learn>=1.7.0",
     "soundfile>=0.13.1",
+    "torchaudio>=2.8.0",
     "tqdm>=4.67.1",
 ]
 
@@ -55,9 +56,6 @@ notebooks = [
   "ipywidgets>=8.1.6",
   "matplotlib>=3.10.6",
   "seaborn>=0.13.2",
-]
-birdnet = [
-    "birdnet>=0.1.7",
 ]
 
 
