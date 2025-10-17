@@ -50,7 +50,8 @@ class EmbeddingInput(ModelInput):
 class PerchEmbeddings(EmbeddingModel):
     """Wrapper for getting embeddings from perch."""
 
-    model = model_configs.load_model_by_name('perch_8')
+    # TODO FIX LINE TO BE LESS MEMORY HEAVY
+    # model = model_configs.load_model_by_name('perch_8')
 
     def embed(self, embeddings):
         """Return embeddings."""

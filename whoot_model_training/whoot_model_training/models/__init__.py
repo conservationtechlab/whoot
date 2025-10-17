@@ -7,11 +7,11 @@ Example:
 from .timm_model import TimmModel, TimmInputs, TimmModelConfig
 from .hf_models import HFModel, HFModelConfig, HFInput
 from .model import Model, ModelInput, ModelOutput
-from .few_shot_model import (
-    PerchEmbeddingInput,
-    PerchFewShotModel,
-    FewShotModelConfig
-)
+# from .few_shot_model import (
+#     PerchEmbeddingInput,
+#     PerchFewShotModel,
+#     FewShotModelConfig
+# )
 
 __all__ = [
     "TimmModel",
