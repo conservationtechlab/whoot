@@ -1,17 +1,6 @@
+"""Wrapper around the hugging face model api!"""
+
 from transformers import AutoFeatureExtractor, AutoModel
-import librosa
-
-"""Wrapper around the timms model zoo!
-
-See https://timm.fast.ai/
-
-Timm model zoo good for computer vision models
-Like CNNs, which are useful for spectrograms
-
-Great repo for models, but currently using this for demoing pipeline
-"""
-
-import timm
 from torch import nn
 import torch
 from contextlib import nullcontext
@@ -21,41 +10,46 @@ from .model import Model, ModelInput, ModelOutput, has_required_inputs
 
 
 class HFInput():
-    """Input for TimmModels.
+    """Input for Hugging Face Models.
 
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
-    def __init__(self, labels=None, spectrogram=None,  waveform=None, extractor_path="DBD-research-group/Bird-MAE-Base"):
+    def __init__(self,
+                 labels=None,
+                 spectrogram=None,
+                 waveform=None,
+                 extractor_path="DBD-research-group/Bird-MAE-Base"):
         """Creates TimmInputs.
 
         Args:
             labels: the data's label for this batch
-            audio_data: some audio_data, basically this has a feature extractor for it
+            spectrogram: Legacy
+            waveform: Legacy
+            extractor_path: Path to hugging face preprocessor
         """
-
-        # print("fe works")
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(extractor_path, trust_remote_code=True) 
-        # self.feature_extractor = AutoFeatureExtractor.from_pretrained(extractor_path, trust_remote_code=True)
-       
-        # mel_spectrogram = feature_extractor(waveform)
-
-        # # # Can use inputs to verify correct shape for upstream model
-        # # assert spectrogram.shape[1:] == (1, 100, 100)
-        # self.labels = labels
-        # self.spectrogram = mel_spectrogram
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(
+            extractor_path,
+            trust_remote_code=True)
+        # TODO MAKE HFINPUT WORK WITH ITSELF
 
     def __call__(self, labels, spectrogram=None,  waveform=None):
+        """Create some fake ModelInputs for HFModels.
+
+        Slightly diffrent API for HFInput, when creating a input
+        Use the preprocessor from hugging face.
+        """
         mel_spectrogram = self.feature_extractor(waveform)
         return ModelInput(labels, waveform=None, spectrogram=mel_spectrogram)
-        
+
+
 class HFModelConfig(PretrainedConfig):
     """Config for Timm Model Zoo Models!"""
     def __init__(
         self,
-        path="DBD-research-group/Bird-MAE-Huge",
-        num_classes=6,
-        embeddings_size=1280,
-        freeze_backbone = True,
+        path: str = "DBD-research-group/Bird-MAE-Huge",
+        num_classes: int = 6,
+        embeddings_size: int = 1280,
+        freeze_backbone: bool = True,
         **kwargs
     ):
         """Creates Config.
@@ -64,6 +58,7 @@ class HFModelConfig(PretrainedConfig):
             path (str): url to pull from hf model zoo
             num_classes (int): number of classes in dataset, for cls
             embeddings_size (int): size of output of model
+            freeze_backbone (bool): freeze the backbone of a model
         """
         self.path = path
         self.num_classes = num_classes
@@ -97,7 +92,10 @@ class HFModel(Model, nn.Module):
         assert config.num_classes > 0
 
         # Deep learning CNN backbone
-        self.backbone = AutoModel.from_pretrained(config.path, trust_remote_code=True)
+        self.backbone = AutoModel.from_pretrained(
+            config.path,
+            trust_remote_code=True
+        )
 
         # Unsure if 1000 is default for all timm models. Need to check this
         self.linear = nn.Linear(config.embeddings_size, config.num_classes)
@@ -132,7 +130,9 @@ class HFModel(Model, nn.Module):
             latent space representations (embeddings), loss and labels.
         """
         with torch.no_grad() if self.config.freeze_backbone else nullcontext():
-            embed = self.backbone(x.spectrogram.to(self.device)).last_hidden_state
+            embed = self.backbone(
+                x.spectrogram.to(self.device)
+            ).last_hidden_state
         logits = self.linear(embed)
         loss = self.loss(logits, x.labels)
 
@@ -142,10 +142,3 @@ class HFModel(Model, nn.Module):
             loss=loss,
             labels=x.labels
         )
-
-
-
-
-
-
-

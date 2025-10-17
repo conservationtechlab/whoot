@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 import librosa
 import numpy as np
-from torchvision import transforms
 
 from pyha_analyzer.preprocessors import PreProcessorBase
 
@@ -56,6 +55,8 @@ class WaveformPreprocessors(PreProcessorBase):
         Args:
             duration (float): length of chunk of data to train on
             augments (Augmentations): An augmentation to apply to waveforms
+            sr (int/None): sample rate of audio to standize,
+                defaults to use file sr
             spectrogram_params (SpectrogramParams):
                 config for spectrogram generation
         """
@@ -63,7 +64,8 @@ class WaveformPreprocessors(PreProcessorBase):
         self.augments = augments
         self.sr = sr
 
-        # # Below parameter defaults from https://arxiv.org/pdf/2403.10380 pg 25
+        # # Below parameter defaults from
+        # # https://arxiv.org/pdf/2403.10380 pg 25
         # self.n_fft = spectrogram_params.n_fft
         # self.hop_length = spectrogram_params.hop_length
         # self.power = spectrogram_params.power
@@ -74,13 +76,15 @@ class WaveformPreprocessors(PreProcessorBase):
 
     def __call__(self, batch):
         """Process a batch of data from an AudioDataset."""
-        # print("preprocessor", len(batch), len(batch["audio"]), len(batch["labels"]))
         new_audio = []
-        new_labels = [] 
+        new_labels = []
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
             try:
-                y, sr = librosa.load(path=batch["audio"][item_idx]["path"], sr=self.sr)
+                y, sr = librosa.load(
+                    path=batch["audio"][item_idx]["path"],
+                    sr=self.sr
+                )
             except Exception as e:
                 print(e)
                 print("File Likely is corrupted, moving on")
@@ -96,11 +100,11 @@ class WaveformPreprocessors(PreProcessorBase):
             # Audio Based Augmentations
             if self.augments.audio is not None:
                 y, label = self.augments.audio(y, sr, label)
-            
+
             new_y = y[int(start * sr):end_sr]
             if (new_y.shape[-1] < int(sr * self.duration)):
                 continue
-            
+
             new_audio.append(new_y)
             new_labels.append(label)
 

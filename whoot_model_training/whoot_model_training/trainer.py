@@ -18,8 +18,8 @@ from .metrics import WhootMutliClassMetrics
 from .dataset import AudioDataset
 from .models import Model
 import torch
-import numpy as np
 from tqdm import tqdm
+
 
 class WhootTrainingArguments(PyhaTrainingArguments):
     """Holds arguments use for training."""
@@ -105,15 +105,30 @@ class WhootTrainer(PyhaTrainer):
             preprocessor,
             model.output_format.ignore_keys
         )
-    def predict(
-            self, test_dataset: AudioDataset, ignore_keys = None, metric_key_prefix: str = "test"
-        ):
 
+    def predict(
+            self,
+            test_dataset: AudioDataset,
+            ignore_keys=None,
+            metric_key_prefix: str = "test"
+    ):
+        """Run Inferance on a given dataset.
+
+        Allows for getting predicted outputs to label a new dataset
+        Args:
+            test_dataset (AudioDataset): dataset to get preds from
+            This has labels but they are meaningless in this method
+            ignore_keys: N/A
+            metric_key_prefix: str = "test"
+        Returns: test_dataset with a new col: "pred"
+        """
         test_dataloader = self.get_test_dataloader(test_dataset)
-        
+
         preds = []
         for batch in tqdm(test_dataloader):
-            preds.append(self.model(self.model.input_format(**batch))["logits"].detach().cpu())
+            preds.append(self.model(
+                self.model.input_format(**batch)
+            )["logits"].detach().cpu())
 
         dataset = test_dataset.to_dict()
         dataset["pred"] = torch.concat(preds).detach().numpy()

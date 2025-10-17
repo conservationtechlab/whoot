@@ -13,7 +13,6 @@ from pydub import AudioSegment
 
 import numpy as np
 from datasets import (
-    load_dataset,
     Dataset,
     Audio,
     DatasetDict,
@@ -26,22 +25,28 @@ from ..dataset import AudioDataset
 import json
 import librosa
 
+
 def filter_by_count(ds, col="en", threshold=10):
+    """Limit species list to species with some amount of species."""
     count_by_species = Counter(ds[col])
-    return ds.filter(lambda row: count_by_species[row] > threshold, input_columns=[col])
+    return ds.filter(
+        lambda row: count_by_species[row] > threshold,
+        input_columns=[col]
+    )
 
 
 def filter_xc_data(row: dict):
-    """ In personal experience, raw XC data is very messy
-    Some files get coruptted
-    This intention checks to see if loading files is possible for the frist place
-    """
+    """In personal experience, raw XC data is very messy.
 
+    Some files get coruptted
+    This intention checks to see if loading files is
+    possible for the frist place
+    """
     file_path = row["filepath"]
     try:
         # Heuristic, if we can load 3 seconds, file is probably okay
         # Prevents some files from taking forever
-        librosa.load(path=file_path, duration=3) 
+        librosa.load(path=file_path, duration=3)
         return True
     except Exception as e:
         print(e, file_path)
@@ -60,13 +65,21 @@ def one_hot_encode(row: dict, classes: list):
     row["labels"] = np.array(one_hot, dtype=float)
     return row
 
+
 def convert_audio_to_flac(row, error_path="bad_files", col="audio"):
+    """Convert any audio to flac for better compression.
+
+    Args:
+        row: row from hugging face table
+        error_path: folder to dump broken files
+        col: column with audio path
+    """
     file_path = row[col]
     flac_path = Path(file_path).parent / (Path(file_path).stem + ".flac")
     if os.path.exists(flac_path):
         row[col] = str(flac_path)
         if os.path.exists(file_path):
-            os.remove(file_path) # Remove origional file, we don't need it
+            os.remove(file_path)  # Remove origional file, we don't need it
         return row
     try:
         wav_audio = AudioSegment.from_file(file_path)
@@ -75,14 +88,22 @@ def convert_audio_to_flac(row, error_path="bad_files", col="audio"):
         if os.path.exists(file_path):
             os.makedirs(error_path, exist_ok=True)
             shutil.move(file_path, error_path)
-        # If quit halfway through processing, make sure we get rid of the bad file
+        # If quit halfway through processing,
+        # make sure we get rid of the bad file
         # if os.path.exists(flac_path):
         #     os.remove(flac_path)
-        print("ERROR", "move to", os.path.join(error_path, Path(file_path).name), "ERR MSG:", e)
+        print(
+            "ERROR",
+            "move to",
+            os.path.join(error_path, Path(file_path).name),
+            "ERR MSG:",
+            e
+        )
         row[col] = str(os.path.join(error_path, Path(file_path).name))
         return row
     row[col] = str(flac_path)
     return row
+
 
 @dataclass
 class XCParams():
@@ -97,6 +118,7 @@ class XCParams():
     test_fold = 5
     sample_rate = 44_100
 
+
 def xc_extractor(
         XC_dataset_json_path,
         parent_path,
@@ -104,13 +126,18 @@ def xc_extractor(
         params: XCParams = XCParams(),
         bad_file_path="data/xc_bad_file"
 ):
+    """Extracts data collected from the XC downloader.
+
+    XC_dataset_json_path: json outputted from XC downloader
+    parent_path: path to highest level audio file
+    cache_path: path to cache hugging
+    """
     if os.path.exists(cache_path):
         return load_from_disk(cache_path)
 
-
     with open(XC_dataset_json_path, mode="r") as f:
         xc_recordings_paged = json.load(f)
-    
+
     xc_recordings = []
     for page in xc_recordings_paged:
         xc_recordings.extend(page["recordings"])
@@ -130,17 +157,27 @@ def xc_extractor(
 
     dataset = dataset.add_column(
         "audio", [
-            os.path.join(parent_path, file.replace("/", "_")) for file in dataset["file-name"]
+            os.path.join(
+                parent_path,
+                file.replace("/", "_")
+            ) for file in dataset["file-name"]
         ]
     )
 
     # Fix file paths
-    dataset = dataset.map(convert_audio_to_flac, fn_kwargs={"error_path": bad_file_path}, num_proc=16)
-    dataset = dataset.filter(lambda x: not bad_file_path in x["audio"], num_proc=16)
+    dataset = dataset.map(
+        convert_audio_to_flac,
+        fn_kwargs={"error_path": bad_file_path},
+        num_proc=16
+    )
+    dataset = dataset.filter(
+        lambda x: bad_file_path not in x["audio"], num_proc=16
+    )
     dataset = dataset.add_column("filepath", dataset["audio"])
-    
-
-    dataset = dataset.cast_column("audio", Audio(sampling_rate=params.sample_rate))
+    dataset = dataset.cast_column(
+        "audio",
+        Audio(sampling_rate=params.sample_rate)
+    )
 
     # TODO FIGURE OUT HOW TO DO SPLITS!
     # # Create splits of the data
@@ -160,7 +197,10 @@ def xc_extractor(
     dataset = filter_by_count(dataset)
 
     train_test = dataset.train_test_split(0.2, stratify_by_column="en")
-    test_val = train_test["test"].train_test_split(0.2, stratify_by_column="en")
+    test_val = train_test["test"].train_test_split(
+        0.2,
+        stratify_by_column="en"
+    )
 
     dataset = AudioDataset(
         DatasetDict({

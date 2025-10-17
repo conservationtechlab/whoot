@@ -77,7 +77,10 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         new_labels = []
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
-            y, sr = batch["audio"][item_idx]["array"],batch["audio"][item_idx]["sampling_rate"]
+            y, sr = (
+                batch["audio"][item_idx]["array"],
+                batch["audio"][item_idx]["sampling_rate"]
+            )
             start = 0
 
             # Handle out of bound issues

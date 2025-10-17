@@ -143,6 +143,7 @@ from datasets.features.features import _FEATURE_TYPES, FeatureType
 _FEATURE_TYPES[SubAudio.__name__] = SubAudio
 FeatureType = Union[FeatureType, SubAudio]
 
+
 def get_empty_dict():
     return  {
         "audio": [],
@@ -150,28 +151,38 @@ def get_empty_dict():
         "labels": [],
     }
 
+
 def get_array_chunks_from_memory(
     parent_folder,
-    chunk_length_sec = 5,
-    no_class_idx = 5,
-    output_path = "/data/manual_buowset"
+    chunk_length_sec=5,
+    no_class_idx=5,
+    output_path="/data/manual_buowset"
 ):
-    
     new_rows = get_empty_dict()
     _datasets = []
     for root, dirs, files in tqdm(os.walk(parent_folder), desc="All Folders"):
-        for filename in tqdm(files, leave=False, desc=f"file in dir"):
+        for filename in tqdm(files, leave=False, desc="file in dir"):
             try:
-                if not filename.lower().endswith((".wav", ".mp3", ".flac", ".ogg", ".m4a")):
+                if not filename.lower().endswith(
+                    (".wav", ".mp3", ".flac", ".ogg", ".m4a")
+                ):
                     continue
                 file_path = os.path.join(root, filename)
                 try:
                     clip_length = librosa.get_duration(path=file_path)
-                    sr = librosa.get_samplerate(path=file_path)
+                    # sr = librosa.get_samplerate(path=file_path)
                 except BaseException as e:
-                    print(file_path, "failed stat read", "continuing")
+                    print(file_path, "failed stat read", "continuing", e)
                     continue
-                for i in tqdm(range(0, int(floor(clip_length)), chunk_length_sec), leave=False, desc=f"{filename}"):
+                for i in tqdm(
+                            range(
+                                0,
+                                int(floor(clip_length)),
+                                chunk_length_sec
+                            ),
+                            leave=False,
+                            desc=f"{filename}"
+                        ):
                     new_rows["audio"].append({
                             "path": file_path,
                             # "sampling_rate": sr,
@@ -186,7 +197,9 @@ def get_array_chunks_from_memory(
 
             # This helps make sure stuff isn't loaded into memory
             # Hopefully
-            file_ds = Dataset.from_dict(new_rows).cast_column("audio", SubAudio())
+            file_ds = Dataset.from_dict(
+                new_rows
+            ).cast_column("audio", SubAudio())
             new_rows = get_empty_dict()
             _datasets.append(file_ds)
         #     break #TODO REMOVE
@@ -194,6 +207,7 @@ def get_array_chunks_from_memory(
         #     break #TODO REMOVE
 
     return concatenate_datasets(_datasets)
+
 
 def one_hot_encode(row: dict, classes: list):
     """One hot Encodes a list of labels.
@@ -207,18 +221,26 @@ def one_hot_encode(row: dict, classes: list):
     row["labels"] = np.array(one_hot, dtype=int)
     return row
 
-def raw_audio_extractor(
-    audio_parent_folder:str = "",
-    sr=32_000,
-    class_list = ["cluck", "coocoo", "twitter", "alarm", "chick begging", "no_buow"],
-    chunk_duration = -1,
-    output_folder = ""
 
+def raw_audio_extractor(
+    audio_parent_folder: str = "",
+    sr=32_000,
+    class_list=[
+        "cluck",
+        "coocoo",
+        "twitter",
+        "alarm",
+        "chick begging",
+        "no_buow"
+    ],
+    chunk_duration=-1,
+    output_folder=""
 ):
     """Extracts raw, unlabeled data in the buowset format into an AudioDataset.
 
     Args:
-        audio_parent_folder (str): Path to the parent folder for all audio data.
+        audio_parent_folder (str): Path to the parent folder for all audio
+            data.
             Note its assumed the audio filepath
             in the csv is relative to parent_path
         sr (int): Sample Rate of the audio files Default: 32_000
@@ -227,7 +249,6 @@ def raw_audio_extractor(
         (AudioDataset): See dataset.py, AudioDatasets are consider
         the universal dataset for the training pipeline.
     """
-
     dataset = get_array_chunks_from_memory(
         parent_folder=audio_parent_folder,
         chunk_length_sec=chunk_duration,
@@ -236,7 +257,9 @@ def raw_audio_extractor(
     # # # # Convert to a uniform one_hot encoding for classes
     dataset = dataset.class_encode_column("labels")
     multilabel_class_label = Sequence(ClassLabel(names=class_list))
-    dataset = dataset.map(lambda row: one_hot_encode(row, class_list)).cast_column(
+    dataset = dataset.map(
+        lambda row: one_hot_encode(row, class_list)
+    ).cast_column(
         "labels", multilabel_class_label
     )
 
@@ -244,4 +267,3 @@ def raw_audio_extractor(
         DatasetDict({"train": dataset, "valid": dataset, "test": dataset})
     )
     return ds
-
