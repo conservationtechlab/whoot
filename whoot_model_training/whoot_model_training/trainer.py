@@ -22,7 +22,6 @@ from .dataset import AudioDataset
 from .models import Model
 
 
-
 class WhootTrainingArguments(PyhaTrainingArguments):
     """Holds arguments use for training."""
 
@@ -117,14 +116,16 @@ class WhootTrainer(PyhaTrainer):
     def predict(
         self,
         test_dataset: AudioDataset,
-        ignore_keys=None, # overloaded, please ignore
-        metric_key_prefix: str = "test", # overloaded, please ignore
+        ignore_keys=None,  # overloaded, please ignore
+        metric_key_prefix: str = "test",  # overloaded, please ignore
     ):
         """Run Inferance with trained model!
 
         Args:
             test_dataset: AudioDataset,
             an AudioDataset to collect predictions from
+            ignore_keys: legacy
+            metric_key_prefix: legacy
 
         ignore_keys, and metric_key_prefix exist for subclass overriding
         """

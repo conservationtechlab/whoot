@@ -110,7 +110,7 @@ class SubAudio(Audio):
         # This is how this function works in the normal
         # Audio type
         if (
-            isinstance(value, dict) # pylint: disable=too-many-boolean-expressions
+            isinstance(value, dict)  # pylint: disable=too-many-boolean-expressions
             and "offset" in value
             and "duration" in value
             and value.get("bytes") is None
@@ -252,12 +252,13 @@ def one_hot_encode(row: dict, classes: list):
     row["labels"] = np.array(one_hot, dtype=int)
     return row
 
+
 # output_folder is there as legacy
 def raw_audio_extractor(
     audio_parent_folder: str = "",
-    class_list=None, #
+    class_list=None,
     chunk_duration=-1,
-    output_folder="", # pylint: disable=unused-argument
+    output_folder="",  # pylint: disable=unused-argument
 ):
     """Extracts raw, unlabeled data in the buowset format into an AudioDataset.
 

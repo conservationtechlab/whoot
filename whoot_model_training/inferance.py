@@ -26,7 +26,6 @@ from train import parse_config, init_env
 from whoot_model_training.preprocessors import MelModelInputPreprocessor
 
 
-
 def test(config, model_name=""):
     """Highest level logic for inferance.
 
