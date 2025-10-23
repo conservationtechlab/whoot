@@ -9,14 +9,24 @@ the label, the original filepath of the original wav the segment came
 from, the path to the segment, and the start and end time of the
 labeled detection relative to the original wav file. The labeled
 segments will be the duration of the label, and the duration of the
-noise will be fixed and consistent. The user of the dataset may choose
-to pad the labeled detections if they need consistent length segments.
+noise will be fixed and consistent. Adding -we (window expansion)
+parameter will expand the window to a default 3s for detections,
+evenly expanding on both sides around the sample. -randomize
+parameter will randomly add window expansion to the default 3s
+but the detection can be anywhere within those 3s.
 
-Usage:
-    python3 create_dataset.py -labels /path/to/human/labeled.csv
+Usage (from /whoot):
+    python3 -m create_dataset.create_dataset
+    -labels /path/to/human/labeled.csv
     -wav_dir /path/to/parent/dir/of/wavs/
     -output_dir /path/to/desired/output/dir/
     -class_list /path/to/classes.txt
+    OPTIONAL
+        -we (For if you want to apply window expansion to default
+             3s to samples less than 3s)
+        -randomize (For if you want the placement of the detected
+                 audio to be placed randomly in the window expanded
+                 window)
 
 """
 import argparse
@@ -28,7 +38,7 @@ from create_segments import create_noise_segments
 from filter_labels import filter_labels_2017, filter_labels_2018
 
 
-def create_dataset(labels, wav_dir, output_dir, class_list):
+def create_dataset(labels, wav_dir, output_dir, class_list, we, randomize):
     """Creates labeled and non labeled segments and metadata.
 
     Creates segments based on human labeled data of a detection,
@@ -47,6 +57,8 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
             seen in the human labels file that you want to create
             segments for. Current format is ',' delimited list
             in a .txt file.
+        we (bool): Default False, True for window expansion.
+        randomize (bool): Default False, True for random window expansion.
     """
     # parse the inputs
     out_file = ntpath.dirname(output_dir)
@@ -80,7 +92,9 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
         new_buow_rows = create_segments(wav,
                                         filtered_labels,
                                         output_dir,
-                                        class_list)
+                                        class_list,
+                                        we,
+                                        randomize)
         # create same number of noise segments from the same wav file randomly
         all_buow_rows = create_noise_segments(wav,
                                               new_buow_rows,
@@ -103,7 +117,7 @@ def create_dataset(labels, wav_dir, output_dir, class_list):
     print(f"Created results: {result_file}")
 
 
-def main(labels, wav_dir, output_dir, class_list):
+def main(labels, wav_dir, output_dir, class_list, we, randomize):
     """Main script to run create dataset.
 
     Args:
@@ -114,8 +128,10 @@ def main(labels, wav_dir, output_dir, class_list):
         class_list (str): Path to file containing the classes
             seen in the human labels file that you want to
             create segments for.
+        we (bool): Default False, True for window expansion.
+        randomize (bool): Default False, True for random window expansion.
     """
-    create_dataset(labels, wav_dir, output_dir, class_list)
+    create_dataset(labels, wav_dir, output_dir, class_list, we, randomize)
 
 
 if __name__ == "__main__":
@@ -130,5 +146,14 @@ if __name__ == "__main__":
                         help='Path to desired directory for segments.')
     PARSER.add_argument('-class_list', type=str,
                         help='Path to txt file of list of labeled classes')
+    PARSER.add_argument('-we', action='store_true',
+                        help='Call for window expansion to 3s')
+    PARSER.add_argument('-randomize', action='store_true',
+                        help='Call for randomly distributed expanded window')
     ARGS = PARSER.parse_args()
-    main(ARGS.labels, ARGS.wav_dir, ARGS.output_dir, ARGS.class_list)
+    main(ARGS.labels,
+         ARGS.wav_dir,
+         ARGS.output_dir,
+         ARGS.class_list,
+         ARGS.we,
+         ARGS.randomize)

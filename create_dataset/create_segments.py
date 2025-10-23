@@ -8,6 +8,7 @@ import csv
 import pandas as pd
 from pydub import AudioSegment, exceptions
 import numpy as np
+from whoot import expand_window
 
 
 def get_paths(home_dir):
@@ -29,7 +30,7 @@ def get_paths(home_dir):
     return wavs_file_paths
 
 
-def create_segments(wav, filtered_labels, out_path, class_list):
+def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
     """Create the labeled segments.
 
     Args:
@@ -43,6 +44,8 @@ def create_segments(wav, filtered_labels, out_path, class_list):
             to be created for. What the manual ID's are in the human
             label file- will ignore everything that is misspelled or
             unknown labels.
+        we (bool): Window expansion option.
+        random (bool): Random window expansion option.
 
     Returns:
         pd.Dataframe: The metadata now associated with the
@@ -62,7 +65,8 @@ def create_segments(wav, filtered_labels, out_path, class_list):
                                         'label',
                                         'segment_path',
                                         'original_path',
-                                        'segment_duration_s',
+                                        'labeled_duration_s',
+                                        'original_rel_start_ms',
                                         'segment_rel_start_ms'])
     with open(class_list, 'r', newline='', encoding='utf-8') as file:
         reader = csv.reader(file)
@@ -82,7 +86,14 @@ def create_segments(wav, filtered_labels, out_path, class_list):
                 end_time = start_time + float(row['DURATION'])
                 start_time = start_time * 1000
                 end_time = end_time * 1000
-                segment = audio[start_time:end_time]
+                rel_start = None
+                if we:
+                    segment, rel_start = expand_window(audio,
+                                                       start_time,
+                                                       end_time,
+                                                       randomize=randomize)
+                else:
+                    segment = audio[start_time:end_time]
                 segment_id = uuid.uuid4()
                 segment_id = str(segment_id) + '.wav'
                 segment_path = os.path.join(out_path, segment_id)
@@ -92,7 +103,8 @@ def create_segments(wav, filtered_labels, out_path, class_list):
                                            segment_path,
                                            wav,
                                            float(row['DURATION']),
-                                           start_time]
+                                           start_time,
+                                           rel_start]
                 df_row += 1
             else:
                 continue
@@ -130,10 +142,11 @@ def create_noise_segments(wav, new_buow_rows, out_path):
     call_type = "no_buow"
     num = len(new_buow_rows) * 2
     seconds_array = np.zeros(duration)
+    rel_start = None
     for _, row in new_buow_rows.iterrows():
         start = int((row['segment_rel_start_ms'] / 1000) - 1)
         end = int((row['segment_rel_start_ms'] / 1000)
-                  + row['segment_duration_s'])
+                  + row['labeled_duration_s'])
         mask_start = max(0, start - 30)
         mask_end = min(len(seconds_array), end + 30 + 1)
         seconds_array[mask_start:mask_end] = 1
@@ -160,7 +173,8 @@ def create_noise_segments(wav, new_buow_rows, out_path):
                                              segment_path,
                                              wav,
                                              duration_of_segment,
-                                             start_time]
+                                             start_time,
+                                             rel_start]
             new_sample += 1
 
     all_buow_rows = new_buow_rows
