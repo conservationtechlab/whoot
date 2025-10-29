@@ -32,9 +32,10 @@ cpu = [
 cu128 = [
   "torch>=2.7.0",
   "torchvision>=0.22.0",
+  "torchcodec>=0.7.0",
 ]
 model-training = [
-  "datasets>=3.5.1,<4.0.0",
+  "datasets>=4.0.0",
   "timm>=1.0.15",
   "pyha-analyzer@git+https://github.com/UCSD-E4E/pyha-analyzer-2.0.git@support_whoot",
   "comet-ml>=3.43.2",
