@@ -3,8 +3,9 @@ name = "whoot"
 dynamic = ["version"]
 description = "Tools for capturing, analyzing, and parsing audio data"
 readme = "README.md"
-requires-python = ">= 3.10.0, < 3.13.0"
+requires-python = ">=3.10,<3.13"
 dependencies = [
+    "executorch>=0.7.0",
     "librosa>=0.10.2.post1",
     "numba==0.61.0",
     "pandas>=2.3.0",
@@ -45,9 +46,6 @@ notebooks = [
   "ipywidgets>=8.1.6",
   "matplotlib>=3.10.5",
   "seaborn>=0.13.2",
-]
-birdnet = [
-    "birdnet>=0.1.7",
 ]
 
 
