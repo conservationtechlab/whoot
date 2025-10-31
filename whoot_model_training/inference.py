@@ -1,15 +1,15 @@
 # pylint: skip-file
-"""Trains a Mutliclass Model with Pytorch and Huggingface.
+""" Run a mutliclass model over a set of unlabeled data!
 
-This script can be used to run experiments with different
-models and datasets to create any model for bioacoustic classification
+This scripts takes a folder of unlabeled data and the path
+to a model checkpoint to get new data.
 
-It is intended this script to be heavily modified with each experiment
-(say one wants to use a different dataset, one should copy this and change the
-extractor!)
+It is intended this script to be heavily modified with each diffrent model type
+(say one wants to use a different model, one should copy this and change the
+model type!)
 
 Usage:
-    $ python train.py /path/to/config.yml
+    $ python train.py /path/to/config.yml --model_name /path/to/model/parent/dir/
 
 config.yml should contain frequently changed hyperparameters
 """
@@ -42,31 +42,19 @@ def test(config, model_name=""):
     """
     # Extract a new dataset
     unlabel_audio_path = "/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/"
+    run_name = f"buowset1.1_{model_name}_ATTEMPT_TO_STUDY_NEW_DATA"
+
+    
     ds = raw_audio_extractor(
         audio_parent_folder=unlabel_audio_path,
         output_folder="data/manual_buowset",
         chunk_duration=3,
     )
 
-    # ds = buowset_extractor(
-    #     metadata_csv=config["metadata_csv"],
-    #     parent_path=config["data_path"],
-    #     output_path=config["hf_cache_path"],
-    # )
-
     # Create the model
     model = TimmModel.from_pretrained(model_name)
-
     preprocessor = MelModelInputPreprocessor(TimmInputs, duration=3)
-
-    ds["train"].set_transform(preprocessor)
-    # ds["valid"].set_transform(preprocessor)
-    # ds["test"].set_transform(preprocessor)
-
-    model_name = "efficientnet_b1"
-    run_name = f"buowset1.1_{model_name}_ATTEMPT_TO_STUDY_NEW_DATA"
-
-    # trainer = WhootTrainer._load_from_checkpoint(model_name)
+    ds["train"].set_transform(preprocessor) # This isn't technically train, but HF expects a train split
 
     # Run training
     training_args = WhootTrainingArguments(
@@ -93,16 +81,10 @@ def test(config, model_name=""):
         ),
     )
 
-    # print(ds["train"].shape, ds["test"].shape, ds["valid"].shape)
-    # input()
-
     out = trainer.predict(ds["train"])
     print(out)
     with open(run_name + ".pkl", mode="wb") as f:
         pickle.dump(out, f)
-    # trainer.evaluate(ds["test"], metric_key_prefix="test")
-    # trainer.evaluate(ds["valid"], metric_key_prefix="valid")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")
