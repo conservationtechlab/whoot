@@ -26,7 +26,12 @@ from whoot_model_training.preprocessors import (
 
 import pickle
 
-def test(config, model_name=""):
+
+def test(
+    config,
+    model_name="",
+    audio_dir="/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/"
+):
     """Highest level logic for inferance.
 
     Does the following:
@@ -38,11 +43,12 @@ def test(config, model_name=""):
 
     Args:
         config (dict): the config used for training. Defined in yaml file
-        TODO
+        model_name (str): path to model checkpoint to use
+        audio_dir (str): path to unlabeled data
     """
     # Extract a new dataset
     ds = raw_audio_extractor(
-        audio_parent_folder="/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/",
+        audio_parent_folder=audio_dir,
         output_folder="data/manual_buowset",
         chunk_duration=3
     )
@@ -64,12 +70,10 @@ def test(config, model_name=""):
     # ds["valid"].set_transform(preprocessor)
     # ds["test"].set_transform(preprocessor)
 
-
     model_name = "efficientnet_b1"
     run_name = f"buowset1.1_{model_name}_ATTEMPT_TO_STUDY_NEW_DATA"
 
     # trainer = WhootTrainer._load_from_checkpoint(model_name)
-    
     # Run training
     training_args = WhootTrainingArguments(
         run_name=run_name,
@@ -105,11 +109,12 @@ def test(config, model_name=""):
     # trainer.evaluate(ds["test"], metric_key_prefix="test")
     # trainer.evaluate(ds["valid"], metric_key_prefix="valid")
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")
     parser.add_argument("config", type=str, help="Path to config.yml")
     parser.add_argument(
-        "--model_name", 
+        "--model_name",
         required=False,
         help="path to weights or hugging face repo id",
         default="/home/sean/whoot/checkpoint-4985")

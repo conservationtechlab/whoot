@@ -171,7 +171,7 @@ def xc_extractor(
         # num_proc=16
     )
     dataset = dataset.filter(
-        lambda x: bad_file_path not in x["audio"], #num_proc=16
+        lambda x: bad_file_path not in x["audio"],
     )
     dataset = dataset.add_column("filepath", dataset["audio"])
     dataset = dataset.cast_column(

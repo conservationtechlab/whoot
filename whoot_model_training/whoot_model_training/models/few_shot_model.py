@@ -12,7 +12,7 @@ do processing on top of that embedding
 """
 
 from torch import nn, Tensor
-from perch_hoplite.zoo import model_configs
+# from perch_hoplite.zoo import model_configs
 from .model import Model, ModelInput, ModelOutput, has_required_inputs
 from transformers import PretrainedConfig
 

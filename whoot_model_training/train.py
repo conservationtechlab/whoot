@@ -17,19 +17,15 @@ import argparse
 import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
-from whoot_model_training.data_extractor import buowset_extractor
+from whoot_model_training.data_extractor import xc_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
 from whoot_model_training.preprocessors import (
     MelModelInputPreprocessor
 )
-from whoot_model_training.preprocessors.spectrogram_preprocessors import SpectrogramParams
-from whoot_model_training.preprocessors.augmentations import (
-    Gain,
-    PolarityInversion,
-    MixItUp,
-    ComposeAudioLabel
+from whoot_model_training.preprocessors.spectrogram_preprocessors import (
+    SpectrogramParams
 )
 
 # Uncomment for use with data augmentation
@@ -75,10 +71,9 @@ def train(config):
     #     output_path=config["hf_cache_path"],
     # )
 
-    from whoot_model_training.whoot_model_training.data_extractor import xc_extractor
-
+    csv_path = "/home/sean/whoot/data/san_diego_xc_aux/xc_meta_aux.json"
     ds = xc_extractor(
-        XC_dataset_json_path="/home/sean/whoot/data/san_diego_xc_aux/xc_meta_aux.json",
+        XC_dataset_json_path=csv_path,
         parent_path="/home/sean/whoot/data/san_diego_xc_aux/xeno-canto"
     )
 
@@ -93,29 +88,29 @@ def train(config):
 
     # Preprocessors
 
-    # Uncomment if doing work with data augmentation
-    # Augmentations
-    wav_augs = ComposeAudioLabel([
-        # AddBackgroundNoise( #We don't have background noise yet...
-        #     sounds_path="data_birdset/background_noise",
-        #     min_snr_db=10,
-        #     max_snr_db=30,
-        #     noise_transform=PolarityInversion(),
-        #     p=0.8
-        # ),
-        Gain(
-            min_gain_db = -12,
-            max_gain_db = 12,
-            p = 0.8
-        ),
-        # MixItUp(
-        #     dataset_ref=ds["train"],
-        #     min_snr_db=10,
-        #     max_snr_db=30,
-        #     noise_transform=PolarityInversion(),
-        #     p=0.8
-        # )
-    ])
+    # # Uncomment if doing work with data augmentation
+    # # Augmentations
+    # wav_augs = ComposeAudioLabel([
+    #     # AddBackgroundNoise( #We don't have background noise yet...
+    #     #     sounds_path="data_birdset/background_noise",
+    #     #     min_snr_db=10,
+    #     #     max_snr_db=30,
+    #     #     noise_transform=PolarityInversion(),
+    #     #     p=0.8
+    #     # ),
+    #     Gain(
+    #         min_gain_db=-12,
+    #         max_gain_db=12,
+    #         p = 0.8
+    #     ),
+    #     # MixItUp(
+    #     #     dataset_ref=ds["train"],
+    #     #     min_snr_db=10,
+    #     #     max_snr_db=30,
+    #     #     noise_transform=PolarityInversion(),
+    #     #     p=0.8
+    #     # )
+    # ])
 
     spectrogram_params = SpectrogramParams()
     # spectrogram_params = SpectrogramParams(

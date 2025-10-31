@@ -2,16 +2,15 @@
 
 Extractor for general, typically unlabeled soundscape recordings
 
-Fits as much as possible to the AudioDataset standard but 
+Fits as much as possible to the AudioDataset standard but
 NOT INTENDED FOR TRAINING
 
 Rather just a placeholder to help inferance work
 """
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Union
 import os
 import numpy as np
 from datasets import (
-    load_dataset,
     Audio,
     concatenate_datasets,
     DatasetDict,
@@ -24,9 +23,9 @@ import librosa
 from math import floor
 from tqdm import tqdm
 import pyarrow as pa
+from datasets.features.features import _FEATURE_TYPES, FeatureType
 
 from ..dataset import AudioDataset
-
 
 
 class SubAudio(Audio):
@@ -36,7 +35,7 @@ class SubAudio(Audio):
     https://github.com/huggingface/datasets/blob/5dc1a179783dff868b0547c8486268cfaea1ea1f/src/datasets/features/audio.py#L24
 
     The Audio Column of a HuggingFace dataset
-    handles loading in data from a given file 
+    handles loading in data from a given file
 
     What is nice is it streams data: it doesn't get loaded into
     memory until it is needed via the path
@@ -45,40 +44,52 @@ class SubAudio(Audio):
     We would need to load it as an array instead of a path
     And it gets loaded into memory. Huge issue with large audio datasets.
 
-    By default HF doesn't support chunking, so this class should handle chunking
+    By default HF doesn't support chunking,
+    so this class should handle chunking
     During streaming rather than during dataset creation
 
-    You can use it the same way you might with the Audio class. In fact, with normal processing
+    You can use it the same way you might with the Audio class.
+    In fact, with normal processing
     it handles the same way!
 
-    To use the chunking feature, create a Audio row with the following parameters
+    To use the chunking feature, create a Audio row with the
+    following parameters
     - path: as is with Audio
     - sampling_rate: as is with Audio
-    - offset: NEW, offset in seconds of when to start taking audio data
-    - duration: NEW, duration from offset in seconds for how much data to collect
+    - offset: NEW, offset in seconds of when to start taking
+        audio data
+    - duration: NEW, duration from offset in seconds for
+        how much data to collect
 
-    You need both offset and duration to load in the chunk, otherwise it will load the full file.
+    You need both offset and duration to load in the chunk,
+    otherwise it will load the full file.
     """
 
     pa_type: ClassVar[Any] = pa.struct({
-        "bytes": pa.binary(), 
+        "bytes": pa.binary(),
         "path": pa.string(),
         "offset": pa.int64(),
         "duration": pa.int64()
     })
 
     def __call__(self):
+        """Get type."""
         return self.pa_type
 
     def encode_example(self, value) -> dict:
+        """Encode audio data to raw."""
         if (
             isinstance(value, dict)
             and value.get("offset")
             and value.get("duration")
-            and value.get("path") is not None 
+            and value.get("path") is not None
             and os.path.isfile(value["path"])
         ):
-            y, sr = librosa.load(path = value["path"], offset=value["offset"], duration=value["duration"])
+            y, sr = librosa.load(
+                path=value["path"],
+                offset=value["offset"],
+                duration=value["duration"]
+            )
             value["array"] = y
             value["sampling_rate"] = sr
             encoded = super().encode_example(value)
@@ -88,20 +99,24 @@ class SubAudio(Audio):
             return encoded
         return super().encode_example(value)
 
-    def decode_example(self, value, token_per_repo_id=None) -> dict: 
-        # print("d4ecode", value)
+    def decode_example(self, value, token_per_repo_id=None) -> dict:
+        """Decode raw data into audio info and array."""
         if (
             isinstance(value, dict)
             and "offset" in value
             and "duration" in value
-            and value.get("bytes") is  None 
-            and value.get("path") is not  None 
+            and value.get("bytes") is None
+            and value.get("path") is not None
             and os.path.isfile(value["path"])
         ):
-            y, sr = librosa.load(path = value["path"], offset=value["offset"], duration=value["duration"])
+            y, sr = librosa.load(
+                path=value["path"],
+                offset=value["offset"],
+                duration=value["duration"]
+            )
             return {
-                "path": value["path"], 
-                "array": y, 
+                "path": value["path"],
+                "array": y,
                 "sampling_rate": sr,
                 "offset": value["offset"],
                 "duration": value["duration"]}
@@ -109,16 +124,25 @@ class SubAudio(Audio):
             isinstance(value, dict)
             and value.get("offset")
             and value.get("duration")
-            and value.get("bytes") is not  None 
+            and value.get("bytes") is not None
         ):
-            decoded = super().decode_example(value, token_per_repo_id=token_per_repo_id)
-            decoded["offset"] = value["offset"]  
-            decoded["duration"] = value["duration"]  
+            decoded = super().decode_example(
+                value,
+                token_per_repo_id=token_per_repo_id
+            )
+            decoded["offset"] = value["offset"]
+            decoded["duration"] = value["duration"]
             return decoded
-        return super().decode_example(value, token_per_repo_id=token_per_repo_id)
-            
-    def cast_storage(self, storage: Union[pa.StringArray, pa.StructArray]) -> pa.StructArray:
-        # print("cast_storage real")
+        return super().decode_example(
+            value,
+            token_per_repo_id=token_per_repo_id
+        )
+
+    def cast_storage(
+        self,
+        storage: Union[pa.StringArray, pa.StructArray]
+    ) -> pa.StructArray:
+        """Cast a hugging face dataset column as the data type."""
         if pa.types.is_struct(storage.type):
             if storage.type.get_field_index("bytes") >= 0:
                 bytes_array = storage.field("bytes")
@@ -135,17 +159,25 @@ class SubAudio(Audio):
             if storage.type.get_field_index("duration") >= 0:
                 duration_array = storage.field("duration")
             else:
-                duration_array = pa.array([None] * len(storage), type=pa.int64())
-            storage = pa.StructArray.from_arrays([bytes_array, path_array, offset_array, duration_array], ["bytes", "path", "offset", "duration"], mask=storage.is_null())
+                duration_array = pa.array(
+                    [None] * len(storage),
+                    type=pa.int64()
+                )
+            storage = pa.StructArray.from_arrays(
+                [bytes_array, path_array, offset_array, duration_array],
+                ["bytes", "path", "offset", "duration"],
+                mask=storage.is_null()
+            )
         return table.array_cast(storage, self.pa_type)
 
-from datasets.features.features import _FEATURE_TYPES, FeatureType
+
 _FEATURE_TYPES[SubAudio.__name__] = SubAudio
 FeatureType = Union[FeatureType, SubAudio]
 
 
 def get_empty_dict():
-    return  {
+    """Helper to make a new row."""
+    return {
         "audio": [],
         "file_path": [],
         "labels": [],
@@ -158,6 +190,7 @@ def get_array_chunks_from_memory(
     no_class_idx=5,
     output_path="/data/manual_buowset"
 ):
+    """Split audio data into chunks and save each as SubAudio data."""
     new_rows = get_empty_dict()
     _datasets = []
     for root, dirs, files in tqdm(os.walk(parent_folder), desc="All Folders"):
