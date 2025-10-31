@@ -123,8 +123,7 @@ class TimmModel(Model, nn.Module):
             (ModelOutput): The model output (logits),
             latent space representations (embeddings), loss and labels.
         """
-        embed = self.backbone(x.spectrogram)
-        logits = self.linear(embed)
+        logits, embed = self.predict(x.spectrogram)
         loss = self.loss(logits, x.labels)
 
         return ModelOutput(
@@ -133,3 +132,9 @@ class TimmModel(Model, nn.Module):
             loss=loss,
             labels=x.labels
         )
+    
+    def predict(self, spectrogram):
+        embed = self.backbone(spectrogram)
+        logits = self.linear(embed)
+        return logits, embed
+
