@@ -168,10 +168,10 @@ def xc_extractor(
     dataset = dataset.map(
         convert_audio_to_flac,
         fn_kwargs={"error_path": bad_file_path},
-        num_proc=16
+        # num_proc=16
     )
     dataset = dataset.filter(
-        lambda x: bad_file_path not in x["audio"], num_proc=16
+        lambda x: bad_file_path not in x["audio"], #num_proc=16
     )
     dataset = dataset.add_column("filepath", dataset["audio"])
     dataset = dataset.cast_column(

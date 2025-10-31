@@ -12,13 +12,11 @@ Usage:
 
 config.yml should contain frequently changed hyperparameters
 """
-import os
 import argparse
-import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
-from whoot_model_training.data_extractor import buowset_extractor, raw_audio_extractor
-from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
+from whoot_model_training.data_extractor import raw_audio_extractor
+from whoot_model_training.models import TimmModel, TimmInputs
 from whoot_model_training import CometMLLoggerSupplement
 from train import parse_config, init_env
 
