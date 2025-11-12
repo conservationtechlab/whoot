@@ -21,7 +21,7 @@ class TimmInputs(ModelInput):
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
 
-    def __init__(self, labels, spectrogram=None):
+    def __init__(self, labels, waveform=None, spectrogram=None):
         """Creates TimmInputs.
 
         Args:
