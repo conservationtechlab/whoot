@@ -9,7 +9,7 @@ It is intended this script to be heavily modified with each diffrent model type
 model type!)
 
 Usage:
-    $ python train.py /path/to/config.yml --model_name /path/to/model/parent/dir/
+    $ python inference.py /path/to/config.yml --model_name /path/to/model/parent/dir/
 
 config.yml should contain frequently changed hyperparameters
 """
@@ -44,7 +44,6 @@ def test(config, model_name=""):
     unlabel_audio_path = "/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/"
     run_name = f"buowset1.1_{model_name}_ATTEMPT_TO_STUDY_NEW_DATA"
 
-    
     ds = raw_audio_extractor(
         audio_parent_folder=unlabel_audio_path,
         output_folder="data/manual_buowset",
