@@ -42,7 +42,7 @@ def test(config, model_name=""):
     """
     # Extract a new dataset
     unlabel_audio_path = "/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/"
-    run_name = f"buowset1.1_{model_name}_ATTEMPT_TO_STUDY_NEW_DATA"
+    run_name = f"{model_name}_infer" # Will create predictions in model_checkpoint_folder
 
     ds = raw_audio_extractor(
         audio_parent_folder=unlabel_audio_path,
