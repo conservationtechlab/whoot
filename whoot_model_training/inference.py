@@ -1,5 +1,5 @@
 # pylint: skip-file
-""" Run a mutliclass model over a set of unlabeled data!
+"""Run a mutliclass model over a set of unlabeled data!
 
 This scripts takes a folder of unlabeled data and the path
 to a model checkpoint to get new data.
@@ -9,7 +9,8 @@ It is intended this script to be heavily modified with each diffrent model type
 model type!)
 
 Usage:
-    $ python inference.py /path/to/config.yml --model_name /path/to/model/parent/dir/
+    $ python inference.py /path/to/config.yml
+        --model_name /path/to/model/parent/dir/
 
 config.yml should contain frequently changed hyperparameters
 """
@@ -42,7 +43,8 @@ def test(config, model_name=""):
     """
     # Extract a new dataset
     unlabel_audio_path = "/mnt/restorage/Audiomoth/Raw sound files/2024/RGCB/"
-    run_name = f"{model_name}_infer" # Will create predictions in model_checkpoint_folder
+    run_name = f"{model_name}_infer"
+    # Will create predictions in model_checkpoint_folder
 
     ds = raw_audio_extractor(
         audio_parent_folder=unlabel_audio_path,
@@ -53,7 +55,8 @@ def test(config, model_name=""):
     # Create the model
     model = TimmModel.from_pretrained(model_name)
     preprocessor = MelModelInputPreprocessor(TimmInputs, duration=3)
-    ds["train"].set_transform(preprocessor) # This isn't technically train, but HF expects a train split
+    ds["train"].set_transform(preprocessor)
+    # This isn't technically train, but HF expects a train split
 
     # Run training
     training_args = WhootTrainingArguments(
@@ -84,6 +87,7 @@ def test(config, model_name=""):
     print(out)
     with open(run_name + ".pkl", mode="wb") as f:
         pickle.dump(out, f)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")

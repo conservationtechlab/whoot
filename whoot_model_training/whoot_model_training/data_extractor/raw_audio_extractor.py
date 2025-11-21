@@ -110,7 +110,8 @@ class SubAudio(Audio):
         # This is how this function works in the normal
         # Audio type
         if (
-            isinstance(value, dict)  # pylint: disable=too-many-boolean-expressions
+            # pylint: disable=too-many-boolean-expressions
+            isinstance(value, dict)
             and "offset" in value
             and "duration" in value
             and value.get("bytes") is None
