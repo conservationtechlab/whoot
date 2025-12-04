@@ -61,7 +61,7 @@ def test(config, model_name=""):
     # Run training
     training_args = WhootTrainingArguments(
         run_name=run_name,
-        subproject_name=config["SUBPROJECT_NAME"] + "_INFERANCE",
+        subproject_name=config["SUBPROJECT_NAME"] + "_INFERENCE",
         dataset_name=config["DATASET_NAME"],
     )
 
