@@ -84,6 +84,7 @@ def test(config, model_name=""):
     )
 
     out = trainer.predict(ds["train"])
+    del out['labels']
     print(out)
     with open(run_name + ".pkl", mode="wb") as f:
         pickle.dump(out, f)
