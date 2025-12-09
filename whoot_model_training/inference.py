@@ -84,6 +84,8 @@ def test(config, model_name=""):
     )
 
     out = trainer.predict(ds["train"])
+    # removing label values for now because they don't match preds
+    # labels every clip as 1st class, despite preds showing otherwise
     del out['labels']
     print(out)
     with open(run_name + ".pkl", mode="wb") as f:
