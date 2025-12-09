@@ -12,6 +12,7 @@ Usage:
 
 config.yml should contain frequently changed hyperparameters
 """
+
 import os
 import argparse
 import yaml
@@ -21,8 +22,9 @@ from whoot_model_training.data_extractor import buowset_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
-from whoot_model_training.preprocessors import (
-    MelModelInputPreprocessor
+from whoot_model_training.preprocessors import MelModelInputPreprocessor
+from whoot_model_training.preprocessors.spectrogram_preprocessors import (
+    SpectrogramParams,
 )
 
 # Uncomment for use with data augmentation
@@ -69,10 +71,12 @@ def train(config):
     )
 
     # Create the model
-    run_name = "flac_pylint_test_efficientnet_b1_buowset"
+    model_name = "efficientnet_b1"
+
+    run_name = f"buowset1.1_{model_name}"
     model_config = TimmModelConfig(
-        timm_model="efficientnet_b1",
-        num_classes=ds.get_num_classes())
+        timm_model=model_name, num_classes=ds.get_num_classes()
+    )
     model = TimmModel(model_config)
 
     # Preprocessors
@@ -101,13 +105,30 @@ def train(config):
     #     )
     # ])
 
+    spectrogram_params = SpectrogramParams()
+    # spectrogram_params = SpectrogramParams(
+    #     n_mels = 224,
+    #     hop_length = 286,
+    # )
+    # """Dataclass for spectrogram Parameters.
+
+    # n_fft: (int) number of fft bins
+    # hop_length (int) skip count
+    # power: (float) usually 2
+    # n_mels: (int) number of mel bins
+    # """
+    # n_fft: int = 2048
+    # hop_length: int = 256
+    # power: float = 2.0
+    # n_mels: int = 256
+
     # Online preprocessors prepare data for training
     train_preprocessor = MelModelInputPreprocessor(
-        TimmInputs, duration=3
+        TimmInputs, duration=3, spectrogram_params=spectrogram_params
     )
 
     preprocessor = MelModelInputPreprocessor(
-        TimmInputs, duration=3
+        TimmInputs, duration=3, spectrogram_params=spectrogram_params
     )
 
     ds["train"].set_transform(train_preprocessor)
@@ -122,11 +143,11 @@ def train(config):
     )
 
     # COMMON OPTIONAL ARGS
-    training_args.num_train_epochs = 2
+    training_args.num_train_epochs = 5
     training_args.eval_steps = 100
-    training_args.per_device_train_batch_size = 32
-    training_args.per_device_eval_batch_size = 32
-    training_args.dataloader_num_workers = 36
+    training_args.per_device_train_batch_size = 16
+    training_args.per_device_eval_batch_size = 16
+    training_args.dataloader_num_workers = 1
     training_args.run_name = run_name
 
     trainer = WhootTrainer(

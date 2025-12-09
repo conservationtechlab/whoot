@@ -30,6 +30,7 @@ def has_required_inputs():
 
     MUST ALWAYS WRAP FORWARD FUNCTION OF MODEL
     """
+
     def decorator(forward):
         @wraps(forward)
         def wrapper(self, x=None, **kwarg):
@@ -87,14 +88,16 @@ class ModelOutput(dict, UserDict):
             labels: labels for computing metrics
             loss: loss as computed by the model
         """
-        super().__init__({
+        super().__init__(
+            {
                 "predictions": logits,
                 "logits": logits,
                 "labels": [labels],
                 # "label_ids": [labels],
                 "embeddings": embeddings,
-                "loss": loss
-            })
+                "loss": loss,
+            }
+        )
 
     def items(self):
         """Get all items in dict.
@@ -102,9 +105,9 @@ class ModelOutput(dict, UserDict):
         But only if they are defined (not null)!
         """
         return [
-            (key, value) for (
-                key, value
-            ) in super().items() if value is not None]
+            (key, value) for
+            (key, value) in super().items() if value is not None
+        ]
 
 
 class ModelInput(UserDict, dict):
@@ -133,11 +136,13 @@ class ModelInput(UserDict, dict):
             waveform: raw audio signal
             spectrogram: 2d matrix to represent the waveform
         """
-        super().__init__({
-            "labels": labels,
-            "waveform": waveform,
-            "spectrogram": spectrogram
-        })
+        super().__init__(
+            {
+                "labels": labels,
+                "waveform": waveform,
+                "spectrogram": spectrogram
+            }
+        )
 
     def items(self):
         """Get all items in dict.
@@ -145,10 +150,8 @@ class ModelInput(UserDict, dict):
         But only if they are defined (not null)!
         """
         return [
-            (key, value) for (
-                key, value
-            ) in super(
-            ).items() if value is not None]
+            (key, value) for
+            (key, value) in super().items() if value is not None]
 
     @classmethod
     def from_dict(cls, some_input: dict):
@@ -172,6 +175,7 @@ class ModelInput(UserDict, dict):
 
 class Model(PreTrainedModel, BaseModel):
     """BaseModel Class for Whoot."""
+
     def __init__(self):
         """Creates a basic model format.
 
@@ -184,7 +188,7 @@ class Model(PreTrainedModel, BaseModel):
 
         assert hasattr(self.forward, "__wrapped__"), (
             "Please put `@has_required_inputs()",
-            "on the forward function of the model"
+            "on the forward function of the model",
         )
 
     def get_embeddings(self, x: ModelInput) -> np.array:

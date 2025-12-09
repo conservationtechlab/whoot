@@ -20,6 +20,7 @@ class TimmInputs(ModelInput):
 
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
+
     def __init__(self, labels, waveform=None, spectrogram=None):
         """Creates TimmInputs.
 
@@ -30,20 +31,21 @@ class TimmInputs(ModelInput):
         """
         # # Can use inputs to verify correct shape for upstream model
         # assert spectrogram.shape[1:] == (1, 100, 100)
-        super().__init__(labels, waveform, spectrogram)
+        super().__init__(labels, waveform=None, spectrogram=spectrogram)
         self.labels = labels
         self.spectrogram = spectrogram
 
 
 class TimmModelConfig(PretrainedConfig):
     """Config for Timm Model Zoo Models!"""
+
     def __init__(
         self,
         timm_model="resnet34",
         pretrained=True,
         in_chans=1,
         num_classes=6,
-        **kwargs
+        **kwargs,
     ):
         """Creates Config.
 
@@ -62,12 +64,10 @@ class TimmModelConfig(PretrainedConfig):
 
 class TimmModel(Model, nn.Module):
     """Model that uses a timm's model."""
+
     config_class = TimmModelConfig
 
-    def __init__(
-        self,
-        config: TimmModelConfig
-    ):
+    def __init__(self, config: TimmModelConfig):
         """Init for TimmModel.
 
         kwargs:

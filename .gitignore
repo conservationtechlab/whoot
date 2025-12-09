@@ -211,9 +211,12 @@ uv.lock
 
 # Data Folders
 data
+*csv
+results/*
 
 # Model Storage
 model_checkpoints/*
+checkpoint-4985/*
 
 
 # testing/debugging notebooks
@@ -226,3 +229,7 @@ settings.json
 # Block all configs besides the example config
 whoot_model_training/configs
 !whoot_model_training/configs/config.yml
+
+# Block demos
+demos/
+*.ipynb
