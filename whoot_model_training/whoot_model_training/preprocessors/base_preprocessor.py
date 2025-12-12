@@ -19,7 +19,7 @@ from pyha_analyzer.preprocessors import PreProcessorBase
 from .spectrogram_preprocessors import (
     BuowMelSpectrogramPreprocessors,
     SpectrogramParams,
-    Augmentations
+    Augmentations,
 )
 from ..models.model import ModelInput
 
@@ -33,6 +33,7 @@ class SpectrogramModelInPreprocessors(PreProcessorBase):
 
     Passes a spectrogram into a ModelInput object.
     """
+
     def __init__(
         self,
         spec_preprocessor: PreProcessorBase,
@@ -75,6 +76,7 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
     format of the old SpectrogramModelInputPreprocessors
     class with the new functionality
     """
+
     def __init__(
         self,
         model_input: ModelInput,

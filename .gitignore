@@ -211,9 +211,12 @@ uv.lock
 
 # Data Folders
 data
+*csv
+results/*
 
 # Model Storage
 model_checkpoints/*
+checkpoint-4985/*
 
 
 # testing/debugging notebooks
@@ -229,3 +232,4 @@ whoot_model_training/configs
 *.csv
 *.ipynb
 *.json
+demos/

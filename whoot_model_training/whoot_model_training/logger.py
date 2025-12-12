@@ -10,7 +10,7 @@ import comet_ml
 
 
 # pylint disable-next=R0903
-class CometMLLoggerSupplement():
+class CometMLLoggerSupplement:
     """Note, that is working with the Trainer!
 
     The Trainer class implements their own CometML Callback during training

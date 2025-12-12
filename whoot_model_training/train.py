@@ -12,6 +12,7 @@ Usage:
 
 config.yml should contain frequently changed hyperparameters
 """
+
 import os
 import argparse
 import yaml
@@ -21,8 +22,9 @@ from whoot_model_training.data_extractor import xc_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
-from whoot_model_training.preprocessors import (
-    MelModelInputPreprocessor
+from whoot_model_training.preprocessors import MelModelInputPreprocessor
+from whoot_model_training.preprocessors.spectrogram_preprocessors import (
+    SpectrogramParams,
 )
 from whoot_model_training.preprocessors.spectrogram_preprocessors import (
     SpectrogramParams
@@ -111,23 +113,6 @@ def train(config):
     #     #     p=0.8
     #     # )
     # ])
-
-    spectrogram_params = SpectrogramParams()
-    # spectrogram_params = SpectrogramParams(
-    #     n_mels = 224,
-    #     hop_length = 286,
-    # )
-    # """Dataclass for spectrogram Parameters.
-
-    # n_fft: (int) number of fft bins
-    # hop_length (int) skip count
-    # power: (float) usually 2
-    # n_mels: (int) number of mel bins
-    # """
-    # n_fft: int = 2048
-    # hop_length: int = 256
-    # power: float = 2.0
-    # n_mels: int = 256
 
     spectrogram_params = SpectrogramParams()
     # spectrogram_params = SpectrogramParams(

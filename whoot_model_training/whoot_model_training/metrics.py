@@ -14,8 +14,9 @@ import comet_ml
 import torch
 from sklearn.metrics import confusion_matrix
 
-from pyha_analyzer.metrics.classification_metrics  \
-    import AudioClassificationMetrics
+from pyha_analyzer.metrics.classification_metrics import (
+    AudioClassificationMetrics
+)
 
 
 class WhootMutliClassMetrics(AudioClassificationMetrics):
@@ -24,6 +25,7 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
     Supports CMAP, ROCAUC, and confusion matrices.
     and reports them to Comet-ML dashboards
     """
+
     def __init__(self, classes: list):
         """Initializes metric reporting.
 
@@ -77,4 +79,6 @@ class WhootMutliClassMetrics(AudioClassificationMetrics):
             torch.argmax(logits, dim=1)
         )
         experiment.log_confusion_matrix(
-            matrix=cm.tolist(), labels=self.classes)
+            matrix=cm.tolist(),
+            labels=self.classes
+        )

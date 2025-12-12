@@ -43,7 +43,7 @@ def one_hot_encode(row: dict, classes: list):
 
 
 @dataclass
-class ESC50Params():
+class ESC50Params:
     """Parameters that describe ESC-50.
 
     validation_fold (int): label for valid split
@@ -51,6 +51,7 @@ class ESC50Params():
     sample_rate (int): sample rate of the data
     filepath (string): name of column in csv for filepaths
     """
+
     validation_fold = 4
     test_fold = 5
     sample_rate = 44_100
@@ -58,10 +59,7 @@ class ESC50Params():
 
 
 def esc50_extractor(
-        metadata_csv,
-        parent_path,
-        output_path,
-        params: ESC50Params = ESC50Params()
+    metadata_csv, parent_path, output_path, params: ESC50Params = ESC50Params()
 ):
     """Extracts raw data in the ESC-50 format into an AudioDataset.
 
@@ -94,15 +92,15 @@ def esc50_extractor(
 
     dataset = dataset.map(
         lambda row: one_hot_encode(row, class_list)
-    ).cast_column(
-        "labels",
-        multilabel_class_label
+        ).cast_column(
+        "labels", multilabel_class_label
     )
 
     dataset = dataset.add_column(
         "audio", [
-            os.path.join(parent_path,
-                         file) for file in dataset[params.filepath]
+            os.path.join(
+                parent_path, file
+            ) for file in dataset[params.filepath]
         ]
     )
     dataset = dataset.add_column("filepath", dataset["audio"])
@@ -114,8 +112,8 @@ def esc50_extractor(
     valid_ds = dataset.filter(lambda x: x["fold"] == params.validation_fold)
     train_ds = dataset.filter(
         lambda x: (
-            x["fold"] != params.test_fold
-            and x["fold"] != params.validation_fold
+            x["fold"] != params.test_fold and
+            x["fold"] != params.validation_fold
         )
     )
 

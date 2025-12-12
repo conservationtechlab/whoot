@@ -59,6 +59,10 @@ notebooks = [
   "seaborn>=0.13.2",
 ]
 
+birdnet = [
+    "birdnet>=0.1.7",
+]
+
 
 [packages.index]
 cu128 = "https://download.pytorch.org/whl/cu128"

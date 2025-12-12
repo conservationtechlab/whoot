@@ -41,7 +41,7 @@ def one_hot_encode(row: dict, classes: list):
 
 
 @dataclass
-class BuowsetParams():
+class BuowsetParams:
     """Parameters that describe the Buowset.
 
     Args:
@@ -50,6 +50,7 @@ class BuowsetParams():
         sample_rate (int): sample rate of the data
         filepath (int): name of column in csv for filepaths
     """
+
     validation_fold = 4
     test_fold = 3
     sr = 32_000
@@ -130,7 +131,7 @@ def binarize_data(row, target_col=0):
     Returns:
         row (dict): now with a binary label instead
     """
-    row["labels"] = [row["labels"][target_col], 1-row["labels"][target_col]]
+    row["labels"] = [row["labels"][target_col], 1 - row["labels"][target_col]]
     return row
 
 
@@ -170,8 +171,10 @@ def buowset_binary_extractor(
     # 0 or 1
     binary_class_label = Sequence(ClassLabel(names=["no_buow", "buow"]))
     for split in ads:
-        ads[split] = ads[split].map(
-            lambda row: binarize_data(row, target_col=target_col)
-        ).cast_column("labels", binary_class_label)
+        ads[split] = (
+            ads[split]
+            .map(lambda row: binarize_data(row, target_col=target_col))
+            .cast_column("labels", binary_class_label)
+        )
 
     return ads
