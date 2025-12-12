@@ -50,6 +50,7 @@ def test(config, model_name=""):
         audio_parent_folder=unlabel_audio_path,
         output_folder="data/manual_buowset",
         chunk_duration=3,
+        class_list=["cluck", "coocoo", "twitter", "Alarm", "Chick Begging", "no_buow"]
     )
 
     # Create the model
@@ -99,7 +100,7 @@ if __name__ == "__main__":
         "--model_name",
         required=False,
         help="path to weights or hugging face repo id",
-        default="/home/sean/whoot/checkpoint-4985",
+        default="/home/sean/clean_repos/whoot/model_checkpoints/flac_pylint_test_efficientnet_b1_buowset_11_19_2025_17:01:32_pcen/checkpoint-998",
     )
     args = parser.parse_args()
     _config = parse_config(args.config)

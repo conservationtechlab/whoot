@@ -212,7 +212,7 @@ def get_array_chunks_from_memory(
             try:
                 clip_length = librosa.get_duration(path=file_path)
                 # sr = librosa.get_samplerate(path=file_path)
-            except IOError as e:
+            except Exception as e:
                 print(e, file_path, "failed stat read", "continuing")
                 continue
             for i in tqdm(

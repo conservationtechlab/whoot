@@ -97,17 +97,21 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
 
             pillow_transforms = transforms.ToPILImage()
 
+            S = librosa.feature.melspectrogram(
+                y=y[int(start * sr):end_sr],
+                sr=sr,
+                n_fft=self.n_fft,
+                hop_length=self.hop_length,
+                power=self.power,
+                n_mels=self.n_mels,
+            )
+
+            PCEN = librosa.pcen(S * (2**31))
+
             mels = (
                 np.array(
                     pillow_transforms(
-                        librosa.feature.melspectrogram(
-                            y=y[int(start * sr):end_sr],
-                            sr=sr,
-                            n_fft=self.n_fft,
-                            hop_length=self.hop_length,
-                            power=self.power,
-                            n_mels=self.n_mels,
-                        )
+                        PCEN
                     ),
                     np.float32,
                 )[np.newaxis, ::]
