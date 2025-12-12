@@ -227,3 +227,5 @@ settings.json
 whoot_model_training/configs
 !whoot_model_training/configs/config.yml
 *.csv
+*.ipynb
+*.json

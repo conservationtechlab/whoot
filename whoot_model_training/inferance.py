@@ -13,18 +13,21 @@ Usage:
 config.yml should contain frequently changed hyperparameters
 """
 import argparse
+import pickle
 
+from train import parse_config, init_env
+
+
+from whoot_model_training.preprocessors.base_preprocessor import WaveformInputPreprocessor
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.data_extractor import raw_audio_extractor
 from whoot_model_training.models import TimmModel, TimmInputs
 from whoot_model_training import CometMLLoggerSupplement
-from train import parse_config, init_env
-
 from whoot_model_training.preprocessors import (
     MelModelInputPreprocessor
 )
 
-import pickle
+
 
 
 def test(

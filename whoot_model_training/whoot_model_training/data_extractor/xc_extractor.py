@@ -9,7 +9,8 @@ from pathlib import Path
 from dataclasses import dataclass
 from collections import Counter
 from pydub import AudioSegment
-
+import json
+import librosa
 
 import numpy as np
 from datasets import (
@@ -21,9 +22,6 @@ from datasets import (
     load_from_disk,
 )
 from ..dataset import AudioDataset
-
-import json
-import librosa
 
 
 def filter_by_count(ds, col="en", threshold=10):
@@ -76,6 +74,7 @@ def convert_audio_to_flac(row, error_path="bad_files", col="audio"):
     """
     file_path = row[col]
     flac_path = Path(file_path).parent / (Path(file_path).stem + ".flac")
+    # print(file_path, flac_path)
     if os.path.exists(flac_path):
         row[col] = str(flac_path)
         if os.path.exists(file_path):
@@ -164,31 +163,32 @@ def xc_extractor(
         ]
     )
 
+
+    # Only accept less than 10 min long clips
+    # Longer clips seem to courrpt more easily... 
+    # Format is "#:##"" hence length 4
+    dataset = dataset.filter(
+        lambda x: len(x["length"]) == 4
+    )
+
     # Fix file paths
     dataset = dataset.map(
         convert_audio_to_flac,
         fn_kwargs={"error_path": bad_file_path},
         # num_proc=16
     )
+
+    
+
     dataset = dataset.filter(
         lambda x: bad_file_path not in x["audio"],
     )
+
     dataset = dataset.add_column("filepath", dataset["audio"])
     dataset = dataset.cast_column(
         "audio",
         Audio(sampling_rate=params.sample_rate)
     )
-
-    # TODO FIGURE OUT HOW TO DO SPLITS!
-    # # Create splits of the data
-    # test_ds = dataset.filter(lambda x: x["fold"] == params.test_fold)
-    # valid_ds = dataset.filter(lambda x: x["fold"] == params.validation_fold)
-    # train_ds = dataset.filter(
-    #     lambda x: (
-    #         x["fold"] != params.test_fold
-    #         and x["fold"] != params.validation_fold
-    #     )
-    # )
 
     dataset = dataset.cast_column(
         "en", ClassLabel(names=list(set(dataset["en"])))

@@ -23,7 +23,7 @@ __all__ = [
     "Model",
     "ModelInput",
     "ModelOutput",
-    "PerchEmbeddingInput",
-    "PerchFewShotModel",
+    # "PerchEmbeddingInput",
+    # "PerchFewShotModel",
     "FewShotModelConfig"
 ]

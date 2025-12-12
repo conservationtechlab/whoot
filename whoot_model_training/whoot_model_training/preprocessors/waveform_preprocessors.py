@@ -81,6 +81,9 @@ class WaveformPreprocessors(PreProcessorBase):
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
             try:
+                #TEMP FIX TO PREVENT LONG AUDIO RECORDINGS BEING BAD!!!
+                if librosa.get_duration(path=batch["audio"][item_idx]["path"]) > 2 * 60:
+                    continue
                 y, sr = librosa.load(
                     path=batch["audio"][item_idx]["path"],
                     sr=self.sr
@@ -102,7 +105,7 @@ class WaveformPreprocessors(PreProcessorBase):
                 y, label = self.augments.audio(y, sr, label)
 
             new_y = y[int(start * sr):end_sr]
-            if (new_y.shape[-1] < int(sr * self.duration)):
+            if new_y.shape[-1] < int(sr * self.duration):
                 continue
 
             new_audio.append(new_y)

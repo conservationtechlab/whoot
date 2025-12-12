@@ -7,6 +7,7 @@ NOT INTENDED FOR TRAINING
 
 Rather just a placeholder to help inferance work
 """
+from math import floor
 from typing import Any, ClassVar, Union
 import os
 import numpy as np
@@ -20,7 +21,6 @@ from datasets import (
     table
 )
 import librosa
-from math import floor
 from tqdm import tqdm
 import pyarrow as pa
 from datasets.features.features import _FEATURE_TYPES, FeatureType
@@ -101,10 +101,14 @@ class SubAudio(Audio):
 
     def decode_example(self, value, token_per_repo_id=None) -> dict:
         """Decode raw data into audio info and array."""
-        if (
+        correct_dict = (
             isinstance(value, dict)
             and "offset" in value
             and "duration" in value
+        )
+
+        if (
+            correct_dict
             and value.get("bytes") is None
             and value.get("path") is not None
             and os.path.isfile(value["path"])
@@ -120,7 +124,7 @@ class SubAudio(Audio):
                 "sampling_rate": sr,
                 "offset": value["offset"],
                 "duration": value["duration"]}
-        elif (
+        if (
             isinstance(value, dict)
             and value.get("offset")
             and value.get("duration")
@@ -187,13 +191,12 @@ def get_empty_dict():
 def get_array_chunks_from_memory(
     parent_folder,
     chunk_length_sec=5,
-    no_class_idx=5,
-    output_path="/data/manual_buowset"
+    no_class_idx=5
 ):
     """Split audio data into chunks and save each as SubAudio data."""
     new_rows = get_empty_dict()
     _datasets = []
-    for root, dirs, files in tqdm(os.walk(parent_folder), desc="All Folders"):
+    for root, _, files in tqdm(os.walk(parent_folder), desc="All Folders"):
         for filename in tqdm(files, leave=False, desc="file in dir"):
             try:
                 if not filename.lower().endswith(
@@ -224,7 +227,6 @@ def get_array_chunks_from_memory(
                     })
                     new_rows["file_path"].append(filename)
                     new_rows["labels"].append(no_class_idx)
-                    # break #TODO REMOVE
             except BaseException as e:
                 print(e)
 
@@ -235,9 +237,6 @@ def get_array_chunks_from_memory(
             ).cast_column("audio", SubAudio())
             new_rows = get_empty_dict()
             _datasets.append(file_ds)
-        #     break #TODO REMOVE
-        # if len(_datasets) > 1: #TODO REMOVE
-        #     break #TODO REMOVE
 
     return concatenate_datasets(_datasets)
 
@@ -267,7 +266,6 @@ def raw_audio_extractor(
         "no_buow"
     ],
     chunk_duration=-1,
-    output_folder=""
 ):
     """Extracts raw, unlabeled data in the buowset format into an AudioDataset.
 

@@ -10,15 +10,14 @@ WhootTrainer: The class that is going to run training
 
 from datetime import datetime
 import os
-
+import torch
+from tqdm import tqdm
 from pyha_analyzer import PyhaTrainingArguments
 from pyha_analyzer import PyhaTrainer
 
 from .metrics import WhootMutliClassMetrics
 from .dataset import AudioDataset
 from .models import Model
-import torch
-from tqdm import tqdm
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):

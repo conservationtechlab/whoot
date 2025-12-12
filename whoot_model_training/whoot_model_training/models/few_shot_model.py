@@ -46,19 +46,22 @@ class EmbeddingInput(ModelInput):
 
         self["embedding"] = self.model.embed(waveform)
 
+# Global variable fore PerchEmbeddings
+perch_model = None
 
 class PerchEmbeddings(EmbeddingModel):
     """Wrapper for getting embeddings from perch."""
 
-    # TODO FIX LINE TO BE LESS MEMORY HEAVY
-    # model = model_configs.load_model_by_name('perch_8')
+    # Warning, was running into issues with memory here
+    # Early attempts recreated model
+    # Hoping using global var only loads it in once
+    if perch_model is None:
+        perch_model = model_configs.load_model_by_name('perch_8')
+
+    model = perch_model
 
     def embed(self, embeddings):
         """Return embeddings."""
-        # embeddings = [
-        #     self.model.embed(waveform).embeddings[0]
-        #     for waveform in waveforms
-        # ]
         return embeddings
 
 
@@ -113,7 +116,6 @@ class PerchFewShotModel(Model, nn.Module):
             config.num_classes
         )
 
-        # TODO USE CUSTOM LOSS FOR FEW SHOW LEARNING
         self.loss = nn.BCEWithLogitsLoss()
 
     @has_required_inputs()
