@@ -41,6 +41,7 @@ class Augmentations:
     audio = None
     spectrogram = None
 
+
 class BuowMelSpectrogramPreprocessors(PreProcessorBase):
     """Preprocessor for processing audio into spectrograms.
 
@@ -145,10 +146,13 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
                 MelSpectrogram: {self.spectrogram_params}
             """
 
+
 class PCENMelSpectrogramPreprocessors(BuowMelSpectrogramPreprocessors):
-    """ A preprocessor for PCEN based spectograms. 
+    """A preprocessor for PCEN based spectograms.
+
     Otherwise follows the same system as BuowMelSpectrogramPreprocessors
     """
+
     def __call__(self, batch):
         """Process a batch of data from an AudioDataset."""
         new_audio = []
@@ -172,7 +176,7 @@ class PCENMelSpectrogramPreprocessors(BuowMelSpectrogramPreprocessors):
 
             pillow_transforms = transforms.ToPILImage()
 
-            S = librosa.feature.melspectrogram(
+            spec = librosa.feature.melspectrogram(
                 y=y[int(start * sr):end_sr],
                 sr=sr,
                 n_fft=self.n_fft,
@@ -181,12 +185,12 @@ class PCENMelSpectrogramPreprocessors(BuowMelSpectrogramPreprocessors):
                 n_mels=self.n_mels,
             )
 
-            PCEN = librosa.pcen(S * (2**31))
+            pcen = librosa.pcen(spec * (2**31))
 
             mels = (
                 np.array(
                     pillow_transforms(
-                        PCEN
+                        pcen
                     ),
                     np.float32,
                 )[np.newaxis, ::]
