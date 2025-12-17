@@ -85,8 +85,10 @@ def test(config, model_name=""):
     )
 
     out = trainer.predict(ds["train"])
-    # removing label values for now because they don't match preds
-    # labels every clip as 1st class, despite preds showing otherwise
+    # Pipeline requires a labels col
+    # For inferance the "labels" are just an array of zeros
+    # Therefore during inferance, "labels" are meaningless
+    # Delete them to make it clearer to downstream users
     del out['labels']
     print(out)
     with open(run_name + ".pkl", mode="wb") as f:
