@@ -70,8 +70,6 @@ def train(config):
         output_path=config["hf_cache_path"],
     )
 
-    
-
     # Create the model
     model_name = "efficientnet_b1"
 
