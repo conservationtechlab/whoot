@@ -233,3 +233,8 @@ whoot_model_training/configs
 # Block demos
 demos/
 *.ipynb
+
+# Block predictions
+predictions/*
+*.pkl
+*.arrow
