@@ -81,13 +81,19 @@ class WaveformPreprocessors(PreProcessorBase):
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
             try:
-                #TEMP FIX TO PREVENT LONG AUDIO RECORDINGS BEING BAD!!!
-                if librosa.get_duration(path=batch["audio"][item_idx]["path"]) > 2 * 60:
-                    continue
-                y, sr = librosa.load(
-                    path=batch["audio"][item_idx]["path"],
-                    sr=self.sr
-                )
+                # TODO: This is a solid section of code for loading audio
+                # Consider turning this into a common helper function
+                if len(batch["audio"][item_idx]["array"]) > 10:
+                    y = batch["audio"][item_idx]["array"]
+                    sr = batch["audio"][item_idx]["sampling_rate"]
+                else:
+                    if librosa.get_duration(path=batch["audio"][item_idx]["path"]) > 2 * 60:
+                        continue
+                    y, sr = librosa.load(
+                        path=batch["audio"][item_idx]["path"],
+                        sr=self.sr
+                    )
+                
             except Exception as e:
                 print(e)
                 print("File Likely is corrupted, moving on")

@@ -14,12 +14,15 @@ import os
 import torch
 from tqdm import tqdm
 
+from datasets import Audio
+
 from pyha_analyzer import PyhaTrainingArguments
 from pyha_analyzer import PyhaTrainer
 
 from .metrics import WhootMutliClassMetrics
 from .dataset import AudioDataset
 from .models import Model
+
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):
@@ -129,14 +132,32 @@ class WhootTrainer(PyhaTrainer):
             metric_key_prefix: str = "test"
         Returns: test_dataset with a new col: "pred"
         """
+
+        # test_dataset = test_dataset.select(range(100))
         test_dataloader = self.get_test_dataloader(test_dataset)
 
         preds = []
+        count = 0
         for batch in tqdm(test_dataloader):
-            preds.append(self.model(
-                self.model.input_format(**batch)
-            )["logits"].detach().cpu())
+            
+            try:
+                preds.append(self.model(
+                    self.model.input_format(**batch)
+                )["logits"].detach().cpu())
+            except Exception as e:
+                print(e)
+                break
+            count += 1
+            # if count > 10:
+            #     break
 
-        dataset = test_dataset.to_dict()
+        
+
+        dataset = test_dataset.with_format()#.cast_column("audio", Audio(decode=False))
+        if count == len(test_dataloader):
+            dataset = dataset.to_dict()
+        else: #If we had a failure, save what data we proccessed
+            dataset = dataset.select(range(count * 16)).to_dict()
+        # dataset = dataset.to_dict()
         dataset["pred"] = torch.concat(preds).detach().numpy()
         return dataset

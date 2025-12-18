@@ -213,6 +213,9 @@ def get_array_chunks_from_memory(
             except IOError as e:
                 print(e, file_path, "failed stat read", "continuing")
                 continue
+            except EOFError as e:
+                print(e, file_path, "failed stat read, reached end of file", "continuing")
+                continue
             for i in tqdm(
                 range(0, int(floor(clip_length)), chunk_length_sec),
                 leave=False,
