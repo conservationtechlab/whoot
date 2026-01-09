@@ -88,7 +88,7 @@ class WaveformPreprocessors(PreProcessorBase):
                     sr = batch["audio"][item_idx]["sampling_rate"]
                 else:
                     if librosa.get_duration(path=batch["audio"][item_idx]["path"]) > 2 * 60:
-                        continue
+                        break
                     y, sr = librosa.load(
                         path=batch["audio"][item_idx]["path"],
                         sr=self.sr
@@ -97,7 +97,7 @@ class WaveformPreprocessors(PreProcessorBase):
             except Exception as e:
                 print(e)
                 print("File Likely is corrupted, moving on")
-                continue
+                break
 
             start = np.random.uniform(0, len(y)/sr - self.duration)
 

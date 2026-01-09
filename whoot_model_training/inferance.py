@@ -115,7 +115,7 @@ def test(
     # print(ds["train"].shape, ds["test"].shape, ds["valid"].shape)
     # input()
 
-    out = trainer.predict(ds["train"])
+    out = trainer.predict(ds["train"], save_path=f"predictions/{run_name}")
     # Pipeline requires a labels col
     # For inferance the "labels" are just an array of zeros
     # Therefore during inferance, "labels" are meaningless

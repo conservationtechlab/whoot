@@ -23,6 +23,8 @@ from .metrics import WhootMutliClassMetrics
 from .dataset import AudioDataset
 from .models import Model
 
+import numpy as np
+
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):
@@ -120,7 +122,8 @@ class WhootTrainer(PyhaTrainer):
             self,
             test_dataset: AudioDataset,
             ignore_keys=None,
-            metric_key_prefix: str = "test"
+            metric_key_prefix: str = "test",
+            save_path = "",
     ):
         """Run Inferance on a given dataset.
 
@@ -137,27 +140,34 @@ class WhootTrainer(PyhaTrainer):
         test_dataloader = self.get_test_dataloader(test_dataset)
 
         preds = []
+        data_selected = []
         count = 0
         for batch in tqdm(test_dataloader):
             
             try:
-                preds.append(self.model(
+                pred = self.model(
                     self.model.input_format(**batch)
-                )["logits"].detach().cpu())
+                )["logits"].detach().cpu().half()
+                preds.append(pred) #The current RAM use is 99/120... To be safe I'm going to reduce bytes
+                data_selected.extend(range(count, count + len(pred)))
+                count += len(pred)
             except Exception as e:
-                print(e)
-                break
-            count += 1
-            # if count > 10:
+                print(e, "break in batch, don't use")
+                count += 16
+                continue
+            
+            if count % 101 == 0:
             #     break
+                import datasets
+                dataset = test_dataset.with_format()
+                out = dataset.select(data_selected).to_dict()
+                out["pred"] = torch.concat(preds).detach().numpy()
+                ds = datasets.Dataset.from_dict(out)
+                ds.save_to_disk(save_path) # saves as a directory
 
         
 
-        dataset = test_dataset.with_format()#.cast_column("audio", Audio(decode=False))
-        if count == len(test_dataloader):
-            dataset = dataset.to_dict()
-        else: #If we had a failure, save what data we proccessed
-            dataset = dataset.select(range(count * 16)).to_dict()
-        # dataset = dataset.to_dict()
+        dataset = test_dataset.with_format()
+        dataset = dataset.select(data_selected).to_dict()
         dataset["pred"] = torch.concat(preds).detach().numpy()
         return dataset
