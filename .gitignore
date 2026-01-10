@@ -233,3 +233,4 @@ whoot_model_training/configs
 *.ipynb
 *.json
 demos/
+predictions/
