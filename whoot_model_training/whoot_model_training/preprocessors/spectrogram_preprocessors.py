@@ -145,3 +145,65 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
                 Augmentations: {self.augments}
                 MelSpectrogram: {self.spectrogram_params}
             """
+
+
+class PCENMelSpectrogramPreprocessors(BuowMelSpectrogramPreprocessors):
+    """A preprocessor for PCEN based spectograms.
+
+    Otherwise follows the same system as BuowMelSpectrogramPreprocessors
+    """
+
+    def __call__(self, batch):
+        """Process a batch of data from an AudioDataset."""
+        new_audio = []
+        new_labels = []
+        for item_idx in range(len(batch["audio"])):
+            label = batch["labels"][item_idx]
+            y, sr = (
+                batch["audio"][item_idx]["array"],
+                batch["audio"][item_idx]["sampling_rate"],
+            )
+            start = 0
+
+            # Handle out of bound issues
+            end_sr = int(start * sr) + int(sr * self.duration)
+            if y.shape[-1] <= end_sr:
+                y = np.pad(y, end_sr - y.shape[-1])
+
+            # Audio Based Augmentations
+            if self.augments.audio is not None:
+                y, label = self.augments.audio(y, sr, label)
+
+            pillow_transforms = transforms.ToPILImage()
+
+            spec = librosa.feature.melspectrogram(
+                y=y[int(start * sr):end_sr],
+                sr=sr,
+                n_fft=self.n_fft,
+                hop_length=self.hop_length,
+                power=self.power,
+                n_mels=self.n_mels,
+            )
+
+            pcen = librosa.pcen(spec * (2**31))
+
+            mels = (
+                np.array(
+                    pillow_transforms(
+                        pcen
+                    ),
+                    np.float32,
+                )[np.newaxis, ::]
+                / 255
+            )
+
+            if self.augments.spectrogram is not None:
+                mels = self.augments.spectrogram(mels)
+
+            new_audio.append(mels)
+            new_labels.append(label)
+
+        batch["audio"] = new_audio
+        batch["labels"] = np.array(new_labels, dtype=np.float32)
+
+        return batch

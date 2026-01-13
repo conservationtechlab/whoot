@@ -16,7 +16,7 @@ config.yml should contain frequently changed hyperparameters
 """
 
 import argparse
-import pickle
+import datasets
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.data_extractor import raw_audio_extractor
@@ -50,6 +50,7 @@ def test(config, model_name=""):
         audio_parent_folder=unlabel_audio_path,
         output_folder="data/manual_buowset",
         chunk_duration=3,
+        class_list=None
     )
 
     # Create the model
@@ -84,12 +85,18 @@ def test(config, model_name=""):
     )
 
     out = trainer.predict(ds["train"])
-    # removing label values for now because they don't match preds
-    # labels every clip as 1st class, despite preds showing otherwise
+    # Pipeline requires a labels col
+    # For inferance the "labels" are just an array of zeros
+    # Therefore during inferance, "labels" are meaningless
+    # Delete them to make it clearer to downstream users
     del out['labels']
+
     print(out)
-    with open(run_name + ".pkl", mode="wb") as f:
-        pickle.dump(out, f)
+    # with open(run_name + ".pkl", mode="wb") as f:
+    #     pickle.dump(out, f)
+    # Below was tested with the pickle made from above
+    ds = datasets.Dataset.from_dict(out)
+    ds.save_to_disk(f"predictions/{run_name}")  # saves as a directory
 
 
 if __name__ == "__main__":
@@ -99,7 +106,7 @@ if __name__ == "__main__":
         "--model_name",
         required=False,
         help="path to weights or hugging face repo id",
-        default="/home/sean/whoot/checkpoint-4985",
+        default="Insert_Checkpoint_Here",
     )
     args = parser.parse_args()
     _config = parse_config(args.config)
