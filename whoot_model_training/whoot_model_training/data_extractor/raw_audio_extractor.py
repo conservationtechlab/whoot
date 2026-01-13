@@ -211,7 +211,20 @@ def get_array_chunks_from_memory(
                 clip_length = librosa.get_duration(path=file_path)
                 # sr = librosa.get_samplerate(path=file_path)
             except IOError as e:
-                print(e, file_path, "failed stat read", "continuing")
+                print(
+                    e,
+                    file_path,
+                    "failed stat read, likely corrupted",
+                    " | ignoring and continuing"
+                )
+                continue
+            except EOFError as e:
+                print(
+                    e,
+                    file_path,
+                    "hit EOF too early, likely corrupted",
+                    "| ignoring and continuing"
+                )
                 continue
             except EOFError as e:
                 print(e, file_path, "failed stat read, reached end of file", "continuing")
