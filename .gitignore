@@ -234,3 +234,4 @@ whoot_model_training/configs
 *.json
 demos/
 predictions/
+*.pkl
