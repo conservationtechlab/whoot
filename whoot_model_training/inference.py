@@ -16,7 +16,6 @@ config.yml should contain frequently changed hyperparameters
 """
 
 import argparse
-import pickle
 import datasets
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
@@ -91,14 +90,14 @@ def test(config, model_name=""):
     # Therefore during inferance, "labels" are meaningless
     # Delete them to make it clearer to downstream users
     del out['labels']
-    
-    
+
     print(out)
     # with open(run_name + ".pkl", mode="wb") as f:
     #     pickle.dump(out, f)
     # Below was tested with the pickle made from above
     ds = datasets.Dataset.from_dict(out)
-    ds.save_to_disk(f"predictions/{run_name}") # saves as a directory
+    ds.save_to_disk(f"predictions/{run_name}")  # saves as a directory
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Input config path")
