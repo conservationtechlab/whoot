@@ -95,9 +95,11 @@ class WaveformPreprocessors(PreProcessorBase):
                     )
                 
             except Exception as e:
+                y = np.zeros(self.sr * 5)
+                sr = self.sr
                 print(e)
                 print("File Likely is corrupted, moving on")
-                break
+                continue
 
             start = np.random.uniform(0, len(y)/sr - self.duration)
 
