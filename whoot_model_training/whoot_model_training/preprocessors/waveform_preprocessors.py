@@ -87,13 +87,15 @@ class WaveformPreprocessors(PreProcessorBase):
                     y = batch["audio"][item_idx]["array"]
                     sr = batch["audio"][item_idx]["sampling_rate"]
                 else:
-                    if librosa.get_duration(path=batch["audio"][item_idx]["path"]) > 2 * 60:
+                    if librosa.get_duration(
+                        path=batch["audio"][item_idx]["path"]
+                    ) > 2 * 60:
                         break
                     y, sr = librosa.load(
                         path=batch["audio"][item_idx]["path"],
                         sr=self.sr
                     )
-                
+
             except Exception as e:
                 y = np.zeros(self.sr * 5)
                 sr = self.sr

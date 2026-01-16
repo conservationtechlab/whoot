@@ -1,51 +1,22 @@
-# %%
-from xc import XenoCantoDownloader
-from dotenv import load_dotenv
-import os
+"""Downloads auxiliary Xeno-Canto data and audio files.
 
-# Load environment variables from the .env file
-load_dotenv()
-
-xcd = XenoCantoDownloader(api_key=os.environ["XC_API_KEY"])
-
-
-
-# %%
-import json
-
-with open("data/xc_meta.json", mode="r") as f:
-    data = json.load(f)
-
-species = { recording["en"] for page in data for recording in page["recordings"] }
-
-# %%
-len({recording["en"] for page in data for recording in page["recordings"] })
-
-# %%
-len(species)
-
-# %%
-data = []
-import tqdm
-for specie in tqdm.tqdm(list(species)):
-    data.append(xcd(query=f'en:"{specie}"'))
-
-# %%
-import itertools
-data = list(itertools.chain.from_iterable(data))
-
-# %%
-with open("xc_meta_aux.json", mode="w") as f:
-    json.dump(data, f, indent=4)
-
-# %%
+Relies on output from data_downloader/xc.py
+Create a .env file with XC api-key
+`XC_API_KEY=your_api_key_here`
+Then call directly with `python xc_aux_downloader.py`
+"""
 import requests
-
-# %%
 import shutil
 import os
+import json
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
+from xc import XenoCantoDownloader
+from dotenv import load_dotenv
+import pandas as pd
+import tqdm
+import itertools
+
 
 # https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
 def download_file(url, local_filename, dry_run=False):
@@ -84,17 +55,33 @@ def download_files(xcd, data, parent_folder="data/xeno-canto_aux", workers = 4):
     pool.close()
     return results
 
-results = download_files(xcd, data)
-results
+def main():
+    # Load environment variables from the .env file
+    load_dotenv()
 
-# %%
-import pandas as pd
-recordings = xcd.concat_recording_data(data)
-df = pd.DataFrame(recordings)
+    xcd = XenoCantoDownloader(api_key=os.environ["XC_API_KEY"])
 
-df.shape
+    with open("data/xc_meta.json", mode="r") as f:
+        data = json.load(f)
 
-# %%
+    species = { recording["en"] for page in data for recording in page["recordings"] }
 
+    # DEBUG
+    # len({recording["en"] for page in data for recording in page["recordings"] })
+    # len(species)
 
+    data = []
+    for specie in tqdm.tqdm(list(species)):
+        data.append(xcd(query=f'en:"{specie}"'))
 
+    data = list(itertools.chain.from_iterable(data))
+
+    with open("xc_meta_aux.json", mode="w") as f:
+        json.dump(data, f, indent=4)
+        results = download_files(xcd, data)
+        results
+
+    recordings = xcd.concat_recording_data(data)
+    df = pd.DataFrame(recordings)
+
+    print(df.shape)

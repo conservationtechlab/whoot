@@ -26,10 +26,6 @@ from whoot_model_training.preprocessors import MelModelInputPreprocessor
 from whoot_model_training.preprocessors.spectrogram_preprocessors import (
     SpectrogramParams,
 )
-from whoot_model_training.preprocessors.spectrogram_preprocessors import (
-    SpectrogramParams
-)
-
 # Uncomment for use with data augmentation
 # from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
 # from audiomentations import (

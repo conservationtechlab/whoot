@@ -14,7 +14,7 @@ import os
 import torch
 from tqdm import tqdm
 
-from datasets import Audio
+import datasets
 
 from pyha_analyzer import PyhaTrainingArguments
 from pyha_analyzer import PyhaTrainer
@@ -22,9 +22,6 @@ from pyha_analyzer import PyhaTrainer
 from .metrics import WhootMutliClassMetrics
 from .dataset import AudioDataset
 from .models import Model
-
-import numpy as np
-
 
 
 class WhootTrainingArguments(PyhaTrainingArguments):
@@ -123,7 +120,7 @@ class WhootTrainer(PyhaTrainer):
             test_dataset: AudioDataset,
             ignore_keys=None,
             metric_key_prefix: str = "test",
-            save_path = "",
+            save_path="",
     ):
         """Run Inferance on a given dataset.
 
@@ -143,29 +140,24 @@ class WhootTrainer(PyhaTrainer):
         data_selected = []
         count = 0
         for batch in tqdm(test_dataloader):
-            
             try:
                 pred = self.model(
                     self.model.input_format(**batch)
                 )["logits"].detach().cpu().half()
-                preds.append(pred) #The current RAM use is 99/120... To be safe I'm going to reduce bytes
+                preds.append(pred)
                 data_selected.extend(range(count, count + len(pred)))
                 count += len(pred)
             except Exception as e:
                 print(e, "break in batch, don't use")
                 count += 16
                 continue
-            
+
             if count % 101 == 0:
-            #     break
-                import datasets
                 dataset = test_dataset.with_format()
                 out = dataset.select(data_selected).to_dict()
                 out["pred"] = torch.concat(preds).detach().numpy()
-                ds = datasets.Dataset.from_dict(out)
-                ds.save_to_disk(save_path) # saves as a directory
-
-        
+                # saves as a directory
+                datasets.Dataset.from_dict(out).save_to_disk(save_path)
 
         dataset = test_dataset.with_format()
         dataset = dataset.select(data_selected).to_dict()

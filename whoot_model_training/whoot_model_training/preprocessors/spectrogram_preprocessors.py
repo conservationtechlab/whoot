@@ -107,7 +107,6 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
             )
             pcen_S = librosa.pcen(S * (2**31))
 
-
             mels = (
                 np.array(
                     pillow_transforms(

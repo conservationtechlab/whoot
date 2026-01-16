@@ -163,9 +163,8 @@ def xc_extractor(
         ]
     )
 
-
     # Only accept less than 10 min long clips
-    # Longer clips seem to courrpt more easily... 
+    # Longer clips seem to courrpt more easily...
     # Format is "#:##"" hence length 4
     dataset = dataset.filter(
         lambda x: len(x["length"]) == 4
@@ -177,8 +176,6 @@ def xc_extractor(
         fn_kwargs={"error_path": bad_file_path},
         # num_proc=16
     )
-
-    
 
     dataset = dataset.filter(
         lambda x: bad_file_path not in x["audio"],
