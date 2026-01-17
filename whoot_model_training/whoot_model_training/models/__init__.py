@@ -25,5 +25,5 @@ __all__ = [
     "ModelOutput",
     # "PerchEmbeddingInput",
     # "PerchFewShotModel",
-    "FewShotModelConfig"
+    # "FewShotModelConfig"
 ]

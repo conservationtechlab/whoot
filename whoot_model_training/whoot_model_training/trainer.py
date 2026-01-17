@@ -96,7 +96,7 @@ class WhootTrainer(PyhaTrainer):
             logger (CometMLLoggerSupplement):
                 Class that adds additional logging
                 On top of logging done by PyhaTrainer
-            preprocessor (PreProcessorBase):
+            preprocessor (DefaultPreprocessor):
                 Preprocessor used for formatting the data
         """
         metrics = WhootMutliClassMetrics(dataset.get_class_labels().names)
@@ -120,8 +120,7 @@ class WhootTrainer(PyhaTrainer):
             test_dataset: AudioDataset,
             ignore_keys=None,
             metric_key_prefix: str = "test",
-            save_path="",
-    ):
+            save_path=""):
         """Run Inferance on a given dataset.
 
         Allows for getting predicted outputs to label a new dataset
@@ -132,7 +131,6 @@ class WhootTrainer(PyhaTrainer):
             metric_key_prefix: str = "test"
         Returns: test_dataset with a new col: "pred"
         """
-
         # test_dataset = test_dataset.select(range(100))
         test_dataloader = self.get_test_dataloader(test_dataset)
 
@@ -140,17 +138,12 @@ class WhootTrainer(PyhaTrainer):
         data_selected = []
         count = 0
         for batch in tqdm(test_dataloader):
-            try:
-                pred = self.model(
-                    self.model.input_format(**batch)
-                )["logits"].detach().cpu().half()
-                preds.append(pred)
-                data_selected.extend(range(count, count + len(pred)))
-                count += len(pred)
-            except Exception as e:
-                print(e, "break in batch, don't use")
-                count += 16
-                continue
+            pred = self.model(
+                self.model.input_format(**batch)
+            )["logits"].detach().cpu().half()
+            preds.append(pred)
+            data_selected.extend(range(count, count + len(pred)))
+            count += len(pred)
 
             if count % 101 == 0:
                 dataset = test_dataset.with_format()

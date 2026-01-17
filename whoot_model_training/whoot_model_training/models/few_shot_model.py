@@ -14,14 +14,19 @@ do processing on top of that embedding
 # from torch import nn, Tensor
 # from perch_hoplite.zoo import model_configs
 # from .model import Model, ModelInput, ModelOutput, has_required_inputs
-from .model import ModelInput
+
 from transformers import PretrainedConfig
+from .model import ModelInput
 
 
 class EmbeddingModel():
     """Wrapper for models which are only intended for embeddings."""
     def embed(self):
         """Get embedding."""
+        raise NotImplementedError()
+
+    def get_k_neighbors(self):
+        """Get k nearest neighbors."""
         raise NotImplementedError()
 
 
@@ -45,14 +50,15 @@ class EmbeddingInput(ModelInput):
         """
         super().__init__(labels, waveform, spectrogram)
 
+        # I keep getting this linting error
+        # But there is not too many function args here
+        # pylint: disable=too-many-function-args
         self["embedding"] = self.model.embed(waveform)
 
 
 # Global variable fore PerchEmbeddings
-perch_model = None
+PERCH_MODEL = None
 
-
-# TODO: Create Environment based loading of models
 # class PerchEmbeddings(EmbeddingModel):
 #     """Wrapper for getting embeddings from perch."""
 

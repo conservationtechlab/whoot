@@ -4,7 +4,7 @@
 
 # %%
 
-from whoot_model_training.whoot_model_training.preprocessors import WaveformInputPreprocessor
+from  import WaveformInputPreprocessor
 from whoot_model_training.whoot_model_training.models import HFInput, HFModel, HFModelConfig
 from whoot_model_training.whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
 from whoot_model_training.whoot_model_training.data_extractor import xc_extractor

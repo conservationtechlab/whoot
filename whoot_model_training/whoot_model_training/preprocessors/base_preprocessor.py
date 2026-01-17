@@ -16,6 +16,8 @@ see `whoot_model_training/models/model.py` for more info.
 
 from pyha_analyzer.preprocessors import PreProcessorBase
 
+from .default_preprocessor import DefaultPreprocessor
+
 from .spectrogram_preprocessors import (
     BuowMelSpectrogramPreprocessors,
     SpectrogramParams,
@@ -36,7 +38,7 @@ class SpectrogramModelInPreprocessors(PreProcessorBase):
 
     def __init__(
         self,
-        spec_preprocessor: PreProcessorBase,
+        spec_preprocessor: DefaultPreprocessor,
         model_input: ModelInput,
     ):
         """Wrapper to get the raw spectrogram output of spec_preprocessor.

@@ -2,13 +2,9 @@
 
 Pulled from pyha_analyzer/preprocessors/spectogram_preprocessors.py
 """
-from dataclasses import dataclass
 
-import librosa
 import numpy as np
-
-from pyha_analyzer.preprocessors import PreProcessorBase
-
+from .default_preprocessor import DefaultPreprocessor, Augmentations
 
 # @dataclass
 # class WaveformParams:
@@ -25,20 +21,7 @@ from pyha_analyzer.preprocessors import PreProcessorBase
 #     n_mels: int = 256
 
 
-@dataclass
-class Augmentations():
-    """Dataclass for the augmentations of the model.
-
-    audio (list[dict]): per item key name of augmentation,
-        value is the augmentation
-    spectrogram (list[dict]): same idea but augmentations
-        applied onto spectrograms
-    """
-    audio = None
-    spectrogram = None
-
-
-class WaveformPreprocessors(PreProcessorBase):
+class WaveformPreprocessors(DefaultPreprocessor):
     """Preprocessor for processing audio into spectrograms.
 
     Particularly for the buow dataset
@@ -72,7 +55,10 @@ class WaveformPreprocessors(PreProcessorBase):
         # self.n_mels = spectrogram_params.n_mels
         # self.spectrogram_params = spectrogram_params
 
-        super().__init__(name="MelSpectrogramPreprocessor")
+        super().__init__(
+            name="MelSpectrogramPreprocessor",
+            duration=duration,
+            sr=self.sr)
 
     def __call__(self, batch):
         """Process a batch of data from an AudioDataset."""
@@ -80,45 +66,14 @@ class WaveformPreprocessors(PreProcessorBase):
         new_labels = []
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
-            try:
-                # TODO: This is a solid section of code for loading audio
-                # Consider turning this into a common helper function
-                if len(batch["audio"][item_idx]["array"]) > 10:
-                    y = batch["audio"][item_idx]["array"]
-                    sr = batch["audio"][item_idx]["sampling_rate"]
-                else:
-                    if librosa.get_duration(
-                        path=batch["audio"][item_idx]["path"]
-                    ) > 2 * 60:
-                        break
-                    y, sr = librosa.load(
-                        path=batch["audio"][item_idx]["path"],
-                        sr=self.sr
-                    )
 
-            except Exception as e:
-                y = np.zeros(self.sr * 5)
-                sr = self.sr
-                print(e)
-                print("File Likely is corrupted, moving on")
-                continue
+            y, sr = self.load_audio(batch, item_idx)
 
             start = np.random.uniform(0, len(y)/sr - self.duration)
 
-            # Handle out of bound issues
-            end_sr = int(start * sr) + int(sr * self.duration)
-            if y.shape[-1] <= end_sr:
-                y = np.pad(y, end_sr - y.shape[-1])
+            y, label = self.augment_audio(y, sr, start, label, self.augments)
 
-            # Audio Based Augmentations
-            if self.augments.audio is not None:
-                y, label = self.augments.audio(y, sr, label)
-
-            new_y = y[int(start * sr):end_sr]
-            if new_y.shape[-1] < int(sr * self.duration):
-                continue
-
-            new_audio.append(new_y)
+            new_audio.append(y)
             new_labels.append(label)
 
         batch["audio"] = new_audio
@@ -146,6 +101,5 @@ class WaveformPreprocessors(PreProcessorBase):
         return (
             f"""{self.name}
                 Augmentations: {self.augments}
-                MelSpectrogram: {self.spectrogram_params}
             """
         )

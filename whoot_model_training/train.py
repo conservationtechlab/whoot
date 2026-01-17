@@ -71,7 +71,7 @@ def train(config):
 
     csv_path = "/home/sean/whoot/data/san_diego_xc_aux/xc_meta_aux.json"
     ds = xc_extractor(
-        XC_dataset_json_path=csv_path,
+        xc_dataset_json_path=csv_path,
         parent_path="/home/sean/whoot/data/san_diego_xc_aux/xeno-canto"
     )
 
@@ -166,7 +166,7 @@ def train(config):
     )
 
     trainer.train()
-    model.save_pretrained("model_checkpoints/xc_aux")
+    model.save_pretrained("model_checkpoints/xc_aux_testing")
 
 
 def init_env(config: dict):

@@ -20,11 +20,10 @@ from datasets import (
     Dataset,
     table
 )
+from datasets.features.features import _FEATURE_TYPES, FeatureType
 import librosa
 from tqdm import tqdm
 import pyarrow as pa
-from datasets.features.features import _FEATURE_TYPES, FeatureType
-
 from ..dataset import AudioDataset
 
 
@@ -216,14 +215,6 @@ def get_array_chunks_from_memory(
                     file_path,
                     "failed stat read, likely corrupted",
                     " | ignoring and continuing"
-                )
-                continue
-            except EOFError as e:
-                print(
-                    e,
-                    file_path,
-                    "hit EOF too early, likely corrupted",
-                    "| ignoring and continuing"
                 )
                 continue
             except EOFError as e:

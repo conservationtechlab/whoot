@@ -5,23 +5,23 @@ See data_downloader/xc.py
 
 import os
 import shutil
+import json
 from pathlib import Path
 from dataclasses import dataclass
 from collections import Counter
 from pydub import AudioSegment
-import json
 import librosa
-
-import numpy as np
 from datasets import (
     Dataset,
     Audio,
     DatasetDict,
     ClassLabel,
-    Sequence,
     load_from_disk,
 )
 from ..dataset import AudioDataset
+from .utils import (
+    convert_labeled_dataset_onehot,
+)
 
 
 def filter_by_count(ds, col="en", threshold=10):
@@ -46,22 +46,12 @@ def filter_xc_data(row: dict):
         # Prevents some files from taking forever
         librosa.load(path=file_path, duration=3)
         return True
-    except Exception as e:
+    except FileNotFoundError as e:
         print(e, file_path)
         return False
-
-
-def one_hot_encode(row: dict, classes: list):
-    """One hot Encodes a list of labels.
-
-    Args:
-        row (dict): row of data in a dataset containing a labels column
-        classes: a list of classes
-    """
-    one_hot = np.zeros(len(classes))
-    one_hot[row["labels"]] = 1
-    row["labels"] = np.array(one_hot, dtype=float)
-    return row
+    except IOError as e:
+        print(e, file_path)
+        return False
 
 
 def convert_audio_to_flac(row, error_path="bad_files", col="audio"):
@@ -83,14 +73,11 @@ def convert_audio_to_flac(row, error_path="bad_files", col="audio"):
     try:
         wav_audio = AudioSegment.from_file(file_path)
         wav_audio.export(flac_path, format="flac")
-    except Exception as e:
+    except IOError as e:
         if os.path.exists(file_path):
             os.makedirs(error_path, exist_ok=True)
             shutil.move(file_path, error_path)
-        # If quit halfway through processing,
-        # make sure we get rid of the bad file
-        # if os.path.exists(flac_path):
-        #     os.remove(flac_path)
+
         print(
             "ERROR",
             "move to",
@@ -119,7 +106,7 @@ class XCParams():
 
 
 def xc_extractor(
-        XC_dataset_json_path,
+        xc_dataset_json_path,
         parent_path,
         cache_path="data/san_diego_xc_aux/cache",
         params: XCParams = XCParams(),
@@ -134,7 +121,7 @@ def xc_extractor(
     if os.path.exists(cache_path):
         return load_from_disk(cache_path)
 
-    with open(XC_dataset_json_path, mode="r") as f:
+    with open(xc_dataset_json_path, mode="r", encoding="utf-8") as f:
         xc_recordings_paged = json.load(f)
 
     xc_recordings = []
@@ -143,16 +130,13 @@ def xc_extractor(
 
     dataset = Dataset.from_list(xc_recordings)
 
-    dataset = dataset.add_column("labels", dataset["en"])
-    dataset = dataset.class_encode_column("labels")
-    class_list = dataset.features["labels"].names
-    multilabel_class_label = Sequence(ClassLabel(names=class_list))
-    dataset = dataset.map(
-        lambda row: one_hot_encode(row, class_list)
-    ).cast_column(
+    dataset = dataset.add_column(
         "labels",
-        multilabel_class_label
+        dataset["en"],
+        new_fingerprint="labels"
     )
+    dataset = dataset.class_encode_column("labels")
+    dataset = convert_labeled_dataset_onehot(dataset)
 
     dataset = dataset.add_column(
         "audio", [

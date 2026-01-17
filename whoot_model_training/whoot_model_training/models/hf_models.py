@@ -1,19 +1,20 @@
 """Wrapper around the hugging face model api!"""
 
-from transformers import AutoFeatureExtractor, AutoModel
+from contextlib import nullcontext
+
+from transformers import AutoFeatureExtractor, AutoModel, PretrainedConfig
 from torch import nn
 import torch
-from contextlib import nullcontext
-from transformers import PretrainedConfig
 
 from .model import Model, ModelInput, ModelOutput, has_required_inputs
 
 
-class HFInput():
+class HFInput(ModelInput):
     """Input for Hugging Face Models.
 
     Specifies TimmModels needs labels and spectrograms that are Tensors
     """
+
     def __init__(self,
                  labels=None,
                  spectrogram=None,
@@ -30,7 +31,7 @@ class HFInput():
         self.feature_extractor = AutoFeatureExtractor.from_pretrained(
             extractor_path,
             trust_remote_code=True)
-        # TODO MAKE HFINPUT WORK WITH ITSELF
+        super().__init__(labels, waveform, spectrogram)
 
     def __call__(self, labels, spectrogram=None,  waveform=None):
         """Create some fake ModelInputs for HFModels.
@@ -134,11 +135,10 @@ class HFModel(Model, nn.Module):
                 x.spectrogram.to(self.device)
             ).last_hidden_state
         logits = self.linear(embed)
-        loss = self.loss(logits, x.labels)
 
         return ModelOutput(
             logits=logits,
             embeddings=embed,
-            loss=loss,
+            loss=self.loss(logits, x.labels),
             labels=x.labels
         )
