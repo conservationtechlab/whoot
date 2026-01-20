@@ -254,7 +254,8 @@ class LabelStudioSetup():
             self,
             ds: datasets.Dataset,
             ls_file_parent: str,
-            is_model_prediction=True):
+            is_model_prediction: bool =True,
+            label_col:str="labels"):
         """Update tasks in label studio with data from a dataset.
 
         Args:
@@ -264,6 +265,7 @@ class LabelStudioSetup():
             ls_file_parent (str): Parent path in label studio for audio files.
             is_model_prediction (bool): Whether the labels are model
                 predictions.
+            label_col (str): "labels" or "pred" based on model training use 
         """
         # li = self.current_project.get_label_interface()
         files = self.get_files(ls_file_parent=ls_file_parent)["files"]
@@ -288,12 +290,14 @@ class LabelStudioSetup():
                 offset = 0.0
                 duration = 1.0
 
+            # Note for line 299
+            # Inferance uses pred, training uses labels
             file_ds = file_ds.map(
                 lambda x: self.default_template_annotation_style(
                     task_id,
                     offset,
                     duration,
-                    x['labels'],
+                    x[label_col], 
                     x['audio']['path'],
                     prediction=is_model_prediction
                 )
