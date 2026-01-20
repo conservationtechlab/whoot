@@ -30,7 +30,7 @@ class LabelStudioSetup():
 
         if label_studio_url is None or label_studio_api_key is None:
             raise ValueError(
-                "LABEL_STUDIO_URL and LABEL_STUDIO_API_KEY",
+                "LABEL_STUDIO_URL and LABEL_STUDIO_API_KEY "
                 "must be set in the .env file."
             )
 
@@ -48,8 +48,8 @@ class LabelStudioSetup():
                 self.current_project.title
             )
             input(
-                "Double check this,",
-                "this script can take destructive actions.",
+                "Double check this,"
+                " this script can take destructive actions. "
                 "Press Enter to continue..."
             )
 
@@ -74,8 +74,8 @@ class LabelStudioSetup():
 
         print("Project ID:", project.id, project.title)
         input(
-            "Double check this,",
-            "this script can take destructive actions.",
+            "Double check this, "
+            "this script can take destructive actions. "
             "Press Enter to continue..."
         )
 
