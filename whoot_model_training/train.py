@@ -18,7 +18,7 @@ import argparse
 import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
-from whoot_model_training.data_extractor import xc_extractor
+from whoot_model_training.data_extractor import xc_extractor, buowset_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
@@ -63,22 +63,22 @@ def train(config):
         config (dict): the config used for training. Defined in yaml file
     """
     # Extract the dataset
-    # ds = buowset_extractor(
-    #     metadata_csv=config["metadata_csv"],
-    #     parent_path=config["data_path"],
-    #     output_path=config["hf_cache_path"],
-    # )
-
-    csv_path = "/home/sean/whoot/data/san_diego_xc_aux/xc_meta_aux.json"
-    ds = xc_extractor(
-        xc_dataset_json_path=csv_path,
-        parent_path="/home/sean/whoot/data/san_diego_xc_aux/xeno-canto"
+    ds = buowset_extractor(
+        metadata_csv=config["metadata_csv"],
+        parent_path=config["data_path"],
+        output_path=config["hf_cache_path"],
     )
+
+    # csv_path = "/home/sean/whoot/data/san_diego_xc_aux/xc_meta_aux.json"
+    # ds = xc_extractor(
+    #     xc_dataset_json_path=csv_path,
+    #     parent_path="/home/sean/whoot/data/san_diego_xc_aux/xeno-canto"
+    # )
 
     # Create the model
     model_name = "efficientnet_b1"
 
-    run_name = f"buowset1.1_{model_name}"
+    run_name = f"buowset1.3_{model_name}"
     model_config = TimmModelConfig(
         timm_model=model_name,
         num_classes=ds.get_num_classes())
@@ -166,7 +166,7 @@ def train(config):
     )
 
     trainer.train()
-    model.save_pretrained("model_checkpoints/xc_aux_testing")
+    model.save_pretrained("model_checkpoints/buowset1.3_effnetb1")
 
 
 def init_env(config: dict):

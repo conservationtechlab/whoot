@@ -83,6 +83,7 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
         self,
         model_input: ModelInput,
         duration=5,
+        sr = 32_000,
         augments: Augmentations = Augmentations(),
         spectrogram_params: SpectrogramParams = SpectrogramParams(),
     ):
@@ -110,7 +111,8 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
         spec_preprocessor = BuowMelSpectrogramPreprocessors(
             duration=duration,
             augments=augments,
-            spectrogram_params=spectrogram_params
+            spectrogram_params=spectrogram_params,
+            sr=sr
         )
         super().__init__(spec_preprocessor, model_input)
 

@@ -38,6 +38,7 @@ class BuowMelSpectrogramPreprocessors(DefaultPreprocessor):
         duration=5,
         augments: Augmentations = Augmentations(),
         spectrogram_params: SpectrogramParams = SpectrogramParams(),
+        sr:int = 32_000
     ):
         """Defines a BuowMelSpectrogramPreprocessors.
 
@@ -56,6 +57,7 @@ class BuowMelSpectrogramPreprocessors(DefaultPreprocessor):
         self.power = spectrogram_params.power
         self.n_mels = spectrogram_params.n_mels
         self.spectrogram_params = spectrogram_params
+        self.sr = sr
 
         super().__init__(
             name="MelSpectrogramPreprocessor", duration=duration, sr=self.sr
@@ -101,7 +103,7 @@ class BuowMelSpectrogramPreprocessors(DefaultPreprocessor):
             new_audio.append(mels)
             new_labels.append(label)
 
-        batch["audio"] = np.concatenate(new_audio)
+        batch["audio"] = new_audio
         batch["labels"] = np.array(new_labels, dtype=np.float32)
 
         return batch
