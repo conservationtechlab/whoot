@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # HOW TO GET AUDIO FILES TO REVIEW
     # Note this is not a perfect process as
     # diffrences between label studio and your dataset may exist
-    ls_setup.get_files(ls_file_parent='data/local-files/?d=data1/')
+    file_meta = ls_setup.get_files(ls_file_parent='data/local-files/?d=data1/')
 
     # Make sure your file names align to label studio files
 
@@ -34,13 +34,9 @@ if __name__ == "__main__":
                   'twitter', 'alarm', 'chick begging', 'no_buow']
 
     ds = datasets.Dataset.from_dict({
-        "audio": ls_setup.get_files(
-            ls_file_parent='data/local-files/?d=data1/')["files"],
+        "audio": file_meta["files"],
         "labels": random.choices(
-            class_list, k=len(
-                ls_setup.get_files(
-                    ls_file_parent='data/local-files/?d=data1/')["files"]
-            )
+            class_list, k=len(file_meta["files"])
         )
     })
 
