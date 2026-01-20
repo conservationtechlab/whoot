@@ -2,6 +2,11 @@
 
 This pipeline intends to take audiodatasets from the inferance or the data_extractors of `whoot_model_training` and format projects in label studio to easily verify annotations. The following readme outlines best practices for creating and intergrating with Label Studio
 
+## Install Instructions
+
+In the root folder run the following to install depencies for data exporter
+
+`pip install -e .[data_exporters]`
 
 ## Creating new project
 
