@@ -48,9 +48,11 @@ class LabelStudioSetup():
                 self.current_project.title
             )
             input(
-                "Double check this,"
-                " this script can take destructive actions. "
-                "Press Enter to continue..."
+                """
+                Double check this,
+                this script can take destructive actions.
+                Press Enter to continue...
+                """
             )
 
         self.api_key = label_studio_api_key
