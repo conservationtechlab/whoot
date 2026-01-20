@@ -15,7 +15,7 @@ LABEL_STUDIO_API_KEY = 'INSERT YOUR API KEY'
 LABEL_STUDIO_PROJECT_ID = 'PROJECT ID FROM URL OF PROJECT'
 ```
 
-2) Create a new project in that label studio instance and uploaded the needed data to it
+2) Create a new project in that label studio instance and upload the needed data to it
 
 NOTE: Save the project_id from the URL of the project
 
