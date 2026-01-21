@@ -255,7 +255,9 @@ class LabelStudioSetup():
             ds: datasets.Dataset,
             ls_file_parent: str,
             is_model_prediction: bool =True,
-            label_col:str="labels"):
+            label_col:str="labels",
+            duration:float = 3.0
+        ):
         """Update tasks in label studio with data from a dataset.
 
         Args:
@@ -282,21 +284,15 @@ class LabelStudioSetup():
 
             # Our custom configuration of datasets
             # allow for segmentation labels in audio :)
-            # This checks for it
-            if "offset" in file_ds[0]["audio"]:
-                offset = file_ds[0]["audio"]["offset"]
-                duration = file_ds[0]["audio"]["duration"]
-            else:
-                offset = 0.0
-                duration = 1.0
+            # lines 294 and 295 check for this vs default by hf
 
-            # Note for line 299
+            # Note for line 296
             # Inferance uses pred, training uses labels
             file_ds = file_ds.map(
                 lambda x: self.default_template_annotation_style(
                     task_id,
-                    offset,
-                    duration,
+                    x["audio"]["offset"] if "offset" in x["audio"] else 0,
+                    x["audio"]["duration"] if "offset" in x["audio"] else duration,
                     x[label_col], 
                     x['audio']['path'],
                     prediction=is_model_prediction
