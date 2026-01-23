@@ -1,20 +1,25 @@
-"""Demo for using Label Studio Exporter with a sample dataset."""
+"""Demo for using Label Studio Exporter with a sample dataset.
+
+Run from project root after saving a cache of buowset data
+"""
 
 import os
 import random
 from dotenv import load_dotenv
 from label_studio import LabelStudioSetup
 import datasets
+from datasets.utils.logging import disable_progress_bar, enable_progress_bar
 import tqdm
 
 class RavenDataset():
-    def __init__(self, ds: datasets.Dataset, duration=3, sr:int = 32_000, label_col="labels"):
+    def __init__(self, ds: datasets.Dataset, duration=3, sr:int = 32_000, label_col="labels", dry_run=True):
         self.ds = ds
         self.raven_ds = None
         self.build_dataset(ds, duration=duration, sr=sr, label_col=label_col)
         self.header = [
             'Selection','View',"Begin Time (s)","End Time (s)","Selection","Low Freq (Hz)",'High Freq (Hz)','Delta Time (s)','Delta Freq (Hz)', "Label"
         ]
+        self.dry_run = dry_run
 
     def default_template_annotation_style(
             self,
@@ -40,11 +45,20 @@ class RavenDataset():
 
     def build_dataset(self, ds, duration=3, sr=32_000, label_col="labels"):
         raven_ds = {}
-        files = list(set([ds["audio"][i]["path"] for i in range(len(ds["audio"]))]))
+
+        # We don't need audio data, so disable decode
+        ds = ds.cast_column(
+            "audio", datasets.Audio(sampling_rate=sr, decode=False))
+
+        print("Collecting files")
+        disable_progress_bar()
+        files = list(set([row["audio"]["path"] for row in  tqdm.tqdm(ds)]))
+        print("Format raven files")
         for i in tqdm.tqdm(
             range(len(files)),
             # desc=f"Updating tasks in project: {self.current_project.title}"
         ):
+            
             file_ds = ds.filter(lambda x: x['audio']['path'] == files[i])
             file_ds = file_ds.map(
                 lambda x: self.default_template_annotation_style(
@@ -55,11 +69,12 @@ class RavenDataset():
                     x
                 )
             )
-
-            print(file_ds[0])
+            
 
             raven_ds[files[i]]= file_ds
 
+        enable_progress_bar()
+        print("Raven dataset created, run save() to save files")
         self.raven_ds = raven_ds
 
     def save(self, folder_path):
@@ -72,7 +87,10 @@ class RavenDataset():
         if self.raven_ds is None:
             raise ValueError("run build_dataset frist")
 
-        os.makedirs(folder_path, exist_ok=True)
+        if self.dry_run:
+            print("Would create: ", folder_path)
+        else:
+            os.makedirs(folder_path, exist_ok=True)
 
         for file in self.raven_ds:
             file_ds = self.raven_ds[file]
@@ -80,9 +98,12 @@ class RavenDataset():
             if file[0] == "/":
                 file = file[1:]
             output_file = os.path.join(folder_path, f"{file.split(os.path.extsep)[0]}.txt")
-            print(output_file, os.path.dirname(output_file))
-            os.makedirs(os.path.dirname(output_file), exist_ok=True)
-            file_ds.to_csv(output_file, sep="\t", columns=self.header)
+            
+            if self.dry_run:
+                print("Would create: ", output_file)
+            else:
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
+                file_ds.to_csv(output_file, sep="\t", columns=self.header)
 
 if __name__ == "__main__":
 
@@ -90,38 +111,14 @@ if __name__ == "__main__":
     # below is a fake dataset creation for demo purposes only
     # In practice you would load your dataset from the saves in
     # whoot_model_training
-    load_dotenv()
 
-    # SELECT A PROJECT FROM LABEL STUDIO
-    # FIND ID IN URL OF PROJECT
-    PROJECT_ID = int(os.getenv("LABEL_STUDIO_PROJECT_ID"))
-    ls_setup = LabelStudioSetup(
-        current_project=PROJECT_ID
-    )
-    # ADD DEFAULT TEMPLATE TO LABEL STUDIO
-    ls_setup.apply_custom_template("template.xml")
-
-    # HOW TO GET AUDIO FILES TO REVIEW
-    # Note this is not a perfect process as
-    # diffrences between label studio and your dataset may exist
-    file_meta = ls_setup.get_files(ls_file_parent='data/local-files/?d=data1/')
-
-    # Make sure your file names align to label studio files
-
-    class_list = ['cluck', 'coocoo',
-                  'twitter', 'alarm', 'chick begging', 'no_buow']
-
-    ds = datasets.Dataset.from_dict({
-        "audio": random.choices(file_meta["files"], k=len(file_meta["files"])),
-        "labels": random.choices(
-            class_list, k=len(file_meta["files"])
-        )
-    })
-
-    ds = ds.cast_column(
-        "audio", datasets.Audio(sampling_rate=16000, decode=False))
+    # This cache gets created when running the buowset_extractor in whoot_model_training
+    ds = datasets.load_from_disk("data/burrowing_owl_dataset/cache/metadata.hf")["valid"]
     # ===============================================================
 
     # UPLOAD DATASET TO LABEL STUDIO
     raven_ds = RavenDataset(ds)
-    raven_ds.save("raven_test")
+
+    # Raven wants audio and annotation files together
+    audio_folder = "data/burrowing_owl_dataset/audio"
+    raven_ds.save(audio_folder)
