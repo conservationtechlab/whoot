@@ -10,6 +10,8 @@ if __name__ == "__main__":
 
     load_dotenv()
 
+    ls_file_parent='data/local-files/?d=data1/'
+
     # SELECT A PROJECT FROM LABEL STUDIO
     # FIND ID IN URL OF PROJECT
     PROJECT_ID = int(os.getenv("LABEL_STUDIO_PROJECT_ID"))
@@ -22,7 +24,7 @@ if __name__ == "__main__":
     # HOW TO GET AUDIO FILES TO REVIEW
     # Note this is not a perfect process as
     # diffrences between label studio and your dataset may exist
-    file_meta = ls_setup.get_files(ls_file_parent='data/local-files/?d=data1/')
+    file_meta = ls_setup.get_files(ls_file_parent)
 
     # Make sure your file names align to label studio files
 
@@ -47,6 +49,6 @@ if __name__ == "__main__":
     # UPLOAD DATASET TO LABEL STUDIO
     ls_setup.update_tasks_in_ls(
         ds,
-        ls_file_parent='data/local-files/?d=data1/',
+        ls_file_parent,
         is_model_prediction=True
     )
