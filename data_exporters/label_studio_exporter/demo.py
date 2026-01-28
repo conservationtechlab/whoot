@@ -1,3 +1,4 @@
+
 """Demo for using Label Studio Exporter with a sample dataset."""
 
 import os
@@ -10,7 +11,7 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    ls_file_parent='data/local-files/?d=data1/'
+    ls_file_parent='label-studio/local/data1/panda_inference/?d=data1/'
 
     # SELECT A PROJECT FROM LABEL STUDIO
     # FIND ID IN URL OF PROJECT
@@ -28,10 +29,40 @@ if __name__ == "__main__":
 
     # Make sure your file names align to label studio files
 
+    # below is an example for loading in your inference results
+
+    '''
+    # class list must not be ints
+    class_list = ['your', 'classes']
+
+    import pickle
+    import numpy as np
+    from pathlib import Path
+
+    path = '/path/to/result/pickle/from/inference.pkl'
+    with open(path, 'rb') as file:
+        data = pickle.load(file)
+    # labelstudio expects non-int values as predictions, map to labels
+    data['labels'] = [
+        class_list[i] for i in np.argmax(data['pred'], axis=1)
+    ]
+    # audio path must match labelstudio path which is a string
+    for item in data['audio']:
+        item['path'] = Path(item['path']).name
+        for file in file_meta['files']:
+            if item['path'] in file:
+                item['path'] = str(file)
+
+    ds = datasets.Dataset.from_dict({
+        'audio': data['audio'],
+        'labels': data['labels']
+    })
+    '''
+
     # ===============================================================
     # below is a fake dataset creation for demo purposes only
     # In practice you would load your dataset from the saves in
-    # whoot_model_training
+    # whoot_model_training using the above example
     class_list = ['cluck', 'coocoo',
                   'twitter', 'alarm', 'chick begging', 'no_buow']
 
