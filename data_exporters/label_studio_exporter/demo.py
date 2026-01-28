@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
     '''
     # class list must not be ints
+    # ensure template.xml matches this list
     class_list = ['your', 'classes']
 
     import pickle
