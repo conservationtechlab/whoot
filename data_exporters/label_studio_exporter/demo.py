@@ -29,6 +29,7 @@ if __name__ == "__main__":
 
     # Make sure your file names align to label studio files
 
+    # ===============================================================
     # below is an example for loading in your inference results
 
     '''
@@ -59,11 +60,13 @@ if __name__ == "__main__":
         'labels': data['labels']
     })
     '''
+    # ===============================================================
 
     # ===============================================================
     # below is a fake dataset creation for demo purposes only
     # In practice you would load your dataset from the saves in
     # whoot_model_training using the above example
+
     class_list = ['cluck', 'coocoo',
                   'twitter', 'alarm', 'chick begging', 'no_buow']
 
