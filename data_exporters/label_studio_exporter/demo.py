@@ -11,7 +11,9 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    ls_file_parent='label-studio/local/data1/panda_inference/?d=data1/'
+    # replace with path to your mapped labelstudio local storage path
+    # keep the /?d=data1/ at the end
+    ls_file_parent='data/local-files/?d=data1/'
 
     # SELECT A PROJECT FROM LABEL STUDIO
     # FIND ID IN URL OF PROJECT
@@ -31,29 +33,40 @@ if __name__ == "__main__":
 
     # ===============================================================
     # below is an example for loading in your inference results
-
-    '''
     # class list must not be ints
     # ensure template.xml matches this list
+    '''
     class_list = ['your', 'classes']
 
     import pickle
     import numpy as np
     from pathlib import Path
 
-    path = '/path/to/result/pickle/from/inference.pkl'
+    path = '/path/to/inference/output.pkl'
     with open(path, 'rb') as file:
         data = pickle.load(file)
     # labelstudio expects non-int values as predictions, map to labels
     data['labels'] = [
         class_list[i] for i in np.argmax(data['pred'], axis=1)
     ]
+    to_delete = []
     # audio path must match labelstudio path which is a string
-    for item in data['audio']:
+    for index, item in enumerate(data['audio']):
         item['path'] = Path(item['path']).name
+        found = False
         for file in file_meta['files']:
             if item['path'] in file:
                 item['path'] = str(file)
+                found = True
+                break
+
+        if not found:
+            print(f"{item['path']} is not in labelstudio, skipping.")
+            to_delete.append(index)
+
+    for i in reversed(to_delete):
+        del data['audio'][i]
+        del data['labels'][i]
 
     ds = datasets.Dataset.from_dict({
         'audio': data['audio'],
@@ -79,6 +92,7 @@ if __name__ == "__main__":
 
     ds = ds.cast_column(
         "audio", datasets.Audio(sampling_rate=16000, decode=False))
+
     # ===============================================================
 
     # UPLOAD DATASET TO LABEL STUDIO
