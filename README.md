@@ -23,6 +23,7 @@ Current support optional dependency collections include
 - `cu128`: Installs torch and torchvision with Cuda 12.8 Binaries
 - `model-training`: Required for running scripts in `whoot/model_training`, make sure to add either `cpu` or `cu128`
 - `dev`: Installs linters pylint and flake8. MUST be used by developers of whoot
+- `data_exporters` Installs LabelStudioSdk
 
 ## Usage
 

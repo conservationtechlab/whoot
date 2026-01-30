@@ -58,6 +58,12 @@ notebooks = [
   "matplotlib>=3.10.6",
   "seaborn>=0.13.2",
 ]
+birdnet = [
+    "birdnet>=0.1.7",
+]
+data-exporters = [
+    "label-studio-sdk>=2.0.5",
+]
 
 
 [packages.index]
