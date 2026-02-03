@@ -131,6 +131,7 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Labels the entire audio file and does not give start and stop times
     - Will need pre-processiong into smaller chunks (1-5s)
     - Proprietary software
+      
     *Pro version is costly $399 for software per user + Subscription + Cloud storage and data upload costs. Subscription allows two activations for a single user for 12 months.
     **Here is a introduction video for using Kaleidoscope with bat data (https://www.youtube.com/watch?v=eT9XYPpESPw)
 
