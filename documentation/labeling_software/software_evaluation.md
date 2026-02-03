@@ -6,7 +6,7 @@
 - [Avisoft-SASLab](https://avisoft.com/sound-analysis/)
 - [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro)
 - [Label Studio](https://labelstud.io)
-- [PAMGuard](https://www.pamguard.org/) (#4)
+- [PAMGuard](https://www.pamguard.org/)
 - [Pyrenote-desk](https://github.com/UCSD-E4E/pyrenote-desk)
   - [Wavesurfer.js](https://github.com/katspaugh/wavesurfer.js)
 - [RavenPro](https://www.ravensoundsoftware.com/software/raven-pro/)
@@ -130,9 +130,9 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Can only have 32 labels available at anytime while using the software
     - Labels the entire audio file and does not give start and stop times
     - Will need pre-processiong into smaller chunks (1-5s)
-    - Proprietary software, so we don't know exactly what's going on "under the hood"
-    * Pro version is costly $399 for software per user + Subscription + Cloud storage and data upload costs. Subscription allows two activations for a single user for 12 months.
-    ** Here is a intro to Kaleidoscope video for bat data (https://www.youtube.com/watch?v=eT9XYPpESPw)
+    - Proprietary software
+    *Pro version is costly $399 for software per user + Subscription + Cloud storage and data upload costs. Subscription allows two activations for a single user for 12 months.
+    **Here is a introduction video for using Kaleidoscope with bat data (https://www.youtube.com/watch?v=eT9XYPpESPw)
 
 ### Label Studio (Free version): 
 __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
@@ -230,5 +230,5 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - You cannot save out multiple .txt across multiple sound files, only allows for data from one audio file
     - Can configure the load of an audio file, but the speed/time expansion setting does not seem to work
     - Originally designed for bird calls
-    - Proprietary software, so we don't know exactly what's going on "under the hood"
+    - Proprietary software
     * Pro version costs $100 per license for non-profits, for more information: [RavenPro Pricing](https://www.ravensoundsoftware.com/raven-pricing/)
