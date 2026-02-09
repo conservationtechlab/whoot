@@ -11,7 +11,7 @@
   - [Wavesurfer.js](https://github.com/katspaugh/wavesurfer.js)
 - [RavenPro](https://www.ravensoundsoftware.com/software/raven-pro/)
 
-* The original search was for annotating bat sound data, so we have included information specifically for bats. Please disregard unless your animal call is greater than 20kHz.
+*The original search was for annotating bat sound data, so we have included information specifically for bats. Please disregard unless your animal call is greater than 20kHz.
 
 ## EDITING DOCUMENT INFO
 __If you are going to edit this document, always double check that both the table and the written notes have been updated! Thank you!__ 
@@ -170,7 +170,7 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Can view audio with sampling rate up to 384kHz 
     - Can label calls manually
     - Has a built-in neural network, ANIMAL-SPOT, for event detection and classification of calls
-    * Intro to PAMGuard video with bat data: https://www.youtube.com/watch?v=zqwy1daloMY
+    *Intro to PAMGuard video with bat data: https://www.youtube.com/watch?v=zqwy1daloMY
   - __Cons:__
     - Not intuitive to initially setup, but once module settings are saved, the program will automated load with those modules during future sessions.
     - GUI is not user-friendly; would need to provide a detailed SOP document 
