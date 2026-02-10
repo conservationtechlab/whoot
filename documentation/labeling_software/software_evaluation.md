@@ -1,5 +1,5 @@
 # Software Evaluations for Annotating Audio Data
-## Software options that create .txt files with label, start_time, end_time, bounding boxes (includes frequency range), and/or whether they can add multiple labels to a single audio file:
+## Software options that create label files with label name, start_time, end_time, bounding boxes (includes frequency range), and/or whether they can add multiple labels to a single audio file:
 
 - [ARBIMON](http://arbimon.org/)
 - [Audacity](https://www.audacityteam.org/)
