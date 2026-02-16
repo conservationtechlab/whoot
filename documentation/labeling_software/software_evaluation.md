@@ -10,6 +10,7 @@
 - [Pyrenote-desk](https://github.com/UCSD-E4E/pyrenote-desk)
   - [Wavesurfer.js](https://github.com/katspaugh/wavesurfer.js)
 - [RavenPro](https://www.ravensoundsoftware.com/software/raven-pro/)
+- [RavenAnnotate - Pre-release](https://www.ravensoundsoftware.com/)
 - [Whombat](https://github.com/mbsantiago/whombat)
 
 *The original search was for annotating bat sound data, so we have included information specifically for bats. Please disregard unless your animal call is greater than 20kHz.
@@ -33,7 +34,7 @@ __If you are going to edit this document, always double check that both the tabl
 | [Pyrenote-desk](https://github.com/UCSD-E4E/pyrenote-desk) | Free, No License | Local | Linux | Oscillogram and Spectrogram | Yes, limited | Multi, Bounding Boxes | Yes | No | No | No | Yes? not currently working | Yes | Easy Difficulty|
 | [RavenLite](https://www.ravensoundsoftware.com/software/raven-lite/) | Free, with Free License | Local | Windows and Linux | Oscillogram, Linear Spectrogram, Power Spectrum | Yes, limited | Multi, Bounding Boxes | Yes | Yes | Yes | No | No | No batch load/save, Yes batch filtering | Medium Difficulty, lots of buttons and tabs |
 | [RavenPro](https://www.ravensoundsoftware.com/software/raven-pro/) | $100 for 1 year License for non-profits | Local | Windows and Linux | Oscillogram, Linear Spectrogram, Power Spectrum | Yes | Multi, Bounding Boxes | Yes | Yes | Yes | Yes | No | No batch load/save, Yes batch filtering | Medium Difficulty, lots of buttons and tabs |
-| [RavenAnnotate](https://www.ravensoundsoftware.com/) (Early-acess) | Free |  Local  | Windows, MacOS, and Linux | Oscillogram and Spectrogram | Yes | Multi, Bounding boxes | Yes | No | Yes, limited | No | No | No | Easy Difficulty |
+| [RavenAnnotate](https://www.ravensoundsoftware.com/) (Pre-release) | Free |  Local  | Windows, MacOS, and Linux | Oscillogram and Spectrogram | Yes | Multi, Bounding boxes | Yes | No | Yes, limited | No | No | No | Easy Difficulty |
 | [Whombat](https://github.com/mbsantiago/whombat) | Free, No License |  Local  | Windows, MacOS, and Linux | Linear Spectrogram | Yes, limited | Multi, Bounding Boxes | Yes (auto pitches down audio for bats) | Yes, limited | Yes, limited | No | Yes | Yes | Easy Difficulty, very intuitive | 
 
 
@@ -138,9 +139,9 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Will need pre-processiong into smaller chunks (1-5s)
     - Proprietary software
     
-*Pro version is costly $399 for software per user + Subscription + Cloud storage and data upload costs. Subscription allows two activations for a single user for 12 months.
+    *Pro version is costly $399 for software per user + Subscription + Cloud storage and data upload costs. Subscription allows two activations for a single user for 12 months.
     
-**Here is a intro to Kaleidoscope video for bat data (https://www.youtube.com/watch?v=eT9XYPpESPw)
+    **Here is a introduction video for using Kaleidoscope with bat data (https://www.youtube.com/watch?v=eT9XYPpESPw)
 
 ### Label Studio (Free version): 
 __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
@@ -176,12 +177,14 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Can view audio with sampling rate up to 384kHz 
     - Can label calls manually
     - Has a built-in neural network, ANIMAL-SPOT, for event detection and classification of calls
-*Intro to PAMGuard video with bat data: https://www.youtube.com/watch?v=zqwy1daloMY
+    
+    *Intro to PAMGuard video with bat data: https://www.youtube.com/watch?v=zqwy1daloMY
+
   - __Cons:__
     - Not intuitive to initially setup, but once module settings are saved, the program will automated load with those modules during future sessions.
     - GUI is not user-friendly; would need to provide a detailed SOP document 
 
-  ### Pyrenote-desk (Is not in a functional state to ship out to labelers)
+  ### Pyrenote-desk (Need to check recent update)
   - Pyrenote creates moment to moment or strong labels for audio data. Pyrenote and much of this README are based on heavily on Audino as well as Wavesurfer.js.
   - __Pros:__
     - Linux compatible
@@ -189,8 +192,8 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Visualizes both the Oscillogram and Spectrogram (but what type is not indicated; would be nice to include different specrogram options.)
     - Can resize and add multiple labels
 
-  - __Cons:__
-  *Using Ubuntu 24
+  - __Cons: Using Ubuntu 24__
+  
     - Difficult to install; installation instructions are not detailed enough, missing packages to install (node.js, npm, curl).
     - Needs better installation notes that do not require links to other tutorials.
     - Adding recordings requires lots of metadata to be inputted first, and I __cannot__ upload recordings without deployment information (which needs to be optional).
@@ -203,7 +206,8 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Additionally, delete, clear, and undo buttons do not work.
     - When I exit out of the application via the X button in the top right corner, the terminal continues to run unless I hit ctrl+C.
 
-  *This uses websurfter.js, so I have reviewed it as well.
+    *This uses websurfter.js, so I have reviewed it as well.
+  
   ### wavesurfer.js
   - Wavesurfer.js is an interactive waveform rendering and audio playback library, perfect for web applications. It leverages modern web technologies to provide a robust and visually engaging audio experience.
   - __Pros:__
@@ -216,7 +220,7 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Nothing is pre-built, except for functions
     - Can make a web-based or desktop application, but would have to be a finished product before shipping to labelers.
 
-  *I have uploaded errors and my functionality requests for pyrenote-desk to Issues on their github.
+    *I have uploaded errors and my functionality requests for pyrenote-desk to Issues on their github.
 
 ### RavenPro (RavenLite is similar; it can perform multiple annotations, but cannot adjust spectrogram parameters)
   - __Pros:__
@@ -239,6 +243,7 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Can configure the load of an audio file, but the speed/time expansion setting does not seem to work
     - Originally designed for bird calls
     - Proprietary software
+
     *Pro version costs $100 per license for non-profits, for more information: [RavenPro Pricing](https://www.ravensoundsoftware.com/raven-pricing/)
 
 ### RavenAnnotate
