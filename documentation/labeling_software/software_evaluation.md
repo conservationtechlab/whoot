@@ -1,5 +1,5 @@
 # Software Evaluations for Annotating Audio Data
-## Software options that create label files with label name, start_time, end_time, bounding boxes (includes frequency range), and/or whether they can add multiple labels to a single audio file:
+## Software options that create .txt files with label, start_time, end_time, bounding boxes (includes frequency range), and/or whether they can add multiple labels to a single audio file:
 
 - [ARBIMON](http://arbimon.org/)
 - [Audacity](https://www.audacityteam.org/)
@@ -29,10 +29,11 @@ __If you are going to edit this document, always double check that both the tabl
 | [Kaleidoscope Free](https://www.wildlifeacoustics.com/products/kaleidoscope-pro) | Free, No License | Local | Windows, MacOS, and Linux | Oscillogram, Spectrogram, and Power Spectrum | Yes, limited | Single label for entire file | Yes | No | Yes | No | No | Yes| Easy Difficulty |
 | [Kaleidoscope Pro](https://www.wildlifeacoustics.com/products/kaleidoscope-pro) | $399 for 1 year License | Local | Windows, MacOS, and Linux | Oscillogram, Spectrogram, and Power Spectrum | Yes | Single label for entire file | Yes | No | Yes | Yes | No | Yes | Easy Difficulty |
 | [Label Studio](https://labelstud.io) | $149/month, additional users $99/month (up to 12 users) | Local, open-source |  Windows, MacOS, and Linux | Oscillogram and Spectrogram (Only goes up to 20kHz) | Yes | Multi, Start-stop | Yes (only to down to 0.5 speed) | No | No | None | Yes, can have as many users as the server can handle | Yes | Easy Difficulty, limited labeling options and spectrogram specifications |
-| [PAMGuard](https://www.pamguard.org/) | Free, No License | Local, open-source; has modules that you connect together to create a pipeline | Windows and MacOS | Oscillogram and Spectrogram | Yes | Multi, Bounding Boxes | Yes | Yes |  | Yes | No | | Hard Difficulty, have setup module/pipeline before utilizing software |
-| [Pyrenote-desk](https://github.com/UCSD-E4E/pyrenote-desk) | Free, No License | Local | Linux | Oscillogram and Spectrogram | Yes, limited | Multi, Bounding Boxes, not currently working | Yes | No | No | No | Yes? not currently working | Yes? not currently working | Easy Difficulty|
+| [PAMGuard](https://www.pamguard.org/) | Free, No License | Local, open-source; has modules that you connect together to create a pipeline | Windows and MacOS | Oscillogram and Spectrogram | Yes | Multi, Bounding Boxes | Yes | Yes |  | Yes | No |  | Hard Difficulty, have setup module/pipeline before utilizing software |
+| [Pyrenote-desk](https://github.com/UCSD-E4E/pyrenote-desk) | Free, No License | Local | Linux | Oscillogram and Spectrogram | Yes, limited | Multi, Bounding Boxes | Yes | No | No | No | Yes? not currently working | Yes | Easy Difficulty|
 | [RavenLite](https://www.ravensoundsoftware.com/software/raven-lite/) | Free, with Free License | Local | Windows and Linux | Oscillogram, Linear Spectrogram, Power Spectrum | Yes, limited | Multi, Bounding Boxes | Yes | Yes | Yes | No | No | No batch load/save, Yes batch filtering | Medium Difficulty, lots of buttons and tabs |
 | [RavenPro](https://www.ravensoundsoftware.com/software/raven-pro/) | $100 for 1 year License for non-profits | Local | Windows and Linux | Oscillogram, Linear Spectrogram, Power Spectrum | Yes | Multi, Bounding Boxes | Yes | Yes | Yes | Yes | No | No batch load/save, Yes batch filtering | Medium Difficulty, lots of buttons and tabs |
+| [RavenAnnotate](https://www.ravensoundsoftware.com/) (Early-acess) | Free |  Local  | Windows, MacOS, and Linux | Oscillogram and Spectrogram | Yes | Multi, Bounding boxes | Yes | No | Yes, limited | No | No | No | Easy Difficulty |
 | [Whombat](https://github.com/mbsantiago/whombat) | Free, No License |  Local  | Windows, MacOS, and Linux | Linear Spectrogram | Yes, limited | Multi, Bounding Boxes | Yes (auto pitches down audio for bats) | Yes, limited | Yes, limited | No | Yes | Yes | Easy Difficulty, very intuitive | 
 
 
@@ -135,9 +136,11 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Can only have 32 labels available at anytime while using the software
     - Labels the entire audio file and does not give start and stop times
     - Will need pre-processiong into smaller chunks (1-5s)
-    - Proprietary software, so we don't know exactly what's going on "under the hood"
-    *Pro version is costly $399 for software per user + Subscription + Cloud storage and data upload costs. Subscription allows two activations for a single user for 12 months.
-    **Here is a intro to Kaleidoscope video for bat data (https://www.youtube.com/watch?v=eT9XYPpESPw)
+    - Proprietary software
+    
+*Pro version is costly $399 for software per user + Subscription + Cloud storage and data upload costs. Subscription allows two activations for a single user for 12 months.
+    
+**Here is a intro to Kaleidoscope video for bat data (https://www.youtube.com/watch?v=eT9XYPpESPw)
 
 ### Label Studio (Free version): 
 __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
@@ -173,7 +176,7 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Can view audio with sampling rate up to 384kHz 
     - Can label calls manually
     - Has a built-in neural network, ANIMAL-SPOT, for event detection and classification of calls
-    * Intro to PAMGuard video with bat data: https://www.youtube.com/watch?v=zqwy1daloMY
+*Intro to PAMGuard video with bat data: https://www.youtube.com/watch?v=zqwy1daloMY
   - __Cons:__
     - Not intuitive to initially setup, but once module settings are saved, the program will automated load with those modules during future sessions.
     - GUI is not user-friendly; would need to provide a detailed SOP document 
@@ -231,12 +234,47 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-13-2026)__
     - Pro version has BirdNet Neural Network built-in for classification of birds, as well as a blue whale, cricket, and narwhal CNNs
   - __Cons:__ 
     - No preset labels, must type in label (could introduce labeling errors from misspelled labels)
-    - You can multi-load audio files, but there is no database
+    - You can multi-load audio files, but there is no database. Would
     - You cannot save out multiple .txt across multiple sound files, only allows for data from one audio file
     - Can configure the load of an audio file, but the speed/time expansion setting does not seem to work
     - Originally designed for bird calls
-    - Proprietary software, so we don't know exactly what's going on "under the hood"
+    - Proprietary software
     *Pro version costs $100 per license for non-profits, for more information: [RavenPro Pricing](https://www.ravensoundsoftware.com/raven-pricing/)
+
+### RavenAnnotate
+  - __Pros:__
+    - Compatible with Windows, MacOS, and Linux
+    - Can visualize the oscillogram and spectrogram
+    - Has spectrogram settings available and can make a preset!:
+      - Window size (samples or ms)
+      - Window type
+      - Overlap
+      - Hop Size (Smaples or ms)
+      - DFT size (samples)
+      - Frequency Grid Spacing (Hz)
+    - Can confirgure color bar/map settings and make a preset!:
+      - Color gradient
+      - Brightness
+      - Contrast
+      - Floor/Ceiling (dB) Cutoff
+    - Installation is easy
+    - Program auto checks if there is an update to the software
+    - Can make multiple bounding boxes, but only if 'auto commit' is on. I cannot find the key shortcut for commiting an annotation.
+    - Sound Measurements:
+      - start/stop timestamp
+      - min/max (low/high) frequency
+      - start/end [continuous offset]
+      - start/emd [absolute offset]
+    - Can make keyboard shortcuts!
+    - Can save out annotations table as a .txt 
+
+  - __Cons:__
+    - Difficult to zoom (can only zoom in or fully zoom out, no other zoom out capabilities)
+    - Limited sound measurements
+    - No pitch shift options
+    - Shows that you can change playback rate, but is not currently working
+    - __BUG__: after you hit play, none of the buttons work, even after hitting the square/stop button
+    - .txt file looks like a dictionary/json file, not a tab or comma delineated text file.
 
 ### Whombat
 - Originally designed for bat call annotation work.
