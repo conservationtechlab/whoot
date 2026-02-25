@@ -8,8 +8,7 @@ stratified folds from to reduce leakage in these datasets.
 Xeno-Canto - This script assumes that you have a folder where you have
 segments generated from birdnet from xeno canto files, and
 each species has its own folder. Data is grouped by original file,
-so the unique xeno canto file identifier ID from the filename is the
-grouping parameter.
+which is the grouping parameter.
 
 SageMic - Assumes you have a folder with each day of recordings from
 the sagemic, and only the species of interest are in those folders.
@@ -42,18 +41,20 @@ def extract_label_sagemic(filename):
 
 
 def extract_grouping_xc(filename):
-    """Extract zthe unique xeno canto ID from the filename.
+    """Extract the original filename from the segment.
 
     Args:
         filename (string): File path of the audio file.
 
     Returns:
-        string: ID extracted from the filename.
+        string: Original filename extracted from the segment.
     """
     file = Path(filename).name
-    after_second_underscore = file.split('_')[2]
-    result = after_second_underscore.split('-')[0]
-    return result
+
+    result = file.split("_", 2)[2]
+    real_name = "_".join(result.split("_")[:-2])
+
+    return real_name
 
 
 def extract_parent_dir(filename):
