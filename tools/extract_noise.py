@@ -12,7 +12,7 @@ import soundfile as sf
 import audioread
 
 
-def clip_loud_segments(file, config):
+def clip_loud_segments(file, config): # pylint: disable=too-many-locals
     """Extract loud segments from a wav file.
 
     If a section of audio RMS is 1.5x above the average
@@ -39,7 +39,7 @@ def clip_loud_segments(file, config):
     num_sec_slice = config['num_sec_slice']
     try:
         sound, sr = librosa.load(filename, sr=None)
-    except audioread.exceptions.NoBackendError as e:
+    except audioread.exceptions.NoBackendError:
         print(f"skipping {file}, corrupt? Or wrong format.")
         return None
     print(f"sample rate: {sr}")
