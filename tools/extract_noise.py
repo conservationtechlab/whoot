@@ -19,6 +19,14 @@ def clip_loud_segments(file, config):
         file (str): The path of the current wav file.
         config (str): The path to the directory to store the
             loud segments.
+
+    Returns:
+        int: Number of clips generated
+        None: Only if audio file was unreadable to exit loop.
+
+    Raises:
+        audioread.exceptions.NoBackendError: If audio file is
+            not readable.
     """
     index = None
     filename = file
@@ -28,7 +36,7 @@ def clip_loud_segments(file, config):
     try:
         sound, sr = librosa.load(filename, sr=None)
     except audioread.exceptions.NoBackendError as e:
-        print(f"skipping {file} because file format not accepted")
+        print(f"skipping {file}, corrupt? Or wrong format.")
         return None
     print(f"sample rate: {sr}")
 
