@@ -15,6 +15,10 @@ import audioread
 def clip_loud_segments(file, config):
     """Extract loud segments from a wav file.
 
+    If a section of audio RMS is 1.5x above the average
+    RMS of the whole file, that section will be stored as
+    its own segment without overlapping.
+
     Args:
         file (str): The path of the current wav file.
         config (str): The path to the directory to store the
