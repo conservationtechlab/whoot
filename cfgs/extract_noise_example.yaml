@@ -1,5 +1,10 @@
+# path to audio file directory
 audio: /path/to/audio/file/dir/
+# folder for resulting clipped segments
 out: /path/to/output/folder/
+# samples of audio per frame to analyze
 frame_length: 4096
+# overlap between frames, should not be larger than frame length
 hop_length: 2048
+# how many seconds the result clip will be
 num_sec_slice: 3
