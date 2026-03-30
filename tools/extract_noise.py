@@ -12,7 +12,7 @@ import soundfile as sf
 import audioread
 
 
-def clip_loud_segments(file, config): # pylint: disable=too-many-locals
+def clip_loud_segments(file, config):  # pylint: disable=too-many-locals
     """Extract loud segments from a wav file.
 
     If a section of audio RMS is 1.5x above the average
