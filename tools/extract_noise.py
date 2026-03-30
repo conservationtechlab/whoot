@@ -9,6 +9,7 @@ import librosa
 import librosa.display
 import numpy as np
 import soundfile as sf
+import audioread
 
 
 def clip_loud_segments(file, config):
@@ -24,7 +25,11 @@ def clip_loud_segments(file, config):
     frame_length = config['frame_length']
     hop_length = config['hop_length']
     num_sec_slice = config['num_sec_slice']
-    sound, sr = librosa.load(filename, sr=None)
+    try:
+        sound, sr = librosa.load(filename, sr=None)
+    except audioread.exceptions.NoBackendError as e:
+        print(f"skipping {file} because file format not accepted")
+        return None
     print(f"sample rate: {sr}")
 
     above_avg_rms = find_peaks(frame_length, hop_length, sound)
@@ -32,7 +37,7 @@ def clip_loud_segments(file, config):
     yes_counter = 0
     start_index = None
     last_right_index = 0
-
+    number_clips_saved = 0
     for index, value in enumerate(above_avg_rms):
         if value == 1:
             if yes_counter == 0:
@@ -56,8 +61,7 @@ def clip_loud_segments(file, config):
                     sf.write(name, sound_slice, sr)
                     yes_counter = 0
                     print(f"created {name}, setting yes_counter back to 0")
-                else:
-                    print("skipping clip bc it would overlap with last clip")
+                    number_clips_saved += 1
 
     if yes_counter > 0:
         stop_index = index
@@ -71,8 +75,7 @@ def clip_loud_segments(file, config):
             filename = filename.strip('.wav')
             name = config['out'] + filename + "_" + str(index) + ".wav"
             sf.write(name, sound_slice, sr)
-        else:
-            print("skipping clip bc it would overlap with last clip")
+    return number_clips_saved
 
 
 def find_peaks(frame_length, hop_length, sound):

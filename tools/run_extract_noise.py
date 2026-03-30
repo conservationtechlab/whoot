@@ -32,8 +32,7 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
     all_files = os.listdir(config['audio'])
     for file in all_files:
-        try:
-            print(f"running {file}")
-            clip_loud_segments(os.path.join(config['audio'], file), config)
-        except Exception as e:
-            print(f"couldnt load {file} because {e}")
+        print(f"running {file}")
+        saved = clip_loud_segments(os.path.join(config['audio'], file), config)
+        if saved != None:
+            print(f"Saved {saved} clips from {file}")
