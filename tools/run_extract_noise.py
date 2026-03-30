@@ -34,5 +34,5 @@ if __name__ == "__main__":
     for file in all_files:
         print(f"running {file}")
         saved = clip_loud_segments(os.path.join(config['audio'], file), config)
-        if saved != None:
+        if saved is not None:
             print(f"Saved {saved} clips from {file}")
