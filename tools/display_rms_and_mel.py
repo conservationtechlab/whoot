@@ -8,6 +8,7 @@ path to your specific audio file.
 Usage:
     python3 display_rms_and_mel.py
 """
+from pathlib import Path
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
@@ -18,6 +19,7 @@ FILENAME = '<path/to/audio/file.wav>'
 FRAME_LENGTH = 2048
 HOP_LENGTH = 512
 NUM_SECONDS_OF_SLICE = 3
+SAVE_PLOT = True
 
 sound, sr = librosa.load(FILENAME, sr=None)
 
@@ -43,5 +45,10 @@ librosa.display.specshow(librosa.amplitude_to_db(S, ref=np.max),
                          y_axis='log', x_axis='time', ax=ax[1])
 ax[1].set(title='log Power spectrogram')
 
+if SAVE_PLOT is True:
+    name = Path(FILENAME).stem
+    plot_name = name + "_RMS_plot.png"
+    plt.savefig(plot_name)
+    print(f"Saved figure to {plot_name}")
 
 plt.show()
