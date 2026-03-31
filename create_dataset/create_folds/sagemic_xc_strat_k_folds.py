@@ -22,7 +22,7 @@ import pandas as pd
 import numpy as np
 
 
-from k_fold_split_copy import solve
+from whoot.k_fold_split_copy import solve
 
 
 def create_strat_folds(df):  # pylint: disable-msg=too-many-locals
