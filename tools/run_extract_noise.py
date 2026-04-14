@@ -30,9 +30,10 @@ if __name__ == "__main__":
     ARGS = PARSER.parse_args()
     with open(ARGS.config, 'r', encoding='UTF-8') as f:
         config = yaml.safe_load(f)
-    all_files = os.listdir(config['audio'])
-    for file in all_files:
-        print(f"running {file}")
-        saved = clip_loud_segments(os.path.join(config['audio'], file), config)
+    all_wav_files = [file for file in os.listdir(config['audio'])
+                 if file.lower().endswith(".wav")]
+    for wav in all_wav_files:
+        print(f"running {wav}")
+        saved = clip_loud_segments(os.path.join(config['audio'], wav), config)
         if saved is not None:
-            print(f"Saved {saved} clips from {file}")
+            print(f"Saved {saved} clips from {wav}")

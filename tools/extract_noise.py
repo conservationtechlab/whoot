@@ -40,7 +40,7 @@ def clip_loud_segments(file, config):  # pylint: disable=too-many-locals
     try:
         sound, sr = librosa.load(filename, sr=None)
     except audioread.exceptions.NoBackendError:
-        print(f"skipping {file}, corrupt? Or wrong format.")
+        print(f"skipping {file}, corrupt?")
         return None
     print(f"sample rate: {sr}")
 
