@@ -6,7 +6,6 @@ the average RMS for that wav file.
 """
 import os
 import librosa
-import librosa.display
 import numpy as np
 import soundfile as sf
 import audioread
