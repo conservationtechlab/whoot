@@ -16,8 +16,10 @@ Usage:
 
 """
 import argparse
+from pathlib import Path
 import os
 import yaml
+import pandas as pd
 from extract_noise import clip_loud_segments
 
 
@@ -30,10 +32,15 @@ if __name__ == "__main__":
     ARGS = PARSER.parse_args()
     with open(ARGS.config, 'r', encoding='UTF-8') as f:
         config = yaml.safe_load(f)
-    all_wav_files = [file for file in os.listdir(config['audio'])
-                 if file.lower().endswith(".wav")]
+    all_wav_files = [str(p) for p in Path(config['audio']).rglob("*.wav")]
+    rows = []
     for wav in all_wav_files:
         print(f"running {wav}")
-        saved = clip_loud_segments(os.path.join(config['audio'], wav), config)
+        saved = clip_loud_segments(wav, config, rows)
         if saved is not None:
             print(f"Saved {saved} clips from {wav}")
+
+    metadata = pd.DataFrame(rows)
+    meta_name = os.path.join(config['out'], "metadata.csv")
+    metadata.to_csv(meta_name, index=False)
+    print(f"Saved metadata to {meta_name}")
