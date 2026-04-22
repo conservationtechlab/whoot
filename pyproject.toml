@@ -51,6 +51,7 @@ birdnet = [
 ]
 data-exporters = [
     "label-studio-sdk>=2.0.5",
+    "polars>=1.37.1",
 ]
 
 
