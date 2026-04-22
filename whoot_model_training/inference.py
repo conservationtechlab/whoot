@@ -92,8 +92,8 @@ def test(config, model_name=""):
     del out['labels']
 
     print(out)
-    # with open(run_name + ".pkl", mode="wb") as f:
-    #     pickle.dump(out, f)
+    with open(run_name + ".pkl", mode="wb") as f:
+         pickle.dump(out, f)
     # Below was tested with the pickle made from above
     ds = datasets.Dataset.from_dict(out)
     ds.save_to_disk(f"predictions/{run_name}")  # saves as a directory
