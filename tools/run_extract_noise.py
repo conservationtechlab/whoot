@@ -32,6 +32,9 @@ if __name__ == "__main__":
     ARGS = PARSER.parse_args()
     with open(ARGS.config, 'r', encoding='UTF-8') as f:
         config = yaml.safe_load(f)
+    if not os.path.exists(config['out']):
+        print(f"{config['out']} does not exist, creating directory.")
+        os.makedirs(config['out'], exist_ok=True)
     all_wav_files = [str(p) for p in Path(config['audio']).rglob("*.wav")]
     rows = []
     for wav in all_wav_files:
