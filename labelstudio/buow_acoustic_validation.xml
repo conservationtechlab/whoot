@@ -1,0 +1,156 @@
+<View>
+  <Audio name="audio" value="$audio"/>
+
+  <Labels name="label" toName="audio">
+    <Label value="twitter" />
+    <Label value="rasp" />
+    <Label value="cluck" />
+    <Label value="coocoo" />
+    <Label value="eep" />
+    <Label value="alarm" />
+    <Label value="rattle" />
+    <Label value="misc" />
+  </Labels>
+
+  <Choices name="correct" toName="audio"
+           choice="single"
+           showInline="true"
+           perRegion="true"
+           visibleWhen="region-selected">
+    <Choice value="Correct" />
+    <Choice value="Incorrect" />
+  </Choices>
+
+  <View visibleWhen="choice-selected"
+        whenTagName="correct"
+        whenChoiceValue="Incorrect">
+
+    <Choices name="corrected_twitter" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="twitter">
+      <Choice value="rasp" />
+      <Choice value="cluck" />
+      <Choice value="coocoo" />
+      <Choice value="eep" />
+      <Choice value="alarm" />
+      <Choice value="rattle" />
+      <Choice value="misc" />
+      <Choice value="unknown" />
+    </Choices>
+
+    <Choices name="corrected_rasp" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="rasp">
+      <Choice value="twitter" />
+      <Choice value="cluck" />
+      <Choice value="coocoo" />
+      <Choice value="eep" />
+      <Choice value="alarm" />
+      <Choice value="rattle" />
+      <Choice value="misc" />
+      <Choice value="unknown" />
+    </Choices>
+
+    <Choices name="corrected_cluck" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="cluck">
+      <Choice value="twitter" />
+      <Choice value="rasp" />
+      <Choice value="coocoo" />
+      <Choice value="eep" />
+      <Choice value="alarm" />
+      <Choice value="rattle" />
+      <Choice value="misc" />
+      <Choice value="unknown" />
+    </Choices>
+
+    <Choices name="corrected_coocoo" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="coocoo">
+      <Choice value="twitter" />
+      <Choice value="rasp" />
+      <Choice value="cluck" />
+      <Choice value="eep" />
+      <Choice value="alarm" />
+      <Choice value="rattle" />
+      <Choice value="misc" />
+      <Choice value="unknown" />
+    </Choices>
+    
+        <Choices name="corrected_eep" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="eep">
+      <Choice value="twitter" />
+      <Choice value="rasp" />
+      <Choice value="cluck" />
+      <Choice value="coocoo" />
+      <Choice value="alarm" />
+      <Choice value="rattle" />
+      <Choice value="misc" />
+      <Choice value="unknown" />
+    </Choices>
+    
+        <Choices name="corrected_alarm" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="alarm">
+      <Choice value="twitter" />
+      <Choice value="rasp" />
+      <Choice value="cluck" />
+      <Choice value="eep" />
+      <Choice value="coocoo" />
+      <Choice value="rattle" />
+      <Choice value="misc" />
+      <Choice value="unknown" />
+    </Choices>
+    
+        <Choices name="corrected_rattle" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="rattle">
+      <Choice value="twitter" />
+      <Choice value="rasp" />
+      <Choice value="cluck" />
+      <Choice value="eep" />
+      <Choice value="alarm" />
+      <Choice value="coocoo" />
+      <Choice value="misc" />
+      <Choice value="unknown" />
+    </Choices>
+        <Choices name="corrected_misc" toName="audio"
+             choice="single"
+             showInline="true"
+             perRegion="true"
+             visibleWhen="region-selected"
+             whenLabelValue="misc">
+      <Choice value="twitter" />
+      <Choice value="rasp" />
+      <Choice value="cluck" />
+      <Choice value="eep" />
+      <Choice value="alarm" />
+      <Choice value="coocoo" />
+      <Choice value="rattle" />
+      <Choice value="unknown" />
+    </Choices>
+
+  </View>
+</View>
