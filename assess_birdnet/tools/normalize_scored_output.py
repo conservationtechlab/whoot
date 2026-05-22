@@ -71,8 +71,18 @@ def mark_intervals(row, chunks_df):
     start_chunk = int(start_time // 3)
     end_chunk = int(end_time // 3)
 
-    if row['TOP1MATCH'] != 'null':
-        chunks_df.loc[start_chunk:end_chunk, 'Label'] = 'yes'
+    row_lower['MANUAL ID*'] = row['MANUAL ID*'].str.lower()
+
+    if row_lower['MANUAL ID*'] == 'cluck':
+        chunks_df.loc[start_chunk:end_chunk, 'Label'] = '0'
+    elif row_lower['MANUAL ID*'] == 'coocoo':
+        chunks_df.loc[start_chunk:end_chunk, 'Label'] = '1'
+    elif row_lower['MANUAL ID*'] == 'twitter':
+        chunks_df.loc[start_chunk:end_chunk, 'Label'] = '2'
+    elif row_lower['MANUAL ID*'] == 'alarm':
+        chunks_df.loc[start_chunk:end_chunk, 'Label'] = '3'
+    elif row_lower['MANUAL ID*'] == 'chick begging':
+        chunks_df.loc[start_chunk:end_chunk, 'Label'] = '4'
 
 
 if __name__ == '__main__':
