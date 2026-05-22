@@ -7,11 +7,9 @@ NOT INTENDED FOR TRAINING
 
 Rather just a placeholder to help inferance work
 """
-
+from math import floor
 from typing import Any, ClassVar, Union
 import os
-from math import floor
-
 import numpy as np
 from datasets import (
     Audio,
@@ -20,10 +18,9 @@ from datasets import (
     ClassLabel,
     Sequence,
     Dataset,
-    table,
+    table
 )
 from datasets.features.features import _FEATURE_TYPES, FeatureType
-
 import librosa
 from tqdm import tqdm
 import pyarrow as pa
@@ -224,9 +221,7 @@ def get_array_chunks_from_memory(
                 print(
                     e,
                     file_path,
-                    "hit EOF too early, likely corrupted",
-                    "| ignoring and continuing"
-                )
+                    "failed stat read, reached end of file", "continuing")
                 continue
             for i in tqdm(
                 range(0, int(floor(clip_length)), chunk_length_sec),

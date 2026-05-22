@@ -229,8 +229,9 @@ settings.json
 # Block all configs besides the example config
 whoot_model_training/configs
 !whoot_model_training/configs/config.yml
-
-# Block demos
+*.csv
+*.ipynb
+*.json
 demos/
 *.ipynb
 

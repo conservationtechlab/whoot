@@ -16,12 +16,18 @@ see `whoot_model_training/models/model.py` for more info.
 
 from pyha_analyzer.preprocessors import PreProcessorBase
 
+from .default_preprocessor import DefaultPreprocessor
+
 from .spectrogram_preprocessors import (
     BuowMelSpectrogramPreprocessors,
     SpectrogramParams,
     Augmentations,
 )
 from ..models.model import ModelInput
+
+from .waveform_preprocessors import (
+    WaveformPreprocessors
+)
 
 
 class SpectrogramModelInPreprocessors(PreProcessorBase):
@@ -32,7 +38,7 @@ class SpectrogramModelInPreprocessors(PreProcessorBase):
 
     def __init__(
         self,
-        spec_preprocessor: PreProcessorBase,
+        spec_preprocessor: DefaultPreprocessor,
         model_input: ModelInput,
     ):
         """Wrapper to get the raw spectrogram output of spec_preprocessor.
@@ -77,6 +83,7 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
         self,
         model_input: ModelInput,
         duration=5,
+        sr = 32_000,
         augments: Augmentations = Augmentations(),
         spectrogram_params: SpectrogramParams = SpectrogramParams(),
     ):
@@ -104,6 +111,61 @@ class MelModelInputPreprocessor(SpectrogramModelInPreprocessors):
         spec_preprocessor = BuowMelSpectrogramPreprocessors(
             duration=duration,
             augments=augments,
-            spectrogram_params=spectrogram_params
+            spectrogram_params=spectrogram_params,
+            sr=sr
         )
         super().__init__(spec_preprocessor, model_input)
+
+
+class WaveformInputPreprocessor(SpectrogramModelInPreprocessors):
+    """Demo of how SpectrogramModelInPreprocessors works.
+
+    Uses a kind of Spectrogram Preprocessor, BuowMelSpectrogramPreprocessors
+
+    This was created in part because legacy implementation of
+    SpectrogramModelInputPreprocessors had these parameters and subclassed
+    BuowMelSpectrogramPreprocessors. This class replicates the
+    format of the old SpectrogramModelInputPreprocessors
+    class with the new functionality
+    """
+    def __init__(
+        self,
+        model_input: ModelInput,
+        duration=5,
+        augments: Augmentations = Augmentations(),
+    ):
+        """Creates a Online preprocessor for MelSpectrograms Based Models.
+
+        Formats input into spefific ModelInput format.
+
+        Args:
+            model_input (ModelInput): How the model like input data formatted
+            duration (int): Length in seconds of input
+            augments (dict): contains two keys: audio,
+                spectrogram each defining
+                a dict of augmentation names and augmentations to run
+            spectrogram_params (SpectrogramParams):
+                has the following parameters:
+                    class_list (list): the classes we are
+                        working with one-hot-encoding
+                    dataset_ref (AudioDataset): a
+                        external ref to an AudioDataset
+        """
+        wav_preprocessor = WaveformPreprocessors(
+            duration=duration,
+            sr=32_000,
+            augments=augments,
+        )
+        super().__init__(wav_preprocessor, model_input)
+
+    def __call__(self, batch: dict) -> ModelInput:
+        """Processes a batch of AudioDataset rows.
+
+        For this specific preprocessor, it creates a spectrogram then
+        Formats the data as a ModelInput
+        """
+        batch = self.spec_preprocessor(batch)
+        return self.model_input(
+            labels=batch["labels"],
+            waveform=batch["audio"]
+        )

@@ -10,10 +10,12 @@ from .buowset_extractor import (
 )
 from .esc50_extractor import esc50_extractor
 from .raw_audio_extractor import raw_audio_extractor
+from .xc_extractor import xc_extractor
 
 __all__ = [
     "buowset_extractor",
     "buowset_binary_extractor",
     "esc50_extractor",
-    "raw_audio_extractor",
+    "xc_extractor",
+    "raw_audio_extractor"
 ]

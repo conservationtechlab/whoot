@@ -18,7 +18,7 @@ import argparse
 import yaml
 
 from whoot_model_training.trainer import WhootTrainer, WhootTrainingArguments
-from whoot_model_training.data_extractor import buowset_extractor
+from whoot_model_training.data_extractor import xc_extractor, buowset_extractor
 from whoot_model_training.models import TimmModel, TimmInputs, TimmModelConfig
 from whoot_model_training import CometMLLoggerSupplement
 
@@ -26,7 +26,6 @@ from whoot_model_training.preprocessors import MelModelInputPreprocessor
 from whoot_model_training.preprocessors.spectrogram_preprocessors import (
     SpectrogramParams,
 )
-
 # Uncomment for use with data augmentation
 # from pyha_analyzer.preprocessors import MixItUp, ComposeAudioLabel
 # from audiomentations import (
@@ -70,18 +69,24 @@ def train(config):
         output_path=config["hf_cache_path"],
     )
 
+    # csv_path = "/home/sean/whoot/data/san_diego_xc_aux/xc_meta_aux.json"
+    # ds = xc_extractor(
+    #     xc_dataset_json_path=csv_path,
+    #     parent_path="/home/sean/whoot/data/san_diego_xc_aux/xeno-canto"
+    # )
+
     # Create the model
     model_name = "efficientnet_b1"
 
-    run_name = f"buowset1.1_{model_name}"
+    run_name = f"buowset1.3_{model_name}"
     model_config = TimmModelConfig(
-        timm_model=model_name, num_classes=ds.get_num_classes()
-    )
+        timm_model=model_name,
+        num_classes=ds.get_num_classes())
     model = TimmModel(model_config)
 
     # Preprocessors
 
-    # Uncomment if doing work with data augmentation
+    # # Uncomment if doing work with data augmentation
     # # Augmentations
     # wav_augs = ComposeAudioLabel([
     #     # AddBackgroundNoise( #We don't have background noise yet...
@@ -92,17 +97,17 @@ def train(config):
     #     #     p=0.8
     #     # ),
     #     Gain(
-    #         min_gain_db = -12,
-    #         max_gain_db = 12,
+    #         min_gain_db=-12,
+    #         max_gain_db=12,
     #         p = 0.8
     #     ),
-    #     MixItUp(
-    #         dataset_ref=ds["train"],
-    #         min_snr_db=10,
-    #         max_snr_db=30,
-    #         noise_transform=PolarityInversion(),
-    #         p=0.8
-    #     )
+    #     # MixItUp(
+    #     #     dataset_ref=ds["train"],
+    #     #     min_snr_db=10,
+    #     #     max_snr_db=30,
+    #     #     noise_transform=PolarityInversion(),
+    #     #     p=0.8
+    #     # )
     # ])
 
     spectrogram_params = SpectrogramParams()
@@ -161,7 +166,7 @@ def train(config):
     )
 
     trainer.train()
-    model.save_pretrained("model_checkpoints/test")
+    model.save_pretrained("model_checkpoints/buowset1.3_effnetb1")
 
 
 def init_env(config: dict):

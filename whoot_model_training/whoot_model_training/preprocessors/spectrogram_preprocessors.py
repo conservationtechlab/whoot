@@ -2,14 +2,13 @@
 
 Pulled from pyha_analyzer/preprocessors/spectogram_preprocessors.py
 """
-
 from dataclasses import dataclass
 
 import librosa
 import numpy as np
 from torchvision import transforms
 
-from pyha_analyzer.preprocessors import PreProcessorBase
+from .default_preprocessor import DefaultPreprocessor, Augmentations
 
 
 @dataclass
@@ -28,21 +27,7 @@ class SpectrogramParams:
     n_mels: int = 256
 
 
-@dataclass
-class Augmentations:
-    """Dataclass for the augmentations of the model.
-
-    audio (list[dict]): per item key name of augmentation,
-        value is the augmentation
-    spectrogram (list[dict]): same idea but augmentations
-        applied onto spectrograms
-    """
-
-    audio = None
-    spectrogram = None
-
-
-class BuowMelSpectrogramPreprocessors(PreProcessorBase):
+class BuowMelSpectrogramPreprocessors(DefaultPreprocessor):
     """Preprocessor for processing audio into spectrograms.
 
     Particularly for the buow dataset
@@ -53,6 +38,7 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         duration=5,
         augments: Augmentations = Augmentations(),
         spectrogram_params: SpectrogramParams = SpectrogramParams(),
+        sr:int = 32_000
     ):
         """Defines a BuowMelSpectrogramPreprocessors.
 
@@ -71,43 +57,40 @@ class BuowMelSpectrogramPreprocessors(PreProcessorBase):
         self.power = spectrogram_params.power
         self.n_mels = spectrogram_params.n_mels
         self.spectrogram_params = spectrogram_params
+        self.sr = sr
 
-        super().__init__(name="MelSpectrogramPreprocessor")
+        super().__init__(
+            name="MelSpectrogramPreprocessor", duration=duration, sr=self.sr
+        )
 
     def __call__(self, batch):
         """Process a batch of data from an AudioDataset."""
+        # pylint: disable=duplicate-code
         new_audio = []
         new_labels = []
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
-            y, sr = (
-                batch["audio"][item_idx]["array"],
-                batch["audio"][item_idx]["sampling_rate"],
-            )
+            y, sr = self.load_audio(batch, item_idx)
             start = 0
 
-            # Handle out of bound issues
-            end_sr = int(start * sr) + int(sr * self.duration)
-            if y.shape[-1] <= end_sr:
-                y = np.pad(y, end_sr - y.shape[-1])
-
-            # Audio Based Augmentations
-            if self.augments.audio is not None:
-                y, label = self.augments.audio(y, sr, label)
+            y, label = self.augment_audio(y, sr, start, label, self.augments)
 
             pillow_transforms = transforms.ToPILImage()
+
+            spec = librosa.feature.melspectrogram(
+                y=y,
+                sr=sr,
+                n_fft=self.n_fft,
+                hop_length=self.hop_length,
+                power=self.power,
+                n_mels=self.n_mels,
+            )
+            pcen_s = librosa.pcen(spec * (2**31))
 
             mels = (
                 np.array(
                     pillow_transforms(
-                        librosa.feature.melspectrogram(
-                            y=y[int(start * sr):end_sr],
-                            sr=sr,
-                            n_fft=self.n_fft,
-                            hop_length=self.hop_length,
-                            power=self.power,
-                            n_mels=self.n_mels,
-                        )
+                        pcen_s
                     ),
                     np.float32,
                 )[np.newaxis, ::]
@@ -155,8 +138,7 @@ class PCENMelSpectrogramPreprocessors(BuowMelSpectrogramPreprocessors):
 
     def __call__(self, batch):
         """Process a batch of data from an AudioDataset."""
-        new_audio = []
-        new_labels = []
+        new_audio, new_labels = [], []
         for item_idx in range(len(batch["audio"])):
             label = batch["labels"][item_idx]
             y, sr = (
@@ -164,20 +146,12 @@ class PCENMelSpectrogramPreprocessors(BuowMelSpectrogramPreprocessors):
                 batch["audio"][item_idx]["sampling_rate"],
             )
             start = 0
-
-            # Handle out of bound issues
-            end_sr = int(start * sr) + int(sr * self.duration)
-            if y.shape[-1] <= end_sr:
-                y = np.pad(y, end_sr - y.shape[-1])
-
-            # Audio Based Augmentations
-            if self.augments.audio is not None:
-                y, label = self.augments.audio(y, sr, label)
+            y, label = self.augment_audio(y, sr, start, label, self.augments)
 
             pillow_transforms = transforms.ToPILImage()
 
             spec = librosa.feature.melspectrogram(
-                y=y[int(start * sr):end_sr],
+                y=y,
                 sr=sr,
                 n_fft=self.n_fft,
                 hop_length=self.hop_length,

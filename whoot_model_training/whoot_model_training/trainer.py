@@ -14,6 +14,8 @@ import os
 import torch
 from tqdm import tqdm
 
+import datasets
+
 from pyha_analyzer import PyhaTrainingArguments
 from pyha_analyzer import PyhaTrainer
 
@@ -94,7 +96,7 @@ class WhootTrainer(PyhaTrainer):
             logger (CometMLLoggerSupplement):
                 Class that adds additional logging
                 On top of logging done by PyhaTrainer
-            preprocessor (PreProcessorBase):
+            preprocessor (DefaultPreprocessor):
                 Preprocessor used for formatting the data
         """
         metrics = WhootMutliClassMetrics(dataset.get_class_labels().names)
@@ -114,31 +116,43 @@ class WhootTrainer(PyhaTrainer):
         )
 
     def predict(
-        self,
-        test_dataset: AudioDataset,
-        ignore_keys=None,  # overloaded, please ignore
-        metric_key_prefix: str = "test",  # overloaded, please ignore
-    ):
-        """Run Inferance with trained model!
-
-        Args:
+            self,
             test_dataset: AudioDataset,
-            an AudioDataset to collect predictions from
-            ignore_keys: legacy
-            metric_key_prefix: legacy
+            ignore_keys=None,
+            metric_key_prefix: str = "test",
+            save_path=""):
+        """Run Inferance on a given dataset.
 
-        ignore_keys, and metric_key_prefix exist for subclass overriding
+        Allows for getting predicted outputs to label a new dataset
+        Args:
+            test_dataset (AudioDataset): dataset to get preds from
+            This has labels but they are meaningless in this method
+            ignore_keys: N/A
+            metric_key_prefix: str = "test"
+        Returns: test_dataset with a new col: "pred"
         """
+        # test_dataset = test_dataset.select(range(100))
         test_dataloader = self.get_test_dataloader(test_dataset)
 
         preds = []
+        data_selected = []
+        count = 0
         for batch in tqdm(test_dataloader):
-            preds.append(
-                self.model(
-                    self.model.input_format(**batch)
-                )["logits"].detach().cpu()
-            )
+            pred = self.model(
+                self.model.input_format(**batch)
+            )["logits"].detach().cpu().half()
+            preds.append(pred)
+            data_selected.extend(range(count, count + len(pred)))
+            count += len(pred)
 
-        dataset = test_dataset.to_dict()
+            if count % 101 == 0:
+                dataset = test_dataset.with_format()
+                out = dataset.select(data_selected).to_dict()
+                out["pred"] = torch.concat(preds).detach().numpy()
+                # saves as a directory
+                datasets.Dataset.from_dict(out).save_to_disk(save_path)
+
+        dataset = test_dataset.with_format()
+        dataset = dataset.select(data_selected).to_dict()
         dataset["pred"] = torch.concat(preds).detach().numpy()
         return dataset

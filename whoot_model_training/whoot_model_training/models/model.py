@@ -136,13 +136,14 @@ class ModelInput(UserDict, dict):
             waveform: raw audio signal
             spectrogram: 2d matrix to represent the waveform
         """
-        super().__init__(
-            {
-                "labels": labels,
-                "waveform": waveform,
-                "spectrogram": spectrogram
-            }
-        )
+        super().__init__({
+            "labels": labels,
+            "waveform": waveform,
+            "spectrogram": spectrogram
+        })
+        self.labels = labels
+        self.waveform = waveform
+        self.spectrogram = spectrogram
 
     def items(self):
         """Get all items in dict.

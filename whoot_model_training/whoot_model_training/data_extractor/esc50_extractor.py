@@ -18,28 +18,14 @@ Dataset: https://github.com/karolpiczak/ESC-50#
 import os
 from dataclasses import dataclass
 
-import numpy as np
 from datasets import (
     load_dataset,
     Audio,
     DatasetDict,
-    ClassLabel,
-    Sequence,
 )
+
+from .utils import convert_labeled_dataset_onehot
 from ..dataset import AudioDataset
-
-
-def one_hot_encode(row: dict, classes: list):
-    """One hot Encodes a list of labels.
-
-    Args:
-        row (dict): row of data in a dataset containing a labels column
-        classes: a list of classes
-    """
-    one_hot = np.zeroes(len(classes))
-    one_hot[row["labels"]] = 1
-    row["labels"] = np.array(one_hot, dtype=float)
-    return row
 
 
 @dataclass
@@ -84,17 +70,7 @@ def esc50_extractor(
     dataset = load_dataset("csv", data_files=metadata_csv)["train"]
     dataset = dataset.rename_column("category", "labels")
 
-    dataset = dataset.class_encode_column("labels")
-
-    class_list = dataset.features["labels"].names
-
-    multilabel_class_label = Sequence(ClassLabel(names=class_list))
-
-    dataset = dataset.map(
-        lambda row: one_hot_encode(row, class_list)
-        ).cast_column(
-        "labels", multilabel_class_label
-    )
+    dataset = convert_labeled_dataset_onehot(dataset)
 
     dataset = dataset.add_column(
         "audio", [
