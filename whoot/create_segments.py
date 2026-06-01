@@ -24,7 +24,7 @@ def get_paths(home_dir):
     wavs_file_paths = []
     for path, _, files in os.walk(home_dir):
         for file in files:
-            if file.endswith('.wav'):
+            if file.endswith('.WAV'):
                 new_file = os.path.join(path, file)
                 wavs_file_paths.append(new_file)
     return wavs_file_paths
@@ -76,14 +76,14 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
         audio = AudioSegment.from_wav(wav)
     except exceptions.CouldntDecodeError:
         print(f"Couldn't decode: {wav}, moving to next file")
-    filtered_labels['MANUAL ID*'] = filtered_labels['MANUAL ID*'].str.lower()
+    filtered_labels['Annotation'] = filtered_labels['Annotation']
     print(filtered_labels)
     df_row = 0
     for _, row in filtered_labels.iterrows():
         for call_type in classes:
-            if row['MANUAL ID*'] == call_type:
-                start_time = float(row['OFFSET'])
-                end_time = start_time + float(row['DURATION'])
+            if row['Annotation'] == call_type:
+                start_time = float(row['Begin Time (s)'])
+                end_time = start_time + float(row['Delta Time (s)'])
                 start_time = start_time * 1000
                 end_time = end_time * 1000
                 rel_start = None
@@ -102,7 +102,7 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
                                            call_type,
                                            segment_path,
                                            wav,
-                                           float(row['DURATION']),
+                                           float(row['Delta Time (s)']),
                                            start_time,
                                            rel_start]
                 df_row += 1

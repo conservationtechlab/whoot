@@ -10,6 +10,33 @@ to that wav file.
 """
 import os
 import ntpath
+from pathlib import Path
+
+
+def custom_filter(wav, labels):
+    """
+    """
+    print("Custom filter is not defined, please edit filter_labels.py")
+
+
+def default_filter(wav, labels):
+    """We have a subset of data we'd like to
+    create a dataset out of, there are no duplicates
+    but we need to filer the label to the corresponding
+    wav file.
+
+    Args:
+        wav (str): The current wav file.
+        labels (pd.DataFrame): All of the labels.
+
+    Returns:
+        pd.DataFrame: The labels associated with the wav of interest.
+
+    """
+    file_name = ntpath.basename(wav)
+    labels['match_file'] = labels['path'].apply(lambda x: Path(x).name)
+    filtered_labels = labels[labels['match_file'] == file_name]
+    return filtered_labels
 
 
 def filter_labels_2017(wav, labels):
