@@ -22,6 +22,7 @@ Usage (from /whoot):
 import argparse
 import ntpath
 import os
+import yaml
 import pandas as pd
 from whoot import get_paths, create_segments
 from whoot import create_noise_segments
@@ -52,39 +53,24 @@ def create_dataset(config):
     wav_file_paths = get_paths(config["wav_dir"])
     # open human label file
     labels = pd.read_csv(config["labels"])
-    use_2017 = None
     # iterate through each individual original wav
-    if 'DATE' in labels:
-        if "2017" in labels['DATE'].iloc[0]:
-            use_2017 = True
-        elif "2018" in labels['DATE'].iloc[0]:
-            use_2017 = False
-    print(f"use_2017?: {use_2017}")
     wav_files = []
     num_samples = []
     for wav in wav_file_paths:
         # check which label format to select parsing method
         # create dataframe of only the labels that correspond to the wav
-        if use_2017 is None:
-            filtered_labels = default_filter(wav, labels)
-        elif use_2017 is True:
-            filtered_labels = filter_labels_2017(wav,
-                                                 labels)
-        else:
-            filtered_labels = filter_labels_2018(wav,
-                                                 labels)
+        if config["default_filter"] == True:
+            filtered_labels = default_filter(wav, labels, config["filepath"])
+        elif config["default_filter"] == False:
+            filtered_labels = custom_filter(wav,
+                                            labels)
         # output the labeled segments and return the dataframe of annotations
-        new_buow_rows = create_segments(wav,
-                                        filtered_labels,
-                                        output_dir,
-                                        class_list,
-                                        we,
-                                        randomize)
+        new_buow_rows = create_segments(wav, filtered_labels, config)
         print(f"new buow rows: {new_buow_rows}")
         # create same number of noise segments from the same wav file randomly
         all_buow_rows = create_noise_segments(wav,
                                               new_buow_rows,
-                                              output_dir)
+                                              config["output_dir"])
         # add the annotations to the csv of metadata for the dataset
         if not all_buow_rows.empty:
             wavv = str(wav)
