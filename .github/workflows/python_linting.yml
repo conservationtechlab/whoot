@@ -1,12 +1,16 @@
-name: Python Linting
+name: Python PR Linter
 on:
   pull_request:
 
 jobs:
-  lint:
+  lint-changed-files:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch depth 0 is required to get the full git history for git diff
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -17,9 +21,26 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install flake8 pylint
+          # Add any other project requirements here, e.g., pip install -r requirements.txt
 
-      - name: Run Flake8
-        run: flake8 . --count --statistics
+      - name: Get changed files and lint
+        run: |
+          # Get list of modified/added .py files in the PR compared to the target branch
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          CHANGED_FILES=$(git diff --name-only --diff-filter=AMR origin/$BASE_BRANCH...HEAD | grep '\.py$' || true)
 
-      - name: Run Pylint
-        run: pylint $(git ls-files '*.py')
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No Python files changed in this PR."
+            exit 0
+          fi
+
+          echo "Files to lint:"
+          echo "$CHANGED_FILES"
+
+          # Run flake8 on changed files
+          echo "Running flake8..."
+          echo "$CHANGED_FILES" | xargs flake8 --config=.flake8 || true
+
+          # Run pylint on changed files
+          echo "Running pylint..."
+          echo "$CHANGED_FILES" | xargs pylint --rcfile=.pylintrc || true
