@@ -24,13 +24,13 @@ def get_paths(home_dir):
     wavs_file_paths = []
     for path, _, files in os.walk(home_dir):
         for file in files:
-            if file.endswith('.wav'):
+            if file.endswith(('.WAV', '.wav')):
                 new_file = os.path.join(path, file)
                 wavs_file_paths.append(new_file)
     return wavs_file_paths
 
 
-def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
+def create_segments(wav, filtered_labels, config):
     """Create the labeled segments.
 
     Args:
@@ -39,13 +39,7 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
         filtered_labels (pd.Dataframe): The human label file reduced
             to only contain the rows of detections pertinent to the
             wav of interest.
-        out_path (str): Path to directory where segment will be saved.
-        class_list (str): Path to the class list that you'd like segments
-            to be created for. What the manual ID's are in the human
-            label file- will ignore everything that is misspelled or
-            unknown labels.
-        we (bool): Window expansion option.
-        random (bool): Random window expansion option.
+        config (dict): Config values in a dict.
 
     Returns:
         pd.Dataframe: The metadata now associated with the
@@ -68,7 +62,7 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
                                         'labeled_duration_s',
                                         'original_rel_start_ms',
                                         'segment_rel_start_ms'])
-    with open(class_list, 'r', newline='', encoding='utf-8') as file:
+    with open(config["class_list"], 'r', newline='', encoding='utf-8') as file:
         reader = csv.reader(file)
         classes = next(reader)
     print(classes)
@@ -76,33 +70,33 @@ def create_segments(wav, filtered_labels, out_path, class_list, we, randomize):
         audio = AudioSegment.from_wav(wav)
     except exceptions.CouldntDecodeError:
         print(f"Couldn't decode: {wav}, moving to next file")
-    filtered_labels['MANUAL ID*'] = filtered_labels['MANUAL ID*'].str.lower()
+    filtered_labels[config["label_column"]] = filtered_labels[config["label_column"]]
     print(filtered_labels)
     df_row = 0
     for _, row in filtered_labels.iterrows():
         for call_type in classes:
-            if row['MANUAL ID*'] == call_type:
-                start_time = float(row['OFFSET'])
-                end_time = start_time + float(row['DURATION'])
+            if row[config["label_column"]] == call_type:
+                start_time = float(row[config["offset_column"]])
+                end_time = start_time + float(row[config["duration_column"]])
                 start_time = start_time * 1000
                 end_time = end_time * 1000
                 rel_start = None
-                if we:
+                if config["we"] == True:
                     segment, rel_start = expand_window(audio,
                                                        start_time,
                                                        end_time,
-                                                       randomize=randomize)
+                                                       randomize=config["randomize"])
                 else:
                     segment = audio[start_time:end_time]
                 segment_id = uuid.uuid4()
                 segment_id = str(segment_id) + '.wav'
-                segment_path = os.path.join(out_path, segment_id)
+                segment_path = os.path.join(config["output_dir"], segment_id)
                 segment.export(segment_path, format='wav')
                 output_rows.loc[df_row] = [segment_id,
                                            call_type,
                                            segment_path,
                                            wav,
-                                           float(row['DURATION']),
+                                           float(row[config["duration_column"]]),
                                            start_time,
                                            rel_start]
                 df_row += 1

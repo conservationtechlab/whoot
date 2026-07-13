@@ -16,29 +16,20 @@ parameter will randomly add window expansion to the default 3s
 but the detection can be anywhere within those 3s.
 
 Usage (from /whoot):
-    python3 -m create_dataset.create_dataset
-    -labels /path/to/human/labeled.csv
-    -wav_dir /path/to/parent/dir/of/wavs/
-    -output_dir /path/to/desired/output/dir/
-    -class_list /path/to/classes.txt
-    OPTIONAL
-        -we (For if you want to apply window expansion to default
-             3s to samples less than 3s)
-        -randomize (For if you want the placement of the detected
-                 audio to be placed randomly in the window expanded
-                 window)
+    python3 -m create_dataset.create_dataset -config /path/to/config.yaml
 
 """
 import argparse
 import ntpath
 import os
+import yaml
 import pandas as pd
-from create_segments import get_paths, create_segments
-from create_segments import create_noise_segments
-from filter_labels import filter_labels_2017, filter_labels_2018
+from whoot import get_paths, create_segments
+from whoot import create_noise_segments
+from whoot import default_filter, custom_filter
 
 
-def create_dataset(labels, wav_dir, output_dir, class_list, we, randomize):
+def create_dataset(config):
     """Creates labeled and non labeled segments and metadata.
 
     Creates segments based on human labeled data of a detection,
@@ -49,56 +40,37 @@ def create_dataset(labels, wav_dir, output_dir, class_list, we, randomize):
     and duration.
 
     Args:
-        labels (str): Path to label file.
-        wav_dir (str): Path to original wav segments of audio.
-        output_dir (str): Path to where the segments and metadata
-            will go.
-        class_list (str): Path to file containing the classes
-            seen in the human labels file that you want to create
-            segments for. Current format is ',' delimited list
-            in a .txt file.
-        we (bool): Default False, True for window expansion.
-        randomize (bool): Default False, True for random window expansion.
+        config (dict): Dictionary of config values.
     """
     # parse the inputs
-    out_file = ntpath.dirname(output_dir)
+    out_file = ntpath.dirname(config["output_dir"])
     result_file = os.path.join(out_file, "metadata.csv")
     if os.path.exists(result_file):
         all_data = pd.read_csv(result_file, index_col=0)
     else:
         all_data = pd.DataFrame()
     # walk dir to list paths to each original wav file
-    wav_file_paths = get_paths(wav_dir)
+    wav_file_paths = get_paths(config["wav_dir"])
     # open human label file
-    labels = pd.read_csv(labels)
-    use_2017 = None
+    labels = pd.read_csv(config["labels"])
     # iterate through each individual original wav
-    if "2017" in labels['DATE'].iloc[0]:
-        use_2017 = True
-    elif "2018" in labels['DATE'].iloc[0]:
-        use_2017 = False
     wav_files = []
     num_samples = []
     for wav in wav_file_paths:
         # check which label format to select parsing method
         # create dataframe of only the labels that correspond to the wav
-        if use_2017:
-            filtered_labels = filter_labels_2017(wav,
-                                                 labels)
-        else:
-            filtered_labels = filter_labels_2018(wav,
-                                                 labels)
+        if config["default_filter"] == True:
+            filtered_labels = default_filter(wav, labels, config["filepath"])
+        elif config["default_filter"] == False:
+            filtered_labels = custom_filter(wav,
+                                            labels)
         # output the labeled segments and return the dataframe of annotations
-        new_buow_rows = create_segments(wav,
-                                        filtered_labels,
-                                        output_dir,
-                                        class_list,
-                                        we,
-                                        randomize)
+        new_buow_rows = create_segments(wav, filtered_labels, config)
+        print(f"new buow rows: {new_buow_rows}")
         # create same number of noise segments from the same wav file randomly
         all_buow_rows = create_noise_segments(wav,
                                               new_buow_rows,
-                                              output_dir)
+                                              config["output_dir"])
         # add the annotations to the csv of metadata for the dataset
         if not all_buow_rows.empty:
             wavv = str(wav)
@@ -117,43 +89,22 @@ def create_dataset(labels, wav_dir, output_dir, class_list, we, randomize):
     print(f"Created results: {result_file}")
 
 
-def main(labels, wav_dir, output_dir, class_list, we, randomize):
+def main(config_file):
     """Main script to run create dataset.
 
     Args:
-        labels (str): Path to label file.
-        wav_dir (str): Path to original wav segments of audio.
-        output_dir (str): Path to where the segments and metadata
-            will go.
-        class_list (str): Path to file containing the classes
-            seen in the human labels file that you want to
-            create segments for.
-        we (bool): Default False, True for window expansion.
-        randomize (bool): Default False, True for random window expansion.
+        config_file (str): Path to config file.
     """
-    create_dataset(labels, wav_dir, output_dir, class_list, we, randomize)
+    with open(config_file, 'r', encoding='utf-8') as file:
+        config = yaml.safe_load(file)
+    create_dataset(config)
 
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
         description='Input Directory Path'
     )
-    PARSER.add_argument('-labels', type=str,
-                        help='Path to human labeled csv')
-    PARSER.add_argument('-wav_dir', type=str,
-                        help='Path to directory containing wav files.')
-    PARSER.add_argument('-output_dir', type=str,
-                        help='Path to desired directory for segments.')
-    PARSER.add_argument('-class_list', type=str,
-                        help='Path to txt file of list of labeled classes')
-    PARSER.add_argument('-we', action='store_true',
-                        help='Call for window expansion to 3s')
-    PARSER.add_argument('-randomize', action='store_true',
-                        help='Call for randomly distributed expanded window')
+    PARSER.add_argument('-config', type=str,
+                        help='Path to config file.')
     ARGS = PARSER.parse_args()
-    main(ARGS.labels,
-         ARGS.wav_dir,
-         ARGS.output_dir,
-         ARGS.class_list,
-         ARGS.we,
-         ARGS.randomize)
+    main(ARGS.config)

@@ -1,0 +1,32 @@
+# Name of column that corresponds to the label of the segment
+label_column: "Annotation"
+
+# Name of column that corresponds to the relative start time of the labeled segment
+offset_column: "Start Time (s)"
+
+# Name of column that corresponds to duration of the labeled segment
+duration_column: "Time Delta (s)"
+
+# Name of column that corresponds to the file path of the original audio files
+filepath: "path"
+
+# Use default label filter, False to use custom label filter
+default_filter: True
+
+# Window expansion, default true, will create segments with minumum 3s length
+we: True
+
+# Randomize, default false, will randomize where window expansion occurs
+randomize: False
+
+# Path to human labeled csv file.
+labels: "/path/to/.csv"
+
+# Path to the directory of wav files.
+wav_dir: "/path/to/wavs/"
+
+# Path to desired output directory where segments and metadata will be created.
+output_dir: "/path/to/output/"
+
+# Path to class list as a list of ',' strings.
+class_list: "/path/to/classes.txt"
