@@ -29,3 +29,19 @@ NOTE: Save the project_id from the URL of the project
 If keeping the data local on the instance, try to keep the file structure the same as is the audio file from your ML machine. For example, if some dataset is located at `mnt/datasets/audio_dataset_cool/AB/1/audio.wav` then you may want to make the path on label studio something like `label_studio_path/audio_dataset_cool/AB/1/audio.wav` for the easiest intergrations. Otherwise some minor file changes will be needed.
 
 3) Run the script to apply annotations, see demo.py in this folder
+
+
+# Importing BirdNET annotations into Label Studio
+
+*Assumes BirdNET analyzer has been run over data, and there exists an input directory of wavs and an output file with concatinated results.
+
+create python env
+pip install whoot
+whoot labelstudio_import
+nano yaml
+edit yaml with labelstudio project data, links, paths to the audio/birdnet labels
+whoot run_import (it will automatically use the yaml)
+
+ 
+
+
