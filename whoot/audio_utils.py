@@ -3,6 +3,7 @@
 """
 import random
 from pydub import AudioSegment
+from pathlib import Path
 
 
 def expand_window(audio, start_time, end_time, length=3000, randomize=False):
@@ -64,3 +65,56 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
         start_offset = start_time - new_start
         return audio[new_start:clip_length], start_offset
     return audio[int(expanded_start):int(expanded_end)], half_diff
+
+
+def check_overlap(file_path, detections, output_dir):
+    """Check for overlap with other detections before expanding window
+       and create a dictionary with the audio, the new path, the duration and 
+       offset of the detection within the newly expanded window.
+
+    Args:
+        file_path:
+        detections:
+        output_dir:
+
+    Returns:
+        dict: A dictionary containing the clip path, offset/duration and label.
+    """
+
+    audio = AudioSegment.from_wav(file_path)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    detections = detections.sort_values("Start (s)")
+
+    groups = []
+
+    for _, row in detections.iterrows():
+        start = int(row["Start (s)"] * 1000)
+        end = int(row["End (s)"] * 1000)
+
+        expanded_start = start - 3500
+        expanded_end = end + 3500
+
+        if groups and expanded_start <= groups[-1][1] + 3500:
+            groups[-1][1] = max(groups[-1][1], end)
+        else:
+            groups.append([start, end])
+
+    for i, (start, end) in enumerate(groups):
+        length = (end - start) + 7000
+
+        clip, _ = expand_window(
+            audio,
+            start,
+            end,
+            length,
+            randomize=False,
+        )
+
+        clip.export(
+            output_dir / f"{Path(file_path).stem}_{i}.wav",
+            format="wav",
+        )    
+
+    #return dict to add to the main dict
