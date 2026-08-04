@@ -10,6 +10,7 @@ the offset and duration of the label, as well as the label for each clip.
 import argparse
 from whoot import check_overlap
 import pandas as pd
+import pickle
 
 
 if __name__ == "__main__":
@@ -26,20 +27,16 @@ if __name__ == "__main__":
 
     results['File'] = results['File'].str.replace('Volumes/BUOW', 'mnt/restorage')
 
-    all_data = pd.DataFrame(columns=['path',
-                                     'offset',
-                                     'duration',
-                                     'label'])
+    all_data = {
+        "audio": [],
+        "labels": [],
+    }
     # creates shortened segments that combine overlaps into 1, provides results in dataframe
     for file_path, detections in results.groupby("File"):
-        print(file_path)
-        print(detections)
-        check_overlap(file_path, detections, out_dir)
-        #all_data = pd.concat([clip_df, all_data], ignore_index=True)
+        metadata = check_overlap(file_path, detections, out_dir)
 
-    #print(all_data)
+        all_data["audio"].extend(metadata["audio"])
+        all_data["labels"].extend(metadata["labels"])
 
-    # turn all_data into a dictionary with audio, labels, accounting
-    # store the dictionary as a pkl
-    
-
+    with open("all_data_jun2026.pkl", "wb") as file:
+        pickle.dump(all_data, file)
