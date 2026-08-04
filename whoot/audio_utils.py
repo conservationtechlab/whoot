@@ -93,28 +93,61 @@ def check_overlap(file_path, detections, output_dir):
         start = int(row["Start (s)"] * 1000)
         end = int(row["End (s)"] * 1000)
 
-        expanded_start = start - 3500
-        expanded_end = end + 3500
+        detection = {
+            "start": start,
+            "end": end,
+            "label": row["Common name"],
+        }
 
-        if groups and expanded_start <= groups[-1][1] + 3500:
-            groups[-1][1] = max(groups[-1][1], end)
+
+        if groups and start - 3500 <= groups[-1]["end"] + 3500:
+            groups[-1]["end"] = max(groups[-1]["end"], end)
+            groups[-1]["detections"].append(detection)
         else:
-            groups.append([start, end])
+            groups.append({
+                "start": start,
+                "end": end,
+                "detections": [detection],
+            })
 
-    for i, (start, end) in enumerate(groups):
-        length = (end - start) + 7000
+    metadata = {
+        "audio": [],
+        "labels": [],
+    }
 
-        clip, _ = expand_window(
+
+    for i, group in enumerate(groups):
+        group_start = group["start"]
+        group_end = group["end"]
+        length = (group_end - group_start) + 7000
+
+        clip, group_offset = expand_window(
             audio,
-            start,
-            end,
+            group_start,
+            group_end,
             length,
             randomize=False,
         )
 
-        clip.export(
-            output_dir / f"{Path(file_path).stem}_{i}.wav",
-            format="wav",
-        )    
+        output_path = output_dir / f"{Path(file_path).stem}_{i}.wav"
+        clip.export(output_path, format="wav")
 
-    #return dict to add to the main dict
+        for detection in group["detections"]:
+            detection_offset = (
+                group_offset
+                + detection["start"]
+                - group_start
+            )
+
+            metadata["audio"].append({
+                "bytes": None,
+                "path": str(output_path),
+                "offset": detection_offset / 1000,
+                "duration": (
+                    detection["end"] - detection["start"]
+                ) / 1000,
+            })
+
+            metadata["labels"].append(detection["label"])
+
+    return metadata
