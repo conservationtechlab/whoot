@@ -18,9 +18,9 @@ if __name__ == "__main__":
         description='Input config path'
     )
     PARSER.add_argument('-results', type=str,
-                        help='Path to config file.')
+                        help='Path to Birdnet concatenated results file.')
     PARSER.add_argument('-output', type=str,
-                        help='Path to desired output.')
+                        help='Path to output dir for metadata and segments.')
     ARGS = PARSER.parse_args()
     results = pd.read_csv(ARGS.results)
     out_dir = ARGS.output
@@ -31,12 +31,21 @@ if __name__ == "__main__":
         "audio": [],
         "labels": [],
     }
+
+    metadata = []
+
     # creates shortened segments that combine overlaps into 1, provides results in dataframe
     for file_path, detections in results.groupby("File"):
-        metadata = check_overlap_dict(file_path, detections, out_dir)
+        metadata_dict, metadata_list = check_overlap_dict(file_path, detections, out_dir)
 
-        all_data["audio"].extend(metadata["audio"])
-        all_data["labels"].extend(metadata["labels"])
+        all_data["audio"].extend(metadata_dict["audio"])
+        all_data["labels"].extend(metadata_dict["labels"])
+
+        metadata.extend(metadata_list)
+
+    dataframe = pd.DataFrame(metadata)
 
     with open("output.pkl", "wb") as file:
         pickle.dump(all_data, file)
+
+    dataframe.to_csv("metadata.csv", index=False)

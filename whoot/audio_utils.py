@@ -4,6 +4,7 @@
 import random
 from pydub import AudioSegment
 from pathlib import Path
+import pandas as pd
 
 
 def expand_window(audio, start_time, end_time, length=3000, randomize=False):
@@ -110,11 +111,12 @@ def check_overlap_dict(file_path, detections, output_dir):
                 "detections": [detection],
             })
 
-    metadata = {
+    metadata_dict = {
         "audio": [],
         "labels": [],
     }
 
+    dataframe_list = []
 
     for i, group in enumerate(groups):
         group_start = group["start"]
@@ -131,6 +133,13 @@ def check_overlap_dict(file_path, detections, output_dir):
 
         output_path = output_dir / f"{Path(file_path).stem}_{i}.wav"
         clip.export(output_path, format="wav")
+        dataframe_dict = {
+            "birdnet_expanded_file": str(output_path),
+            "original_file_path": str(file_path),
+            "offset": group_start,
+            "duration": length
+        }
+        dataframe_list.append(dataframe_dict)
 
         for detection in group["detections"]:
             detection_offset = (
@@ -139,7 +148,7 @@ def check_overlap_dict(file_path, detections, output_dir):
                 - group_start
             )
 
-            metadata["audio"].append({
+            metadata_dict["audio"].append({
                 "bytes": None,
                 "path": str(output_path),
                 "offset": detection_offset / 1000,
@@ -148,6 +157,6 @@ def check_overlap_dict(file_path, detections, output_dir):
                 ) / 1000,
             })
 
-            metadata["labels"].append(detection["label"])
+            metadata_dict["labels"].append(detection["label"])
 
-    return metadata
+    return metadata_dict, dataframe_list
