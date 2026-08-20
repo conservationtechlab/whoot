@@ -1,4 +1,4 @@
 __version__ = "0.1.1.dev0"
 
-from .audio_utils import expand_window, check_overlap
+from .audio_utils import expand_window, check_overlap_dict
 from .label_studio import LabelStudioSetup

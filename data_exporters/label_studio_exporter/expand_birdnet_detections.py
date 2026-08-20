@@ -8,7 +8,7 @@ the offset and duration of the label, as well as the label for each clip.
 
 """
 import argparse
-from whoot import check_overlap
+from whoot import check_overlap_dict
 import pandas as pd
 import pickle
 
@@ -33,10 +33,10 @@ if __name__ == "__main__":
     }
     # creates shortened segments that combine overlaps into 1, provides results in dataframe
     for file_path, detections in results.groupby("File"):
-        metadata = check_overlap(file_path, detections, out_dir)
+        metadata = check_overlap_dict(file_path, detections, out_dir)
 
         all_data["audio"].extend(metadata["audio"])
         all_data["labels"].extend(metadata["labels"])
 
-    with open("all_data_jun2026.pkl", "wb") as file:
+    with open("output.pkl", "wb") as file:
         pickle.dump(all_data, file)

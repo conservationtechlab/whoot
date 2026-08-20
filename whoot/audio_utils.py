@@ -67,7 +67,7 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
     return audio[int(expanded_start):int(expanded_end)], half_diff
 
 
-def check_overlap(file_path, detections, output_dir):
+def check_overlap_dict(file_path, detections, output_dir):
     """Check for overlap with other detections before expanding window
        and create a dictionary with the audio, the new path, the duration and 
        offset of the detection within the newly expanded window.
