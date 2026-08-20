@@ -1,0 +1,16 @@
+<View>
+  <Audio name="audio" value="$audio" spectrogram="true" height="300" decode="true"/>
+  <Labels name="label" toName="audio">
+    <Label value="twitter" />
+    <Label value="rasp" />
+    <Label value="cluck" />
+    <Label value="coocoo" />
+    <Label value="eep" />
+    <Label value="alarm" />
+    <Label value="rattle" />
+  </Labels>
+  <Choices name="correct" toName="audio"
+           choice="single">
+    <Choice value="No BUOW" />
+  </Choices>
+</View>
