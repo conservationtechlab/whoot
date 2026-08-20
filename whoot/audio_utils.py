@@ -131,10 +131,11 @@ def check_overlap_dict(file_path, detections, output_dir):
             randomize=False,
         )
 
-        output_path = output_dir / f"{Path(file_path).stem}_{i}.wav"
+        segment_name = f"{Path(file_path).stem}_{i}.wav"
+        output_path = output_dir / segment_name
         clip.export(output_path, format="wav")
         dataframe_dict = {
-            "birdnet_expanded_file": str(output_path),
+            "birdnet_expanded_file": str(segment_name),
             "original_file_path": str(file_path),
             "offset": group_start,
             "duration": length
