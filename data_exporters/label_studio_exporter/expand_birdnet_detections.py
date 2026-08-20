@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     dataframe = pd.DataFrame(metadata)
 
-    with open("output.pkl", "wb") as file:
+    with open(f"{out_dir}/output.pkl", "wb") as file:
         pickle.dump(all_data, file)
 
-    dataframe.to_csv("metadata.csv", index=False)
+    dataframe.to_csv(f"{out_dir}/metadata.csv", index=False)
