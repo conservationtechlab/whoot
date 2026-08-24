@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 if __name__=="__main__":
-    with open("/home/katie/whoot/data_exporters/label_studio_exporter/jun2026_labelstudio_export.json", "r") as file:
+    with open("/home/katiegarwood/Downloads/project-39-at-2026-08-18-15-53-cc7eeb08.json", "r") as file:
         data = json.load(file)
     list_from_json = []
 
@@ -29,13 +29,21 @@ if __name__=="__main__":
 
     ls_data = pd.DataFrame.from_dict(list_from_json)
     print(ls_data)
-    with open("/home/katie/whoot/data_exporters/label_studio_exporter/jun2026_results/metadata.csv", "r") as meta:
+    with open("/home/katiegarwood/Downloads/jun2026_metadata.csv", "r") as meta:
         metadata = pd.read_csv(meta)
     print(metadata)
     merged_data = pd.merge(ls_data, metadata, on="birdnet_expanded_file")
 
     print(merged_data)
 
+    # check for clips longer than 3s first, s we can use expand_window as-is
+    # you look at a rows rel_end - rel_start if it's greater than 3, proceed
+    merged_data['label_duration'] = merged_data['ls_rel_end'] - merged_data['ls_rel_start']
+    longer_labels = merged_data.groubpy(merged_data['label_duration']>3)
+    segments_to_add = []
+    for _, row in longer_labels.iterows():
+        that row, new end time = start time + 3
+        then append a segment to add but with a start time of 
 """    create column that does the math to figure out where label is relative to the real start, rel start + rel start 
     check for clips longer than 3s, cut them into chunks. if 3-6s, from the middle out make 2. if 6-9, make 3, one 3s in the middle, 2 on each edge.
     so one labeled segment that is 4, will become 2 segments that are 3s starting in the middle NEED TO WINDOW EXPAND EDGES ALREADY BECAUSE CANT HANDLE THAT IN CREATE_SEGMENTS 
