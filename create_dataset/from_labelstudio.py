@@ -36,20 +36,15 @@ if __name__=="__main__":
                         "label": label})
 
     ls_data = pd.DataFrame.from_dict(list_from_json)
-    print(ls_data)
     with open("/home/katie/whoot/data_exporters/label_studio_exporter/jun2026_results/metadata.csv", "r") as meta:
         metadata = pd.read_csv(meta)
-    print(metadata)
     merged_data = pd.merge(ls_data, metadata, on="birdnet_expanded_file")
 
-    print(merged_data)
-
-
-    merged_data["original_start_s"] = (merged_data["offset"] / 1000 + merged_data["ls_rel_start"])
+    merged_data["original_start_s"] = (merged_data["offset"].astype(float) / 1000 + merged_data["ls_rel_start"].astype(float))
     merged_data["label_duration"] = (merged_data["ls_rel_end"] - merged_data["ls_rel_start"])
     # check for clips longer than 3s first, s we can use expand_window as-is
-    # you look at a rows rel_end - rel_start if it's greater than 3, proceed
     segments_to_add = []
+
 
     for _, row in merged_data.iterrows():
         start = row["original_start_s"]
@@ -63,9 +58,9 @@ if __name__=="__main__":
                 "DURATION": duration})
         else:
             num_segments = math.ceil(duration /3)
-            midpoint = (start-end)/2
             total_segment_duration = num_segments * 3
-            first_segment_start = (midpoint - total_segment_duration /2)
+            extra = total_segment_duration - duration
+            first_segment_start = start - (extra / 2)
             for segment_num in range(num_segments):
                 segment_start = (first_segment_start + segment_num * 3)
                 segments_to_add.append({
