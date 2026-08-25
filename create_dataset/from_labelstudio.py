@@ -11,20 +11,21 @@ import os
 
 
 if __name__=="__main__":
-    with open("/home/katie/whoot/project-39-at-2026-08-18-15-53-cc7eeb08.json", "r") as file:
+    with open("/path/to/ls_labels.json", "r") as file:
         data = json.load(file)
     list_from_json = []
-
-    out_dir = "/home/katie/whoot/create_dataset/jun2026_training_data"
-    class_list  = "/home/katie/whoot/create_dataset/ls_buow_class_list.txt"
-    output_metadata_path = os.path.join(out_dir, "jun2026_clip_metadata.csv")
+    out_dir = "/path/to/output/folder"
+    # comma separated list of classes
+    class_list  = "/path/to/class_list.txt"
+    output_metadata_path = os.path.join(out_dir, "metadata.csv")
     os.makedirs(out_dir, exist_ok=True)
-
     for item_1 in data:
         filename = item_1['data']['audio']
         filename = Path(filename).name
         for item_2 in item_1['annotations']:
             for item_3 in item_2['result']:
+                if item_3['type'] != 'labels':
+                    continue
                 ls_rel_start = item_3['value']['start']
                 ls_rel_end = item_3['value']['end']
                 for item_4 in item_3['value']['labels']:
@@ -36,7 +37,7 @@ if __name__=="__main__":
                         "label": label})
 
     ls_data = pd.DataFrame.from_dict(list_from_json)
-    with open("/home/katie/whoot/data_exporters/label_studio_exporter/jun2026_results/metadata.csv", "r") as meta:
+    with open("/path/to/expanded/birdnet/metadata.csv", "r") as meta:
         metadata = pd.read_csv(meta)
     merged_data = pd.merge(ls_data, metadata, on="birdnet_expanded_file")
 
