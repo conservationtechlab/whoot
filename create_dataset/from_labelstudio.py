@@ -1,3 +1,5 @@
+"""Take Label Studio strong labels and create a formatted dataset.
+"""
 import argparse
 import random
 from pydub import AudioSegment
@@ -10,36 +12,59 @@ from whoot import expand_window
 import os
 
 
-if __name__=="__main__":
-    with open("/path/to/ls_labels.json", "r") as file:
-        data = json.load(file)
+def parse_labelstudio(data):
+    """Parse Label Studio data for start/stop labels.
+
+    Args:
+        data (json): JSON export from labelstudio for a project.
+    Returns:
+        pd.DataFrame: A dataframe of all relevant labels. Ignores
+            clips that are unlabeled or labeled only with a 'choice'
+    """
+
     list_from_json = []
-    out_dir = "/path/to/output/folder"
-    # comma separated list of classes
-    class_list  = "/path/to/class_list.txt"
-    output_metadata_path = os.path.join(out_dir, "metadata.csv")
-    os.makedirs(out_dir, exist_ok=True)
+
     for item_1 in data:
         filename = item_1['data']['audio']
         filename = Path(filename).name
+
         for item_2 in item_1['annotations']:
             for item_3 in item_2['result']:
+                # skips files only labeled with 'choice'
                 if item_3['type'] != 'labels':
                     continue
                 ls_rel_start = item_3['value']['start']
                 ls_rel_end = item_3['value']['end']
+
                 for item_4 in item_3['value']['labels']:
                     label = item_4
                     list_from_json.append({
-                        "birdnet_expanded_file": filename,
+                        "ls_filename": filename,
                         "ls_rel_start": ls_rel_start, 
                         "ls_rel_end": ls_rel_end,
                         "label": label})
 
-    ls_data = pd.DataFrame.from_dict(list_from_json)
+    ls_df = pd.DataFrame.from_dict(list_from_json)
+
+    return ls_df
+
+
+if __name__=="__main__":
+
+    with open("/path/to/ls_labels.json", "r") as file:
+        data = json.load(file)
+    out_dir = "/path/to/output/folder"
+
+    # comma separated list of classes
+    class_list  = "/path/to/class_list.txt"
+    output_metadata_path = os.path.join(out_dir, "metadata.csv")
+    os.makedirs(out_dir, exist_ok=True)
+
+    ls_df = parse_labelstudio(data)
+
     with open("/path/to/expanded/birdnet/metadata.csv", "r") as meta:
         metadata = pd.read_csv(meta)
-    merged_data = pd.merge(ls_data, metadata, on="birdnet_expanded_file")
+    merged_data = pd.merge(ls_df, metadata, on="ls_filename")
 
     merged_data["original_start_s"] = (merged_data["offset"].astype(float) / 1000 + merged_data["ls_rel_start"].astype(float))
     merged_data["label_duration"] = (merged_data["ls_rel_end"] - merged_data["ls_rel_start"])
