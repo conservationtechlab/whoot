@@ -43,4 +43,6 @@ Style guidelines are listed in `.flake8` and `pylintrc`. To use these tools do t
 2) Activate the environment
 
 To run the linters run `python -m flake8` and `python -m pylint --recursive y PATH/TO/FILES.py`
-In order to contribute to whoot, both of these must be cleared. 
+
+Pull requests will automatically trigger pylint and flake8 checks through Github Actions, 
+and in order to contribute to whoot, both of these must be cleared. 
