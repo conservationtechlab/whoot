@@ -27,6 +27,7 @@ __If you are going to edit this document, always double check that both the tabl
 | [Audacity](https://www.audacityteam.org/) | Free, No License | Local | Windows, MacOS, and Linux | Oscillogram, Spectrogram, Power Spectrum | Yes | Multi, Start-stop| Yes | Yes | No | No | No | No | Easy Difficulty |
 | [Avisoft-SASLab Lite](https://avisoft.com/sound-analysis/) | Free, No License | Local  | Windows, MacOS? | Oscillogram, Spectrogram, Power Spectrum | Yes, limited | None | Yes | Yes | Yes, but could not find | Yes| No | No | High difficulty; not intuitive, but has nice documentation online |
 | [Avisoft-SASLab Pro](https://avisoft.com/sound-analysis/) |  €2900/$3400 for 1 year License | Local | Windows, MacOS | Oscillogram, Spectrogram, and Power Spectrum | Yes | Multi, Bounding Boxes | Yes | Yes | Yes, but could not find | Yes | No | No | High difficulty; not intuitive, but has nice documentation online |
+| [FrogLabel](https://jaradfor.github.io/frog_label/) (Jay's Software) | Free, No License  | Online, Browser  | Linux, Mac, and Windows | Oscillogram and Spectrogram | Yes | Multi, Bounding Boxes; JSON/CSV| Yes | Yes, dBFS Filter | Yes | No | No? | No | Meduim Difficulty, lots of keybinds |
 | [Kaleidoscope Free](https://www.wildlifeacoustics.com/products/kaleidoscope-pro) | Free, No License | Local | Windows, MacOS, and Linux | Oscillogram, Spectrogram, and Power Spectrum | Yes, limited | Single label for entire file | Yes | No | Yes | No | No | Yes| Easy Difficulty |
 | [Kaleidoscope Pro](https://www.wildlifeacoustics.com/products/kaleidoscope-pro) | $399 for 1 year License | Local | Windows, MacOS, and Linux | Oscillogram, Spectrogram, and Power Spectrum | Yes | Single label for entire file | Yes | No | Yes | Yes | No | Yes | Easy Difficulty |
 | [Label Studio](https://labelstud.io) | $149/month, additional users $99/month (up to 12 users) | Local, open-source |  Windows, MacOS, and Linux | Oscillogram and Spectrogram (Only goes up to 20kHz) | Yes | Multi, Start-stop | Yes (only to down to 0.5 speed) | No | No | None | Yes, can have as many users as the server can handle | Yes | Easy Difficulty, limited labeling options and spectrogram specifications |
@@ -121,6 +122,26 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Does not have magma or plasma color scheme for viewing spectrogram
     - Annotations are not available in lite version
     - Pricing for the Pro version is €2900, which is ~$3,400 (on 1/22/26)
+
+### Frog Label (Jay's Software)
+  - __Pros:__
+    - Linux, Windows, and Mac compatiable
+    - Browser interface (no direct install required)
+    - Local User Data can be directly loaded in
+    - Visualizes oscillogram and spectrogram, including linear, adjustable, and logarithmic
+    - Can zoom in, pan time and frequency (but difficult to do with keybinds)
+  - __Cons:__
+    - Cannot load in audio data with a sr > 192kHz
+    - GUI is a little difficult to interpret. There are too many keybinds
+    - Cannot save session setup/spectro setting preference
+    - Have to save out a JSON file or a CSV file to reload data if session is closed
+    - Cannot delete or edit a label once it has been made; would have to restart the session
+    - Cannot adjust spectrogram window
+    - Spectrogram cannot be adjusted to show frequencies higher than: 24000 Hz
+    - Cannot make mel-frequency spectrograms
+    - Cannot adjust playback timing; the playback yellow bar is not clickable or adjustable
+    - BUG: Currently, cannot save out JSON or CSV data (Error Message: "Local Annotation file is invalid...")
+    - BUG: Currently, cannot use the letter N for the Left-Hand Code input, but works for the other inputs
 
 ### Kaleidoscope Lite (Did not have access to Pro)
   - __Pros:__
