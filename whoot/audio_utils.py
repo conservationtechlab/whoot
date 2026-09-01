@@ -137,8 +137,8 @@ def check_overlap_dict(file_path, detections, output_dir):
         dataframe_dict = {
             "ls_filename": str(segment_name),
             "original_file_path": str(file_path),
-            "offset": group_start,
-            "duration": length
+            "offset": group_start - group_offset,
+            "duration": len(clip)
         }
         dataframe_list.append(dataframe_dict)
 
