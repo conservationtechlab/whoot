@@ -133,7 +133,8 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Can zoom in, pan time and frequency (but difficult to do with keybinds)
   - __Cons:__
     - Cannot load in audio data with a sr > 192kHz
-    - GUI is a little difficult to interpret. There are too many keybinds
+    - Missing energy spectrum (needed for bat analysis).
+    - GUI is a little difficult to interpret. There are too many keybinds.
     - Cannot save session setup/spectro setting preference
     - Have to save out a JSON file or a CSV file to reload data if session is closed
     - Cannot delete or edit a label once it has been made; would have to restart the session
@@ -141,8 +142,10 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Spectrogram cannot be adjusted to show frequencies higher than: 24000 Hz
     - Cannot make mel-frequency spectrograms
     - Cannot adjust playback timing; the playback yellow bar is not clickable or adjustable
+    - Zoom only allows for zoom for both axes at the same time
+    - Pre-defined window durations make it difficult to use an other settings.
     - BUG: Currently, cannot save out JSON or CSV data (Error Message: "Local Annotation file is invalid...")
-    - BUG: Currently, cannot use the letter N for the Left-Hand Code input, but works for the other inputs
+    - BUG: Currently, cannot use the letters: y, u, i, o, p, g, h, j, k, l, n, or m for the Left-Hand Code label section
     
 ### Kaleidoscope Lite (Did not have access to Pro)
   - __Pros:__
@@ -153,7 +156,10 @@ __(No longer considering for bats; Decided at Whoot Meeting on 1-7-2026)__
     - Can view audio with sampling rate up to 384kHz 
     - Can adjust spectrogram parameters using the GUI 
     - Can zoom-in and out of spectrogram to focus on a particular part of the audio file and can play just that highlighted section.
-    - Can label with multiple labels
+    - Can label entire file with multiple labels
+    - Double-click on x-axis rule to change from duration to timestamp
+    - Can open multiple viewer windows
+    - Can make a bounding box and click button with proportional symbol (like an infinity symbol) to measure and view the energy spectrum.
   - __Cons:__
     - GUI is not intuitive, but options are limited in free version; would need to provide a detailed SOP document
     - Can only have 32 labels available at anytime while using the software
