@@ -2,6 +2,7 @@
 
 """
 import random
+from pathlib import Path
 from pydub import AudioSegment
 
 
@@ -64,3 +65,98 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
         start_offset = start_time - new_start
         return audio[new_start:clip_length], start_offset
     return audio[int(expanded_start):int(expanded_end)], half_diff
+
+
+def check_overlap_dict(file_path, detections, output_dir):
+    """Check for overlap with other detections before expanding window
+       and create a dictionary with the audio, the new path, the duration and
+       offset of the detection within the newly expanded window.
+
+    Args:
+        file_path (str): Path to an audio file.
+        detections (pandas.DataFrame): The group of BirdNET detections
+            associated with the provided audio file.
+        output_dir (str): Path to where the new audio segments will be stored.
+
+    Returns:
+        dict: A dictionary containing the clip path, offset/duration and label.
+    """
+
+    audio = AudioSegment.from_wav(file_path)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    detections = detections.sort_values("Start (s)")
+
+    groups = []
+
+    for _, row in detections.iterrows():
+        start = int(row["Start (s)"] * 1000)
+        end = int(row["End (s)"] * 1000)
+
+        detection = {
+            "start": start,
+            "end": end,
+            "label": row["Common name"],
+        }
+
+        if groups and start - 3500 <= groups[-1]["end"] + 3500:
+            groups[-1]["end"] = max(groups[-1]["end"], end)
+            groups[-1]["detections"].append(detection)
+        else:
+            groups.append({
+                "start": start,
+                "end": end,
+                "detections": [detection],
+            })
+
+    metadata_dict = {
+        "audio": [],
+        "labels": [],
+    }
+
+    dataframe_list = []
+
+    for i, group in enumerate(groups):
+        group_start = group["start"]
+        group_end = group["end"]
+        length = (group_end - group_start) + 7000
+
+        clip, group_offset = expand_window(
+            audio,
+            group_start,
+            group_end,
+            length,
+            randomize=False,
+        )
+
+        segment_name = f"{Path(file_path).stem}_{i}.wav"
+        output_path = output_dir / segment_name
+        clip.export(output_path, format="wav")
+        dataframe_dict = {
+            "ls_filename": str(segment_name),
+            "original_file_path": str(file_path),
+            "offset": group_start - group_offset,
+            "duration": len(clip)
+        }
+        dataframe_list.append(dataframe_dict)
+
+        for detection in group["detections"]:
+            detection_offset = (
+                group_offset
+                + detection["start"]
+                - group_start
+            )
+
+            metadata_dict["audio"].append({
+                "bytes": None,
+                "path": str(output_path),
+                "offset": detection_offset / 1000,
+                "duration": (
+                    detection["end"] - detection["start"]
+                ) / 1000,
+            })
+
+            metadata_dict["labels"].append(detection["label"])
+
+    return metadata_dict, dataframe_list
