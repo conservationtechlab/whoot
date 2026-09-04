@@ -2,9 +2,8 @@
 
 """
 import random
-from pydub import AudioSegment
 from pathlib import Path
-import pandas as pd
+from pydub import AudioSegment
 
 
 def expand_window(audio, start_time, end_time, length=3000, randomize=False):
@@ -70,13 +69,14 @@ def expand_window(audio, start_time, end_time, length=3000, randomize=False):
 
 def check_overlap_dict(file_path, detections, output_dir):
     """Check for overlap with other detections before expanding window
-       and create a dictionary with the audio, the new path, the duration and 
+       and create a dictionary with the audio, the new path, the duration and
        offset of the detection within the newly expanded window.
 
     Args:
-        file_path:
-        detections:
-        output_dir:
+        file_path (str): Path to an audio file.
+        detections (pandas.DataFrame): The group of BirdNET detections
+            associated with the provided audio file.
+        output_dir (str): Path to where the new audio segments will be stored.
 
     Returns:
         dict: A dictionary containing the clip path, offset/duration and label.
@@ -99,7 +99,6 @@ def check_overlap_dict(file_path, detections, output_dir):
             "end": end,
             "label": row["Common name"],
         }
-
 
         if groups and start - 3500 <= groups[-1]["end"] + 3500:
             groups[-1]["end"] = max(groups[-1]["end"], end)
